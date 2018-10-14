@@ -8,9 +8,9 @@
 #include "Model.hpp"
 #include "OpenGL/Program.hpp"
 #include "OpenGL/Shader.hpp"
+#include <algorithm>
 #include <fstream>
 #include <vector>
-#include <algorithm>
 
 namespace {
 
@@ -22,8 +22,8 @@ static GLuint UBO;
 
 static glm::mat4 NDC_View = glm::identity<glm::mat4>();
 static glm::mat4 View_World = glm::identity<glm::mat4>();
-static glm::vec3 EyePos = glm::vec3(0.0f, 0.0f, -2.0f);
-static glm::vec3 LookDir = glm::vec3(0.0f, 0.0f, 1.0f);
+static glm::vec3 EyePos = glm::vec3(0.0f, 0.0f, 2.0f);
+static glm::vec3 LookDir = glm::vec3(0.0f, 0.0f, -1.0f);
 static const glm::vec3 Up = glm::vec3(0.0f, 1.0f, 0.0f);
 
 } // namespace
@@ -47,10 +47,11 @@ static void OnMotion(int x, int y) {
     y -= LastGrabbing.y;
     LastGrabbing.x += x;
     LastGrabbing.y += y;
+    y = -y; // XXX in glut, window coordinate originates at top left.
     int w = glutGet(GLUT_WINDOW_WIDTH);
     int h = glutGet(GLUT_WINDOW_HEIGHT);
-    const float x_degrees(180.0f / w * -x);
-    const float y_degrees(180.0f / h * -y);
+    const float x_degrees(180.0f / w * x);
+    const float y_degrees(180.0f / h * y);
     ViewAngle.horizontal += x_degrees;
     ViewAngle.vertical += y_degrees;
     if (ViewAngle.horizontal > 180.0f || ViewAngle.horizontal <= -180.0f) {
@@ -62,9 +63,9 @@ static void OnMotion(int x, int y) {
     } else if (ViewAngle.vertical < -y_mag_max) {
         ViewAngle.vertical = -y_mag_max;
     }
-    LookDir.x = glm::sin(RadianOfDegree(ViewAngle.horizontal)) * glm::cos(RadianOfDegree(ViewAngle.vertical));
+    LookDir.x = glm::cos(RadianOfDegree(ViewAngle.vertical)) * glm::sin(RadianOfDegree(ViewAngle.horizontal));
     LookDir.y = glm::sin(RadianOfDegree(ViewAngle.vertical));
-    LookDir.z = glm::cos(RadianOfDegree(ViewAngle.horizontal)) * glm::cos(RadianOfDegree(ViewAngle.vertical));
+    LookDir.z = glm::cos(RadianOfDegree(ViewAngle.vertical)) * -glm::cos(RadianOfDegree(ViewAngle.horizontal)); // XXX
 }
 
 static void OnMouse(int button, int state, int x, int y) {
