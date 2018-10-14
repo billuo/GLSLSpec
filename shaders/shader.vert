@@ -18,9 +18,6 @@ layout(binding = 0) uniform Transformations {
     mat4 World_Model;
 };
 
-// layout(location = 0) uniform mat4 NDC_World = mat4(1.0f);
-// layout(location = 1) uniform mat4 World_Model = mat4(1.0f);
-
 void main(void) {
     vec4 world = World_Model * vec4(pos, 1.0f);
     gl_Position = NDC_World * world;

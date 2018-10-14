@@ -281,8 +281,9 @@ static void Every15ms(int current_ms) {
     if (Input::KeyPressed[static_cast<unsigned char>('d')]) {
         EyePos -= glm::normalize(glm::cross(Up, LookDir)) * 0.01f;
     }
+    // MyModel.SetPos(glm::vec3(glm::sin(current_ms * 0.001f) - 0.5f, 0.0f, glm::cos(current_ms * 0.001f) - 0.5f));
     MyModel.SetOrientation(
-            glm::quat_cast(glm::rotate(glm::mat4(1.0f), delta_ms * 0.001f, glm::vec3(0.0f, 1.0f, 0.0f))) *
+            glm::quat_cast(glm::rotate(glm::mat4(1.0f), delta_ms * 0.0005f, glm::vec3(0.0f, 0.0f, 1.0f))) *
             MyModel.GetOrientation());
     View_World = glm::lookAt(EyePos, EyePos + LookDir, Up);
 }
