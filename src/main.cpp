@@ -10,16 +10,15 @@
 #include "OpenGL/Shader.hpp"
 #include <fstream>
 #include <vector>
+#include <algorithm>
 
 namespace {
 
 static GLuint VAO;
 
-static OpenGL::Program Program;
+static OpenGL::Program ProgramTriangles, ProgramLines;
+static Model MyModel, MyAxis;
 static GLuint UBO;
-
-static Model MyModel;
-static Model MyAxis;
 
 static glm::mat4 NDC_View = glm::identity<glm::mat4>();
 static glm::mat4 View_World = glm::identity<glm::mat4>();
@@ -66,7 +65,6 @@ static void OnMotion(int x, int y) {
     LookDir.x = glm::sin(RadianOfDegree(ViewAngle.horizontal)) * glm::cos(RadianOfDegree(ViewAngle.vertical));
     LookDir.y = glm::sin(RadianOfDegree(ViewAngle.vertical));
     LookDir.z = glm::cos(RadianOfDegree(ViewAngle.horizontal)) * glm::cos(RadianOfDegree(ViewAngle.vertical));
-    View_World = glm::lookAt(EyePos, EyePos + LookDir, Up);
 }
 
 static void OnMouse(int button, int state, int x, int y) {
@@ -116,37 +114,19 @@ void MyDebugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum server
                             const GLchar* message, const void* user);
 
 static void InitShaderProgram() {
-    // Prepare shader sources
     const std::string shader_dir("./shaders/");
-    struct _pair {
-        const char* const file_name;
-        OpenGL::Shader* shader;
-        GLenum type;
-    } shaders[3] = {
-        { "shader.vert", new OpenGL::Shader(), GL_VERTEX_SHADER },
-        { "shader.geom", new OpenGL::Shader(), GL_GEOMETRY_SHADER },
-        { "shader.frag", new OpenGL::Shader(), GL_FRAGMENT_SHADER },
-    };
-    // Create, compile and link shaders
-    Program.Create();
-    for (size_t i = 0; i < countof(shaders); ++i) {
-        _pair& pair = shaders[i];
-        pair.shader->Create(pair.type);
-        std::ifstream file_stream;
-        file_stream.open((shader_dir + pair.file_name).c_str());
-        if (!file_stream) {
-            DEBUG("Failed to open %s\n", (shader_dir + pair.file_name).c_str());
-        }
-        std::string source_string((std::istreambuf_iterator<char>(file_stream)), std::istreambuf_iterator<char>());
-        pair.shader->Source(source_string.c_str());
-        pair.shader->Compile();
-        Program.Attach(*pair.shader);
-        pair.shader->Delete();
-        delete pair.shader;
-    }
-    Program.Link(), Program.Use();
-    const OpenGL::Program::UniformBlock* pub = Program.GetUniformBlock("Transformations");
+    std::vector<std::string> sphere_sources;
+    sphere_sources.push_back("shader.vert");
+    sphere_sources.push_back("shader.geom");
+    sphere_sources.push_back("shader.frag");
+    OpenGL::Program::InitWithShaders(ProgramTriangles, shader_dir, sphere_sources);
+    std::vector<std::string> axes_sources;
+    axes_sources.push_back("shader.vert");
+    axes_sources.push_back("shader2.geom");
+    axes_sources.push_back("shader.frag");
+    OpenGL::Program::InitWithShaders(ProgramLines, shader_dir, axes_sources);
     // setup UBO
+    const OpenGL::Program::UniformBlock* pub = ProgramTriangles.GetUniformBlock("Transformations");
     glCreateBuffers(1, &UBO);
     glNamedBufferStorage(UBO, pub->size, NULL, GL_DYNAMIC_STORAGE_BIT);
     glBindBufferBase(GL_UNIFORM_BUFFER, pub->index, UBO);
@@ -190,11 +170,11 @@ static void InitDraw() {
     std::vector<glm::vec3> vertices;
     SphereVetices(0.8f, 60, 30, vertices);
     std::vector<glm::vec3> axes_vertices;
-    axes_vertices.push_back(glm::vec3(-1.0f, 0.0f, 0.0f));
+    axes_vertices.push_back(glm::vec3(0.0f, 0.0f, 0.0f));
     axes_vertices.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
-    axes_vertices.push_back(glm::vec3(0.0f, -1.0f, 0.0f));
+    axes_vertices.push_back(glm::vec3(0.0f, 0.0f, 0.0f));
     axes_vertices.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
-    axes_vertices.push_back(glm::vec3(0.0f, 0.0f, -1.0f));
+    axes_vertices.push_back(glm::vec3(0.0f, 0.0f, 0.0f));
     axes_vertices.push_back(glm::vec3(0.0f, 0.0f, 1.0f));
     // upload vertices
     {
@@ -227,34 +207,46 @@ static void InitMisc() {
 static void Draw() {
     static glm::vec4 bg_color(0.9f, 0.9f, 0.9f, 1.0f);
     static glm::vec3 fg_color(0.9f, 0.1f, 0.9f);
+    static glm::vec3 axis_color(0.0f, 0.2f, 0.9f);
     // init
     glClearBufferfv(GL_COLOR, 0, glm::value_ptr(bg_color));
     glClear(GL_DEPTH_BUFFER_BIT);
-    // update uniforms
-    const OpenGL::Program::UniformBlock* pub = Program.GetUniformBlock("Transformations");
+    // update attributes
+    glVertexAttrib3fv(1, glm::value_ptr(glm::zero<glm::vec3>()));
+    CHECK_OPENGL();
+    // draw axis
+    glVertexAttrib3fv(2, glm::value_ptr(axis_color));
+    ProgramLines.Use();
+    const OpenGL::Program::UniformBlock* pub = ProgramLines.GetUniformBlock("Transformations");
     assert(pub);
     for (size_t i = 0; i < pub->uniforms.size(); ++i) {
         const OpenGL::Program::Resource& r = pub->uniforms[i];
-        /// @TODO inefficient
+        if (r.name == "World_Model") {
+            glNamedBufferSubData(UBO, r.offset, OpenGL::TypeSize(r.type), glm::value_ptr(MyAxis.GetTransform()));
+        }
+    }
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    MyAxis.GetMesh().Draw(VAO, GL_LINES);
+    CHECK_OPENGL();
+    // draw front face
+    glVertexAttrib3fv(2, glm::value_ptr(fg_color));
+    ProgramTriangles.Use();
+    for (size_t i = 0; i < pub->uniforms.size(); ++i) {
+        const OpenGL::Program::Resource& r = pub->uniforms[i];
         if (r.name == "NDC_World") {
             glNamedBufferSubData(UBO, r.offset, OpenGL::TypeSize(r.type), glm::value_ptr(NDC_View * View_World));
         } else if (r.name == "World_Model") {
             glNamedBufferSubData(UBO, r.offset, OpenGL::TypeSize(r.type), glm::value_ptr(MyModel.GetTransform()));
         }
     }
-    // update attributes
-    glVertexAttrib3fv(1, glm::value_ptr(glm::zero<glm::vec3>()));
-    glVertexAttrib3fv(2, glm::value_ptr(fg_color));
-    // draw axis
-    // MyAxis.GetMesh().Draw(VAO, GL_LINES);
-    // draw front face
     glFrontFace(GL_CCW);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     MyModel.GetMesh().Draw(VAO, GL_TRIANGLES);
+    CHECK_OPENGL();
     // draw back face
     glFrontFace(GL_CW);
     glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
     MyModel.GetMesh().Draw(VAO, GL_TRIANGLES);
+    CHECK_OPENGL();
     // update front frame buffer
     glutSwapBuffers();
     if (GLint err = glGetError()) {
@@ -263,7 +255,9 @@ static void Draw() {
 }
 
 static void Reshape(GLint w, GLint h) {
-    NDC_View = glm::perspective(Pi / 2, static_cast<float>(w) / static_cast<float>(h), 0.01f, 10.0f);
+    NDC_View = glm::perspective(Pi / 2, static_cast<float>(w) / h, 0.01f, 100.0f);
+    std::string str = glm::to_string(NDC_View).c_str();
+    DEBUG("Perspective:\n%s\n", str.c_str());
     glViewport(0, 0, w, h);
 }
 
@@ -293,7 +287,7 @@ static void Every15ms(int current_ms) {
 }
 
 static void OnClose() {
-    printf("Window closed\n");
+    DEBUG("Window closed\n");
     glutIdleFunc(NULL);
 }
 

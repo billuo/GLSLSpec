@@ -1,9 +1,57 @@
 #include "OpenGL/Program.hpp"
 #include "Debug.hpp"
 #include <algorithm>
+#include <fstream>
+#include <map>
 #include <utility>
 
 namespace OpenGL {
+
+std::map<std::string, GLenum>& SuffixTypeInitMap() {
+    static std::map<std::string, GLenum> map;
+    map["vert"] = GL_VERTEX_SHADER;
+    map["geom"] = GL_GEOMETRY_SHADER;
+    map["frag"] = GL_FRAGMENT_SHADER;
+    return map;
+}
+
+static const GLenum GL_UNKNOWN_SHADER = 0;
+static GLenum SuffixType(const std::string& suffix) {
+    static std::map<std::string, GLenum>& map = SuffixTypeInitMap();
+    std::map<std::string, GLenum>::iterator it = map.find(suffix);
+    if (it != map.end()) {
+        return it->second;
+    } else {
+        return GL_UNKNOWN_SHADER;
+    }
+}
+
+void Program::InitWithShaders(Program& program, const std::string& source_dir,
+                              const std::vector<std::string>& source_file_names) {
+    program.Create();
+    for (size_t i = 0; i < source_file_names.size(); ++i) {
+        std::string file = source_dir + source_file_names[i];
+        size_t beyond_dot_pos = file.rfind('.') + 1;
+        GLenum type = SuffixType(file.substr(beyond_dot_pos));
+        if (type == GL_UNKNOWN_SHADER) {
+            DEBUG("Can not recognize shader type of %s\n", file.substr(beyond_dot_pos).c_str());
+        }
+        Shader shader;
+        shader.Create(type);
+        std::ifstream file_stream;
+        file_stream.open(file.c_str());
+        if (!file_stream) {
+            DEBUG("Failed to open %s\n", file.c_str());
+        }
+        std::string source_string((std::istreambuf_iterator<char>(file_stream)), std::istreambuf_iterator<char>());
+        shader.Source(source_string.c_str());
+        shader.Compile();
+        program.Attach(shader);
+        shader.Delete();
+    }
+    program.Link();
+    CHECK_OPENGL();
+}
 
 void Program::Attach(const Shader& shader) {
     if (aux_CheckInitialized(true)) {

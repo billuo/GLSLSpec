@@ -37,6 +37,9 @@ public:
         void Update(const std::string& uniform_name);
     };
 
+    static void InitWithShaders(Program& program, const std::string& dir_name,
+                                const std::vector<std::string>& shader_sources_file_names);
+
 public:
     Program() : Object<Program>(), m_uniform_blocks() {}
     ~Program() {
