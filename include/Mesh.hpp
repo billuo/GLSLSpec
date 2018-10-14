@@ -9,12 +9,15 @@
 class Mesh {
 public:
     typedef glm::vec3 Vertex;
+
     Mesh() : m_n_vertices(0), m_buffer_vertex(0) {}
+
     explicit Mesh(size_t n_vertices) : m_n_vertices(n_vertices) {
         glCreateBuffers(1, &m_buffer_vertex);
         assert(m_buffer_vertex);
         glNamedBufferStorage(m_buffer_vertex, n_vertices * sizeof(Vertex), NULL, GL_MAP_WRITE_BIT);
     }
+
     void InitData(size_t n_vertices) {
         if (m_n_vertices) {
             DEBUG("Mesh already allocated");
@@ -25,12 +28,10 @@ public:
             glNamedBufferStorage(m_buffer_vertex, n_vertices * sizeof(Vertex), NULL, GL_MAP_WRITE_BIT);
         }
     }
+
     void* MapBufferVertex() {
-        CHECK_OPENGL();
         glBindBuffer(GL_ARRAY_BUFFER, m_buffer_vertex);
-        CHECK_OPENGL();
         void* ret = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
-        CHECK_OPENGL();
         return ret;
     }
     bool UnmapBufferVertex() {
@@ -47,6 +48,10 @@ public:
         glVertexAttribFormat(0, 3, GL_FLOAT, GL_FALSE, 0);
         glVertexAttribBinding(0, 0);
         glBindVertexBuffer(0, m_buffer_vertex, 0, sizeof(Vertex));
+        // [1] in vec3 normal
+        glEnableVertexArrayAttrib(VAO, 1);
+        glVertexAttribFormat(1, 3, GL_FLOAT, GL_FALSE, 0);
+        glVertexAttribBinding(1, 0); // @TODO update real normal data.
         // draw
         glDrawArrays(layout, 0, m_n_vertices);
     }

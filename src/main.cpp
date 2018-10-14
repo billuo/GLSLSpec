@@ -133,7 +133,8 @@ static void InitShaderProgram() {
     glBindBufferBase(GL_UNIFORM_BUFFER, pub->index, UBO);
 }
 
-static void SphereVetices(float radius, size_t n_slices, size_t n_layers, std::vector<glm::vec3>& vertices) {
+static void SphereVetices(float radius, size_t n_slices, size_t n_layers, std::vector<glm::vec3>& vertices,
+                          std::vector<glm::vec3>& normals) {
     const float dtheta = 2 * Pi / n_slices;
     const float dphi = Pi / n_layers;
     float r1 = 0.0f;
@@ -158,6 +159,7 @@ static void SphereVetices(float radius, size_t n_slices, size_t n_layers, std::v
         y1 = y2;
         y2 = glm::cos((layer + 1) * dphi);
     }
+    normals = vertices;
     const size_t n_vertices = vertices.size();
     for (size_t i = 0; i < n_vertices; ++i) {
         vertices[i] *= radius;
@@ -169,7 +171,9 @@ static void InitDraw() {
     glCreateVertexArrays(1, &VAO);
     // prepare vertices
     std::vector<glm::vec3> vertices;
-    SphereVetices(0.8f, 60, 30, vertices);
+    std::vector<glm::vec3> normals;
+    SphereVetices(0.8f, 60, 30, vertices, normals);
+    /// @TODO use 'normals'
     std::vector<glm::vec3> axes_vertices;
     axes_vertices.push_back(glm::vec3(0.0f, 0.0f, 0.0f));
     axes_vertices.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
@@ -213,8 +217,6 @@ static void Draw() {
     glClearBufferfv(GL_COLOR, 0, glm::value_ptr(bg_color));
     glClear(GL_DEPTH_BUFFER_BIT);
     // update attributes
-    glVertexAttrib3fv(1, glm::value_ptr(glm::zero<glm::vec3>()));
-    CHECK_OPENGL();
     // draw axis
     glVertexAttrib3fv(2, glm::value_ptr(axis_color));
     ProgramLines.Use();
@@ -226,9 +228,8 @@ static void Draw() {
             glNamedBufferSubData(UBO, r.offset, OpenGL::TypeSize(r.type), glm::value_ptr(MyAxis.GetTransform()));
         }
     }
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     MyAxis.GetMesh().Draw(VAO, GL_LINES);
-    CHECK_OPENGL();
     // draw front face
     glVertexAttrib3fv(2, glm::value_ptr(fg_color));
     ProgramTriangles.Use();
@@ -244,11 +245,9 @@ static void Draw() {
     MyModel.GetMesh().Draw(VAO, GL_TRIANGLES);
     CHECK_OPENGL();
     // draw back face
-    glFrontFace(GL_CW);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
-    MyModel.GetMesh().Draw(VAO, GL_TRIANGLES);
-    CHECK_OPENGL();
-    // update front frame buffer
+    // glFrontFace(GL_CW);
+    // glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
+    // MyModel.GetMesh().Draw(VAO, GL_TRIANGLES);
     glutSwapBuffers();
     if (GLint err = glGetError()) {
         exit(err);

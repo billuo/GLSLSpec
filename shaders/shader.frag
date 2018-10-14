@@ -5,8 +5,7 @@ in GS_FS {
     vec3 pos;
     vec3 normal;
     vec3 color;
-}
-fs_in;
+} fs_in;
 /* clang-format off */
 
 out vec4 color;
