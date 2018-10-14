@@ -1,0 +1,6 @@
+.*.swp
+.*.swo
+.ycm*
+tags
+*build*/
+include/glm

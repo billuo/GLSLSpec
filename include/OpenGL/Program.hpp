@@ -38,7 +38,7 @@ public:
     };
 
 public:
-    Program() : Object<Program>() {}
+    Program() : Object<Program>(), m_uniform_blocks() {}
     ~Program() {
         if (Initialized()) {
             Delete();
@@ -87,6 +87,9 @@ private:
 
     GLint aux_Get(GLenum param) const;
     GLint aux_GetStage(GLenum stage, GLenum pname) const;
+
+private:
+    mutable std::vector<UniformBlock> m_uniform_blocks;
 };
 
 } // namespace OpenGL
