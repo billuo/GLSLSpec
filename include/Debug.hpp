@@ -12,7 +12,7 @@
 #include <cstdio>
 
 /// Print format string to stderr
-#define DEBUG(fmt, ...) fprintf(stderr, fmt, ##__VA_ARGS__)
+#define DEBUG(fmt, ...) fprintf(stderr, fmt "\n", ##__VA_ARGS__)
 
 /// Convert OpenGL error code to error string.
 const char* GLErrorString(int error);
@@ -21,7 +21,7 @@ const char* GLErrorString(int error);
 #define CHECK_OPENGL()                                                                                         \
     do {                                                                                                       \
         if (GLint err = glGetError()) {                                                                        \
-            DEBUG("Function:%s\nLine:%d\nOpenGL Error(%d):%s\n", __func__, __LINE__, err, GLErrorString(err)); \
+            DEBUG("Function:%s\nLine:%d\nOpenGL Error(%d):%s", __func__, __LINE__, err, GLErrorString(err)); \
             exit(err);                                                                                         \
         }                                                                                                      \
     } while (0)

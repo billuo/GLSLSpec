@@ -27,11 +27,25 @@ static glm::vec3 EyePos = glm::vec3(0.0f, 0.0f, 2.0f);
 static glm::vec3 LookDir = glm::vec3(0.0f, 0.0f, -1.0f);
 static const glm::vec3 Up = glm::vec3(0.0f, 1.0f, 0.0f);
 
-enum RasterizationMode { Fill, Line, Point, None, Max };
+} // namespace
+
+namespace Draw {
+
+enum RasterizationMode { None = 0, Fill = GL_FILL, Line = GL_LINE, Point = GL_POINT };
+static inline RasterizationMode NextMode(RasterizationMode mode) {
+    switch (mode) {
+    case None: return Fill;
+    case Fill: return Line;
+    case Line: return Point;
+    case Point: return None;
+    default: DEBUG("Bad RasterizationMode");
+    }
+}
 static RasterizationMode Front = Fill;
 static RasterizationMode Back = None;
+static bool Axes = true;
 
-} // namespace
+} // namespace Draw
 
 namespace Input {
 
@@ -85,10 +99,10 @@ static void OnMouse(int button, int state, int x, int y) {
 }
 
 static void OnKeyboard(unsigned char key, int x, int y) {
-    /// @TODO
     switch (key) {
-    case '[': Front = static_cast<RasterizationMode>((Front + 1) % Max); break;
-    case ']': Back = static_cast<RasterizationMode>((Back + 1) % Max); break;
+    case '\\': Draw::Axes = !Draw::Axes; break;
+    case '[': Draw::Front = Draw::NextMode(Draw::Front); break;
+    case ']': Draw::Back = Draw::NextMode(Draw::Back); break;
     case 'w':
     case 'a':
     case 's':
@@ -222,45 +236,54 @@ static void InitMisc() {
     glEnable(GL_CULL_FACE);
 }
 
-static void Draw() {
+static void Render() {
     static glm::vec4 bg_color(0.9f, 0.9f, 0.9f, 1.0f);
     static glm::vec3 fg_color(0.9f, 0.1f, 0.9f);
     static glm::vec3 axis_color(0.0f, 0.2f, 0.9f);
     // init
     glClearBufferfv(GL_COLOR, 0, glm::value_ptr(bg_color));
     glClear(GL_DEPTH_BUFFER_BIT);
-    glVertexAttrib3fv(2, glm::value_ptr(axis_color));
     auto* pub = ProgramLines.GetUniformBlock("Transformations");
     assert(pub);
-    // prepare to draw axes
-    ProgramLines.Use();
-    for (auto&& r : pub->uniforms) {
-        if (r.name.get() == std::string("World_Model")) {
-            glNamedBufferSubData(UBO, r.offset, OpenGL::TypeSize(r.type), glm::value_ptr(MyAxis.GetTransform()));
+    if (Draw::Axes) {
+        ProgramLines.Use();
+        // prepare to draw axes
+        glVertexAttrib3fv(2, glm::value_ptr(axis_color));
+        for (auto&& r : pub->uniforms) {
+            if (r.name.get() == std::string("World_Model")) {
+                glNamedBufferSubData(UBO, r.offset, OpenGL::TypeSize(r.type), glm::value_ptr(MyAxis.GetTransform()));
+            }
+        }
+        // draw axes
+        MyAxis.GetMesh().Draw(VAO, GL_LINES);
+    }
+    if (Draw::Back != Draw::None || Draw::Front != Draw::None) {
+        ProgramTriangles.Use();
+        // prepare to draw main object
+        glVertexAttrib3fv(2, glm::value_ptr(fg_color));
+        for (size_t i = 0; i < pub->uniforms.size(); ++i) {
+            const OpenGL::Program::Resource& r = pub->uniforms[i];
+            if (r.name.get() == std::string("NDC_World")) {
+                glNamedBufferSubData(UBO, r.offset, OpenGL::TypeSize(r.type), glm::value_ptr(NDC_View * View_World));
+            } else if (r.name.get() == std::string("World_Model")) {
+                glNamedBufferSubData(UBO, r.offset, OpenGL::TypeSize(r.type), glm::value_ptr(MyModel.GetTransform()));
+            }
+        }
+        // draw front face
+        if (Draw::Front != Draw::None) {
+            glPolygonMode(GL_FRONT_AND_BACK, Draw::Front);
+            glFrontFace(GL_CCW);
+            MyModel.GetMesh().Draw(VAO, GL_TRIANGLES);
+            CHECK_OPENGL();
+        }
+        // draw back face
+        if (Draw::Back != Draw::None) {
+            glPolygonMode(GL_FRONT_AND_BACK, Draw::Back);
+            glFrontFace(GL_CW);
+            MyModel.GetMesh().Draw(VAO, GL_TRIANGLES);
+            CHECK_OPENGL();
         }
     }
-    // draw axes
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    MyAxis.GetMesh().Draw(VAO, GL_LINES);
-    // prepare to draw main object
-    ProgramTriangles.Use();
-    glVertexAttrib3fv(2, glm::value_ptr(fg_color));
-    for (size_t i = 0; i < pub->uniforms.size(); ++i) {
-        const OpenGL::Program::Resource& r = pub->uniforms[i];
-        if (r.name.get() == std::string("NDC_World")) {
-            glNamedBufferSubData(UBO, r.offset, OpenGL::TypeSize(r.type), glm::value_ptr(NDC_View * View_World));
-        } else if (r.name.get() == std::string("World_Model")) {
-            glNamedBufferSubData(UBO, r.offset, OpenGL::TypeSize(r.type), glm::value_ptr(MyModel.GetTransform()));
-        }
-    }
-    // draw front face
-    glFrontFace(GL_CCW);
-    MyModel.GetMesh().Draw(VAO, GL_TRIANGLES);
-    CHECK_OPENGL();
-    // draw back face
-    glFrontFace(GL_CW);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
-    MyModel.GetMesh().Draw(VAO, GL_TRIANGLES);
     // finish up
     glutSwapBuffers();
     if (GLint err = glGetError()) {
@@ -300,7 +323,7 @@ static void Every15ms(int current_ms) {
 }
 
 static void OnClose() {
-    DEBUG("Window closed\n");
+    DEBUG("Window closed");
     glutIdleFunc(nullptr);
 }
 
@@ -315,7 +338,7 @@ int main(int argc, char** argv) {
     glutInitWindowPosition(0, 0);
     glutCreateWindow("Sphere");
     // glut setup window specific callbacks
-    glutDisplayFunc(Draw);
+    glutDisplayFunc(Render);
     glutReshapeFunc(Reshape);
     glutKeyboardFunc(Input::OnKeyboard);
     glutKeyboardUpFunc(Input::OnKeyboardUp);
@@ -326,16 +349,16 @@ int main(int argc, char** argv) {
     // init glew for OpenGL 4+
     GLenum err = glewInit();
     if (err != GLEW_OK) {
-        DEBUG("Failed to init glew:%s\n", glewGetErrorString(err));
+        DEBUG("Failed to init glew:%s", glewGetErrorString(err));
     } else if (GLEW_VERSION_4_5) {
-        DEBUG("OpenGL 4.5 support\n");
+        DEBUG("OpenGL 4.5 support");
     }
     // init for draw
     InitShaderProgram();
     InitDraw();
     InitMisc();
     // glut setup global callbacks
-    glutIdleFunc(Draw);
+    glutIdleFunc(Render);
     glutTimerFunc(15, Every15ms, 0);
     // main loop
     glutMainLoop();

@@ -92,7 +92,7 @@ Shader& GetShader(const std::string& dir, const std::string& source, GLenum type
         const size_t beyond_dot_pos = file.rfind('.') + 1;
         type = SuffixType(file.substr(beyond_dot_pos));
         if (type == GL_UNKNOWN_SHADER) {
-            DEBUG("Can not identify the shader type of %s\n", file.substr(beyond_dot_pos).c_str());
+            DEBUG("Can not identify the shader type of %s", file.substr(beyond_dot_pos).c_str());
             return EmptyShader;
         }
     }
@@ -100,7 +100,7 @@ Shader& GetShader(const std::string& dir, const std::string& source, GLenum type
     std::ifstream file_stream;
     file_stream.open(file.c_str());
     if (!file_stream) {
-        DEBUG("Failed to open %s\n", file.c_str());
+        DEBUG("Failed to open %s", file.c_str());
         return EmptyShader;
     }
     std::string source_string((std::istreambuf_iterator<char>(file_stream)), std::istreambuf_iterator<char>());
