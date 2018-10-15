@@ -38,7 +38,7 @@ static inline RasterizationMode NextMode(RasterizationMode mode) {
     case Fill: return Line;
     case Line: return Point;
     case Point: return None;
-    default: DEBUG("Bad RasterizationMode");
+    default: DEBUG("Bad RasterizationMode"); return None;
     }
 }
 static RasterizationMode Front = Fill;
@@ -199,7 +199,7 @@ static void InitDraw() {
     // prepare vertices
     std::vector<glm::vec3> vertices;
     std::vector<glm::vec3> normals;
-    SphereVetices(0.8f, 60, 30, vertices, normals);
+    SphereVetices(0.8f, 120, 60, vertices, normals);
     /// @TODO use 'normals'
     std::vector<glm::vec3> axes_vertices;
     axes_vertices.push_back(glm::vec3(0.0f, 0.0f, 0.0f));
@@ -238,7 +238,7 @@ static void InitMisc() {
 
 static void Render() {
     static glm::vec4 bg_color(0.9f, 0.9f, 0.9f, 1.0f);
-    static glm::vec3 fg_color(0.9f, 0.1f, 0.9f);
+    static glm::vec3 fg_color(0.9f, 0.8f, 0.05f);
     static glm::vec3 axis_color(0.0f, 0.2f, 0.9f);
     // init
     glClearBufferfv(GL_COLOR, 0, glm::value_ptr(bg_color));

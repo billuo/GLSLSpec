@@ -109,7 +109,7 @@ const Program::UniformBlock* Program::GetUniformBlock(const GLchar* block_name) 
     // XXX glGetProgramResourceiv return -1 for GL_LOCATION of uniforms in uniform block.
     glGetActiveUniformBlockiv(Name(), ret.index, GL_UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES, uniform_indices.get());
     for (GLint i = 0; i < n_uniforms; ++i) {
-        ret.uniforms[i].index = uniform_indices[i];
+        ret.uniforms[i].first.index = uniform_indices[i];
     }
     //
     // get name, type and offset of uniforms
@@ -120,9 +120,9 @@ const Program::UniformBlock* Program::GetUniformBlock(const GLchar* block_name) 
         glGetProgramResourceiv(Name(), GL_UNIFORM, i, N, properties, N, nullptr, results);
         auto&& name = std::make_unique<GLchar[]>(results[0] + 1); // XXX one more unnecessary byte, just in case
         glGetProgramResourceName(Name(), GL_UNIFORM, i, results[0] + 1, nullptr, name.get());
-        ret.uniforms[i].type = results[1];
-        ret.uniforms[i].offset = results[2];
-        ret.uniforms[i].name = std::move(name);
+        ret.uniforms[i].first.type = results[1];
+        ret.uniforms[i].second = results[2];
+        ret.uniforms[i].first.name = std::move(name);
     }
     //
     // cache and return

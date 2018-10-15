@@ -19,21 +19,26 @@ namespace OpenGL {
 class Program : public Object<Program> {
 public:
     struct Resource {
-        GLint type = 0;
-        GLint index = -1;
-        GLint offset = 0;
         std::unique_ptr<GLchar[]> name;
-        Resource() = default;
-        Resource(Resource&& obj) = default;
-        bool operator<(const Resource& rhs) const { return index < rhs.index; }
+        GLint index = -1;
+        GLint type = 0;
+        GLint offset = 0;
+        // bool operator<(const Resource& rhs) const { return index < rhs.index; }
+    };
+    struct Uniform {
+        std::unique_ptr<GLchar[]> name;
+        GLint index = -1;
+        GLint type = 0;
+
+        void Update(void* data);
     };
     struct UniformBlock {
-        GLuint index = -1;
-        GLint size = 0;
         std::unique_ptr<GLchar[]> name;
-        std::vector<Resource> uniforms;
+        GLuint index = -1;
+        std::vector<std::pair<Uniform, GLint>> uniforms;
+        GLint size = 0;
 
-        void Update(const std::string& uniform_name);
+        void Update(void* data);
     };
 
 public:

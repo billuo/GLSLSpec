@@ -37,6 +37,8 @@ void main(void) {
     vec4 world = World_Model * vec4(pos, 1.0f);
     gl_Position = NDC_World * world;
     vs_out.pos = world.xyz;
+    //
     vs_out.normal = (World_Model * vec4(normal, 0.0f)).xyz;
+    //
     vs_out.color = color;
 }
