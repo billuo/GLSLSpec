@@ -27,6 +27,10 @@ static glm::vec3 EyePos = glm::vec3(0.0f, 0.0f, 2.0f);
 static glm::vec3 LookDir = glm::vec3(0.0f, 0.0f, -1.0f);
 static const glm::vec3 Up = glm::vec3(0.0f, 1.0f, 0.0f);
 
+enum RasterizationMode { Fill, Line, Point, None, Max };
+static RasterizationMode Front = Fill;
+static RasterizationMode Back = None;
+
 } // namespace
 
 namespace Input {
@@ -83,6 +87,8 @@ static void OnMouse(int button, int state, int x, int y) {
 static void OnKeyboard(unsigned char key, int x, int y) {
     /// @TODO
     switch (key) {
+    case '[': Front = static_cast<RasterizationMode>((Front + 1) % Max); break;
+    case ']': Back = static_cast<RasterizationMode>((Back + 1) % Max); break;
     case 'w':
     case 'a':
     case 's':
@@ -223,22 +229,22 @@ static void Draw() {
     // init
     glClearBufferfv(GL_COLOR, 0, glm::value_ptr(bg_color));
     glClear(GL_DEPTH_BUFFER_BIT);
-    // update attributes
-    // draw axis
     glVertexAttrib3fv(2, glm::value_ptr(axis_color));
-    ProgramLines.Use();
-    const OpenGL::Program::UniformBlock* pub = ProgramLines.GetUniformBlock("Transformations");
+    auto* pub = ProgramLines.GetUniformBlock("Transformations");
     assert(pub);
+    // prepare to draw axes
+    ProgramLines.Use();
     for (auto&& r : pub->uniforms) {
         if (r.name.get() == std::string("World_Model")) {
             glNamedBufferSubData(UBO, r.offset, OpenGL::TypeSize(r.type), glm::value_ptr(MyAxis.GetTransform()));
         }
     }
+    // draw axes
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     MyAxis.GetMesh().Draw(VAO, GL_LINES);
-    // draw front face
-    glVertexAttrib3fv(2, glm::value_ptr(fg_color));
+    // prepare to draw main object
     ProgramTriangles.Use();
+    glVertexAttrib3fv(2, glm::value_ptr(fg_color));
     for (size_t i = 0; i < pub->uniforms.size(); ++i) {
         const OpenGL::Program::Resource& r = pub->uniforms[i];
         if (r.name.get() == std::string("NDC_World")) {
@@ -247,13 +253,15 @@ static void Draw() {
             glNamedBufferSubData(UBO, r.offset, OpenGL::TypeSize(r.type), glm::value_ptr(MyModel.GetTransform()));
         }
     }
+    // draw front face
     glFrontFace(GL_CCW);
     MyModel.GetMesh().Draw(VAO, GL_TRIANGLES);
     CHECK_OPENGL();
     // draw back face
-    // glFrontFace(GL_CW);
-    // glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
-    // MyModel.GetMesh().Draw(VAO, GL_TRIANGLES);
+    glFrontFace(GL_CW);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
+    MyModel.GetMesh().Draw(VAO, GL_TRIANGLES);
+    // finish up
     glutSwapBuffers();
     if (GLint err = glGetError()) {
         exit(err);

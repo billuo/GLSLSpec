@@ -1,6 +1,7 @@
 #include "OpenGL/Program.hpp"
 #include "Debug.hpp"
 #include <algorithm>
+#include <cstring>
 #include <fstream>
 #include <map>
 #include <utility>
@@ -76,17 +77,21 @@ void Program::List(GLenum interface) const {
     delete[] name;
 }
 
-const Program::UniformBlock* Program::GetUniformBlock(const GLchar* name) const {
+const Program::UniformBlock* Program::GetUniformBlock(const GLchar* block_name) const {
+    //
     // look up cached uniform blocks
-    auto it = std::find_if(m_uniform_blocks.begin(), m_uniform_blocks.end(),
-                           [name](const UniformBlock& b) { return b.name == name; });
+    auto it = std::find_if(m_uniform_blocks.begin(), m_uniform_blocks.end(), [block_name](const UniformBlock& b) {
+        static std::string str_name(block_name);
+        return b.name.get() == str_name;
+    });
     if (it != m_uniform_blocks.end()) {
         return std::addressof(*it);
     }
     UniformBlock ret;
+    //
     // get index and size of uniform block
     GLint n_uniforms;
-    ret.index = glGetUniformBlockIndex(Name(), name);
+    ret.index = glGetUniformBlockIndex(Name(), block_name);
     if (ret.index == GL_INVALID_INDEX) {
         glDebugMessageInsert(GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_ERROR, 0, GL_DEBUG_SEVERITY_LOW, -1,
                              "Uniform block not found");
@@ -94,8 +99,11 @@ const Program::UniformBlock* Program::GetUniformBlock(const GLchar* name) const 
     }
     glGetActiveUniformBlockiv(Name(), ret.index, GL_UNIFORM_BLOCK_DATA_SIZE, &(ret.size));
     glGetActiveUniformBlockiv(Name(), ret.index, GL_UNIFORM_BLOCK_ACTIVE_UNIFORMS, &n_uniforms);
-    ret.name.assign(name);
+    int len = strlen(block_name);
+    ret.name = std::make_unique<GLchar[]>(len);
+    strcpy(ret.name.get(), block_name);
     ret.uniforms.resize(n_uniforms);
+    //
     // get indices of uniforms
     auto&& uniform_indices = std::make_unique<GLint[]>(n_uniforms);
     // XXX glGetProgramResourceiv return -1 for GL_LOCATION of uniforms in uniform block.
@@ -103,6 +111,7 @@ const Program::UniformBlock* Program::GetUniformBlock(const GLchar* name) const 
     for (GLint i = 0; i < n_uniforms; ++i) {
         ret.uniforms[i].index = uniform_indices[i];
     }
+    //
     // get name, type and offset of uniforms
     const GLenum properties[] = { GL_NAME_LENGTH, GL_TYPE, GL_OFFSET };
     GLint results[countof(properties)];
@@ -115,6 +124,7 @@ const Program::UniformBlock* Program::GetUniformBlock(const GLchar* name) const 
         ret.uniforms[i].offset = results[2];
         ret.uniforms[i].name = std::move(name);
     }
+    //
     // cache and return
     m_uniform_blocks.emplace_back(std::move(ret));
     return &m_uniform_blocks.back();
