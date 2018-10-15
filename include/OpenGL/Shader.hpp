@@ -15,7 +15,7 @@ namespace OpenGL {
 
 /**
  * @class Shader
- * @brief Operations on OpenGL shader object.
+ * @brief Encapsulated OpenGL shader objects
  */
 class Shader : public Object<Shader> {
 public:

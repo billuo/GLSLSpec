@@ -33,6 +33,7 @@ target_link_libraries(Main ${GLEW_LIBRARIES})
 
 set(Main_sources
     Debug.cpp
+    Utility.cpp
     OpenGL/Common.cpp
     OpenGL/Program.cpp
     OpenGL/Shader.cpp

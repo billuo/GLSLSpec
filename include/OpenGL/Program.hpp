@@ -15,8 +15,6 @@ namespace OpenGL {
 /**
  * @class Program
  * @brief Encapsulates OpenGL shader program objects.
- * @details A shader program groups together several shader objects, linking (possibly after compiling) them before put
- * into use.
  */
 class Program : public Object<Program> {
 public:
@@ -39,8 +37,6 @@ public:
 
 public:
     Program() = default;
-    Program(const Program&) = delete;
-    Program& operator=(const Program&) = delete;
     Program(Program&&) = default;
     Program& operator=(Program&&) = default;
     ~Program() {

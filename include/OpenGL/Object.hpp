@@ -38,10 +38,10 @@ public:
 
 protected:
     void SetName(GLuint name) { m_name = name; }
-    /// Compains when Object is not initialized.
+    /// Compains when Object is not initialized as expected.
     bool aux_CheckInitialized(bool expected) const {
         if (Initialized() != expected) {
-            DEBUG("OpenGL obejct<type=%s> not initialized before use.\n", typeid(Derived).name());
+            DEBUG("OpenGL obejct<type=%s> not initialized before use.\n", type_name<Derived>());
         }
         return true;
     }

@@ -60,20 +60,12 @@ std::unique_ptr<char[]> Shader::aux_GetInfoLog() const {
 
 namespace ShaderResource {
 
-static std::map<std::string, GLenum> SuffixTypeInitMap() {
-    static std::map<std::string, GLenum> map;
-    map["vert"] = GL_VERTEX_SHADER;
-    map["tesc"] = GL_TESS_CONTROL_SHADER;
-    map["tese"] = GL_TESS_EVALUATION_SHADER;
-    map["geom"] = GL_GEOMETRY_SHADER;
-    map["frag"] = GL_FRAGMENT_SHADER;
-    map["comp"] = GL_COMPUTE_SHADER;
-    return map;
-}
-
-static GLenum SuffixType(const std::string& suffix) {
-    static std::map<std::string, GLenum> map = SuffixTypeInitMap();
-    std::map<std::string, GLenum>::iterator it = map.find(suffix);
+static GLenum SuffixType(std::string suffix) {
+    static const auto map = std::map<std::string, GLenum>{
+        { "vert", GL_VERTEX_SHADER },   { "tesc", GL_TESS_CONTROL_SHADER }, { "tese", GL_TESS_EVALUATION_SHADER },
+        { "geom", GL_GEOMETRY_SHADER }, { "frag", GL_FRAGMENT_SHADER },     { "comp", GL_COMPUTE_SHADER },
+    };
+    auto it = map.find(suffix);
     if (it != map.end()) {
         return it->second;
     } else {
@@ -90,7 +82,7 @@ Shader& GetShader(const std::string& dir, const std::string& source, GLenum type
     const auto it = ShaderCache.find(file);
     if (it != ShaderCache.end()) {
         if (force_compile) {
-            ShaderCache.erase(it);
+            it->second->Delete();
         } else {
             return *it->second;
         }
@@ -113,12 +105,14 @@ Shader& GetShader(const std::string& dir, const std::string& source, GLenum type
     }
     std::string source_string((std::istreambuf_iterator<char>(file_stream)), std::istreambuf_iterator<char>());
     // add to cache and compile
-    Shader& shader = *new Shader();
-    shader.Create(type);
-    shader.Source(source_string.c_str());
-    shader.Compile();
-    ShaderCache[file].reset(&shader);
-    return shader;
+    auto&& shader = ShaderCache[file];
+    if (!shader) {
+        shader.reset(new Shader());
+    }
+    shader->Create(type);
+    shader->Source(source_string.c_str());
+    shader->Compile();
+    return *shader;
 }
 
 } // namespace ShaderResource
