@@ -7,73 +7,35 @@
 
 namespace OpenGL {
 
-std::map<std::string, GLenum>& SuffixTypeInitMap() {
-    static std::map<std::string, GLenum> map;
-    map["vert"] = GL_VERTEX_SHADER;
-    map["geom"] = GL_GEOMETRY_SHADER;
-    map["frag"] = GL_FRAGMENT_SHADER;
-    return map;
-}
-
-static const GLenum GL_UNKNOWN_SHADER = 0;
-static GLenum SuffixType(const std::string& suffix) {
-    static std::map<std::string, GLenum>& map = SuffixTypeInitMap();
-    std::map<std::string, GLenum>::iterator it = map.find(suffix);
-    if (it != map.end()) {
-        return it->second;
-    } else {
-        return GL_UNKNOWN_SHADER;
-    }
-}
-
-void Program::InitWithShaders(Program& program, const std::string& source_dir,
-                              const std::vector<std::string>& source_file_names) {
-    program.Create();
-    for (size_t i = 0; i < source_file_names.size(); ++i) {
-        std::string file = source_dir + source_file_names[i];
-        size_t beyond_dot_pos = file.rfind('.') + 1;
-        GLenum type = SuffixType(file.substr(beyond_dot_pos));
-        if (type == GL_UNKNOWN_SHADER) {
-            DEBUG("Can not recognize shader type of %s\n", file.substr(beyond_dot_pos).c_str());
-        }
-        Shader shader;
-        shader.Create(type);
-        std::ifstream file_stream;
-        file_stream.open(file.c_str());
-        if (!file_stream) {
-            DEBUG("Failed to open %s\n", file.c_str());
-        }
-        std::string source_string((std::istreambuf_iterator<char>(file_stream)), std::istreambuf_iterator<char>());
-        shader.Source(source_string.c_str());
-        shader.Compile();
-        program.Attach(shader);
-        shader.Delete();
-    }
-    program.Link();
-    CHECK_OPENGL();
-}
-
-void Program::Attach(const Shader& shader) {
+void Program::Attach(const Shader* shader) {
     if (aux_CheckInitialized(true)) {
-        if (shader.Initialized()) {
-            glAttachShader(Name(), shader.Name());
+        std::vector<const Shader*>::iterator it =
+                std::find(m_attached_shaders.begin(), m_attached_shaders.end(), shader);
+        if (it != m_attached_shaders.end()) {
+            DEBUG("Shader<name=%u> already attached to Program<name=%u>.", shader->Name(), Name());
+        } else {
+            m_attached_shaders.push_back(shader);
         }
     }
 }
 
-void Program::Detach(const Shader& shader) {
+void Program::Attach(const std::vector<const Shader*>& shaders) {
     if (aux_CheckInitialized(true)) {
-        if (shader.Initialized()) {
-            glDetachShader(Name(), shader.Name());
+        for (std::vector<const Shader*>::const_iterator it = shaders.begin(); it != shaders.end(); ++it) {
+            Attach(*it);
         }
     }
 }
 
 void Program::Link() {
     if (aux_CheckInitialized(true)) {
+        for (std::vector<const Shader*>::iterator it = m_attached_shaders.begin(); it != m_attached_shaders.end();
+             ++it) {
+            glAttachShader(Name(), (*it)->Name());
+        }
         glLinkProgram(Name());
         if (aux_Get(GL_LINK_STATUS) == GL_FALSE) {
-            DEBUG("Shader program linking failed:\n%s", GetInfoLog().c_str());
+            DEBUG("Shader program linking failed:\n%s", aux_GetInfoLog().c_str());
         }
     }
 }
@@ -101,14 +63,14 @@ void Program::List(GLenum interface) const {
     std::vector<Resource> attributes(n_attributes);
     GLint max_name_length = 0;
     for (GLint i = 0; i < n_attributes; ++i) {
-        glGetProgramResourceiv(Name(), interface, i, N, properties, N, NULL, results);
+        glGetProgramResourceiv(Name(), interface, i, N, properties, N, nullptr, results);
         max_name_length = std::max(max_name_length, results[0]);
         attributes[i].type = results[1];
         attributes[i].index = results[2];
     }
     GLchar* name = new GLchar[max_name_length + 1];
     for (GLint i = 0; i < n_attributes; ++i) {
-        glGetProgramResourceName(Name(), interface, i, max_name_length + 1, NULL, name);
+        glGetProgramResourceName(Name(), interface, i, max_name_length + 1, nullptr, name);
         printf("[%2d] %s %s\n", attributes[i].index, TypeString(attributes[i].type), name);
     }
     delete[] name;
@@ -134,7 +96,7 @@ const Program::UniformBlock* Program::GetUniformBlock(const GLchar* name) const 
     if (ret.index == GL_INVALID_INDEX) {
         glDebugMessageInsert(GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_ERROR, 0, GL_DEBUG_SEVERITY_LOW, -1,
                              "Uniform block not found");
-        return NULL;
+        return nullptr;
     }
     glGetActiveUniformBlockiv(Name(), ret.index, GL_UNIFORM_BLOCK_DATA_SIZE, &(ret.size));
     glGetActiveUniformBlockiv(Name(), ret.index, GL_UNIFORM_BLOCK_ACTIVE_UNIFORMS, &n_uniforms);
@@ -154,9 +116,9 @@ const Program::UniformBlock* Program::GetUniformBlock(const GLchar* name) const 
     GLint results[countof(properties)];
     const size_t N = countof(properties);
     for (GLint i = 0; i < n_uniforms; ++i) {
-        glGetProgramResourceiv(Name(), GL_UNIFORM, i, N, properties, N, NULL, results);
+        glGetProgramResourceiv(Name(), GL_UNIFORM, i, N, properties, N, nullptr, results);
         GLchar* uniform_name = new GLchar[results[0] + 1];
-        glGetProgramResourceName(Name(), GL_UNIFORM, i, results[0] + 1, NULL, uniform_name);
+        glGetProgramResourceName(Name(), GL_UNIFORM, i, results[0] + 1, nullptr, uniform_name);
         ret.uniforms[i].type = results[1];
         ret.uniforms[i].offset = results[2];
         ret.uniforms[i].name = uniform_name;
@@ -167,13 +129,13 @@ const Program::UniformBlock* Program::GetUniformBlock(const GLchar* name) const 
     return &m_uniform_blocks.back();
 }
 
-std::string Program::GetInfoLog() const {
+std::string Program::aux_GetInfoLog() const {
     std::string ret;
     if (aux_CheckInitialized(true)) {
         GLint length = aux_Get(GL_INFO_LOG_LENGTH);
         assert(length >= 0);
         ret.resize(length);
-        glGetProgramInfoLog(Name(), length, NULL, &ret[0]);
+        glGetProgramInfoLog(Name(), length, nullptr, &ret[0]);
     }
     return ret;
 }

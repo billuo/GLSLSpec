@@ -37,11 +37,12 @@ public:
         void Update(const std::string& uniform_name);
     };
 
-    static void InitWithShaders(Program& program, const std::string& dir_name,
-                                const std::vector<std::string>& shader_sources_file_names);
-
 public:
-    Program() : Object<Program>(), m_uniform_blocks() {}
+    Program() = default;
+    Program(const Program&) = delete;
+    Program& operator=(const Program&) = delete;
+    Program(Program&&) = default;
+    Program& operator=(Program&&) = default;
     ~Program() {
         if (Initialized()) {
             Delete();
@@ -50,23 +51,25 @@ public:
 
     void Create() {
         if (aux_CheckInitialized(false)) {
-            m_name = glCreateProgram();
+            SetName(glCreateProgram());
         }
     }
 
     void Delete() {
         if (aux_CheckInitialized(true)) {
-            glDeleteProgram(m_name);
+            glDeleteProgram(Name());
         }
     }
 
-    /// Attach shader to this program.
-    void Attach(const Shader& shader);
+    /// Attach a shader to this program.
+    void Attach(const Shader* shader);
+    /// Attach shaders to this program.
+    void Attach(const std::vector<const Shader*>& shaders);
 
     /// Detach shader from this program.
-    void Detach(const Shader& shader);
+    // void Detach(const Shader* shader);
 
-    /// Link this program.
+    /// Link all attached shaders together, forming a valid program. Program must be created first.
     void Link();
 
     /// Make shader program current in current OpenGL context.
@@ -81,18 +84,17 @@ public:
     /// @TODO
     const UniformBlock* GetUniformBlock(const GLchar* name) const;
 
-    /// Retrive information log safely.
-    std::string GetInfoLog() const;
-
 private:
-    Program(const Program&);
-    Program& operator=(const Program&);
-
+    /// Query about a property of this program.
     GLint aux_Get(GLenum param) const;
+    /// Query about a property an interface of this program.
     GLint aux_GetStage(GLenum stage, GLenum pname) const;
+    /// Retrive information log safely.
+    std::string aux_GetInfoLog() const;
 
 private:
     mutable std::vector<UniformBlock> m_uniform_blocks;
+    std::vector<const Shader*> m_attached_shaders;
 };
 
 } // namespace OpenGL

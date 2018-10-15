@@ -15,7 +15,7 @@ public:
     explicit Mesh(size_t n_vertices) : m_n_vertices(n_vertices) {
         glCreateBuffers(1, &m_buffer_vertex);
         assert(m_buffer_vertex);
-        glNamedBufferStorage(m_buffer_vertex, n_vertices * sizeof(Vertex), NULL, GL_MAP_WRITE_BIT);
+        glNamedBufferStorage(m_buffer_vertex, n_vertices * sizeof(Vertex), nullptr, GL_MAP_WRITE_BIT);
     }
 
     void InitData(size_t n_vertices) {
@@ -25,7 +25,7 @@ public:
             m_n_vertices = n_vertices;
             glCreateBuffers(1, &m_buffer_vertex);
             assert(glIsBuffer(m_buffer_vertex));
-            glNamedBufferStorage(m_buffer_vertex, n_vertices * sizeof(Vertex), NULL, GL_MAP_WRITE_BIT);
+            glNamedBufferStorage(m_buffer_vertex, n_vertices * sizeof(Vertex), nullptr, GL_MAP_WRITE_BIT);
         }
     }
 

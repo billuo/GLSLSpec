@@ -116,20 +116,24 @@ void MyDebugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum server
 
 static void InitShaderProgram() {
     const std::string shader_dir("./shaders/");
-    std::vector<std::string> sphere_sources;
-    sphere_sources.push_back("shader.vert");
-    sphere_sources.push_back("shader.geom");
-    sphere_sources.push_back("shader.frag");
-    OpenGL::Program::InitWithShaders(ProgramTriangles, shader_dir, sphere_sources);
-    std::vector<std::string> axes_sources;
-    axes_sources.push_back("shader.vert");
-    axes_sources.push_back("shader2.geom");
-    axes_sources.push_back("shader.frag");
-    OpenGL::Program::InitWithShaders(ProgramLines, shader_dir, axes_sources);
+    std::vector<const OpenGL::Shader*> sphere_shaders;
+    std::vector<const OpenGL::Shader*> axes_shaders;
+    sphere_shaders.push_back(&OpenGL::ShaderResource::GetShader(shader_dir, "shader.vert"));
+    sphere_shaders.push_back(&OpenGL::ShaderResource::GetShader(shader_dir, "shader.geom"));
+    sphere_shaders.push_back(&OpenGL::ShaderResource::GetShader(shader_dir, "shader.frag"));
+    axes_shaders.push_back(&OpenGL::ShaderResource::GetShader(shader_dir, "shader.vert"));
+    axes_shaders.push_back(&OpenGL::ShaderResource::GetShader(shader_dir, "shader2.geom"));
+    axes_shaders.push_back(&OpenGL::ShaderResource::GetShader(shader_dir, "shader.frag"));
+    ProgramLines.Create();
+    ProgramLines.Attach(axes_shaders);
+    ProgramLines.Link();
+    ProgramTriangles.Create();
+    ProgramTriangles.Attach(sphere_shaders);
+    ProgramTriangles.Link();
     // setup UBO
     const OpenGL::Program::UniformBlock* pub = ProgramTriangles.GetUniformBlock("Transformations");
     glCreateBuffers(1, &UBO);
-    glNamedBufferStorage(UBO, pub->size, NULL, GL_DYNAMIC_STORAGE_BIT);
+    glNamedBufferStorage(UBO, pub->size, nullptr, GL_DYNAMIC_STORAGE_BIT);
     glBindBufferBase(GL_UNIFORM_BUFFER, pub->index, UBO);
 }
 
@@ -202,9 +206,9 @@ static void InitDraw() {
 
 static void InitMisc() {
     // printf("Max number of vertex attributes: %d\n", OpenGL::GetIneger(GL_MAX_VERTEX_ATTRIBS));
-    glDebugMessageCallback(MyDebugMessageCallback, NULL);
+    glDebugMessageCallback(MyDebugMessageCallback, nullptr);
     glEnable(GL_DEBUG_OUTPUT);
-    glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, GL_TRUE);
+    glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
     glPointSize(3.0f);
     glEnable(GL_CULL_FACE);
 }
@@ -228,7 +232,7 @@ static void Draw() {
             glNamedBufferSubData(UBO, r.offset, OpenGL::TypeSize(r.type), glm::value_ptr(MyAxis.GetTransform()));
         }
     }
-    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     MyAxis.GetMesh().Draw(VAO, GL_LINES);
     // draw front face
     glVertexAttrib3fv(2, glm::value_ptr(fg_color));
@@ -256,8 +260,6 @@ static void Draw() {
 
 static void Reshape(GLint w, GLint h) {
     NDC_View = glm::perspective(Pi / 2, static_cast<float>(w) / h, 0.01f, 100.0f);
-    std::string str = glm::to_string(NDC_View).c_str();
-    DEBUG("Perspective:\n%s\n", str.c_str());
     glViewport(0, 0, w, h);
 }
 
@@ -289,7 +291,7 @@ static void Every15ms(int current_ms) {
 
 static void OnClose() {
     DEBUG("Window closed\n");
-    glutIdleFunc(NULL);
+    glutIdleFunc(nullptr);
 }
 
 int main(int argc, char** argv) {

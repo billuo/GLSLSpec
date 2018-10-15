@@ -8,6 +8,7 @@
 #pragma once
 
 #include "OpenGL/Object.hpp"
+#include <memory>
 #include <string>
 
 namespace OpenGL {
@@ -18,29 +19,30 @@ namespace OpenGL {
  */
 class Shader : public Object<Shader> {
 public:
-    /// Convert shader type enum to const string.
-    static const char* NameOfType(GLenum type);
-
-public:
-    Shader() : Object<Shader>() {}
-    ~Shader() { Delete(); }
+    Shader() = default;
+    Shader(Shader&&) = default;
+    Shader& operator=(Shader&&) = default;
+    ~Shader() {
+        if (Initialized()) {
+            Delete();
+        }
+    }
 
     /// Create this shader object
     void Create(GLenum type) {
         if (aux_CheckInitialized(false)) {
-            m_name = glCreateShader(type);
+            SetName(glCreateShader(type));
         }
     }
     /// Delete this shader object
     void Delete() {
         if (aux_CheckInitialized(true)) {
-            glDeleteShader(m_name);
+            glDeleteShader(Name());
         }
     }
 
     /// Add array of strings as sources of this shader
     void Source(const GLchar** sources, size_t count);
-
     /// Add a single string as the source of this shader
     void Source(const GLchar* source) { Source(&source, 1); }
 
@@ -48,15 +50,21 @@ public:
     void Compile();
 
 private:
-    Shader(const Shader&);
-    Shader& operator=(const Shader&);
-
     /// Query a parameter of this shader object
     GLint aux_GetParameter(GLenum param) const;
 
     /// Retrive information log in a smart pointer
-    std::string GetInfoLog() const;
+    std::unique_ptr<char[]> aux_GetInfoLog() const;
 };
+
+namespace ShaderResource {
+
+static const GLenum GL_UNKNOWN_SHADER = 0;
+
+Shader& GetShader(const std::string& dir, const std::string& source, GLenum type = GL_UNKNOWN_SHADER,
+                  bool force_compile = false);
+
+} // namespace ShaderResource
 
 } // namespace OpenGL
 

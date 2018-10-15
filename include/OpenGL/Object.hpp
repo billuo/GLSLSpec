@@ -23,24 +23,37 @@ public:
     bool Initialized() const { return m_name != 0; }
     GLuint Name() const { return m_name; }
 
+public:
+    Object() : m_name(0) {}
+    Object(const Object&) = delete;
+    Object& operator=(const Object&) = delete;
+    Object(Object&& obj) : m_name(obj.m_name) { obj.m_name = 0; }
+    Object& operator=(Object&& rhs) {
+        GLuint name = rhs.m_name;
+        rhs.m_name = 0;
+        m_name = name;
+    }
+
+    virtual ~Object() = 0;
+
 protected:
-    Object() : m_name(0) { ; }
-    ~Object() { m_name = 0; }
-
-    GLuint m_name;
-
+    void SetName(GLuint name) { m_name = name; }
     /// Compains when Object is not initialized.
     bool aux_CheckInitialized(bool expected) const {
         if (Initialized() != expected) {
-            DEBUG("OpenGL obejct not initialized before use.\n");
+            DEBUG("OpenGL obejct<type=%s> not initialized before use.\n", typeid(Derived).name());
         }
         return true;
     }
 
 private:
-    Object(const Object&);            // disable
-    Object& operator=(const Object&); // disable
+    GLuint m_name;
 };
+
+template <typename Derived>
+Object<Derived>::~Object() {
+    m_name = 0;
+}
 
 } // namespace OpenGL
 
