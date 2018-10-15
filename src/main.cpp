@@ -9,6 +9,7 @@
 #include "OpenGL/Program.hpp"
 #include "OpenGL/Shader.hpp"
 #include <algorithm>
+#include <bitset>
 #include <fstream>
 #include <vector>
 
@@ -30,7 +31,7 @@ static const glm::vec3 Up = glm::vec3(0.0f, 1.0f, 0.0f);
 
 namespace Input {
 
-static bool KeyPressed[128];
+static std::bitset<128> KeyPressed;
 
 static struct {
     float horizontal;
@@ -116,20 +117,22 @@ void MyDebugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum server
 
 static void InitShaderProgram() {
     const std::string shader_dir("./shaders/");
+    // prepare main program
     std::vector<const OpenGL::Shader*> sphere_shaders;
-    std::vector<const OpenGL::Shader*> axes_shaders;
     sphere_shaders.push_back(&OpenGL::ShaderResource::GetShader(shader_dir, "shader.vert"));
     sphere_shaders.push_back(&OpenGL::ShaderResource::GetShader(shader_dir, "shader.geom"));
     sphere_shaders.push_back(&OpenGL::ShaderResource::GetShader(shader_dir, "shader.frag"));
+    ProgramTriangles.Create();
+    ProgramTriangles.Attach(sphere_shaders);
+    ProgramTriangles.Link();
+    // prepare program to draw axes
+    std::vector<const OpenGL::Shader*> axes_shaders;
     axes_shaders.push_back(&OpenGL::ShaderResource::GetShader(shader_dir, "shader.vert"));
     axes_shaders.push_back(&OpenGL::ShaderResource::GetShader(shader_dir, "shader2.geom"));
     axes_shaders.push_back(&OpenGL::ShaderResource::GetShader(shader_dir, "shader.frag"));
     ProgramLines.Create();
     ProgramLines.Attach(axes_shaders);
     ProgramLines.Link();
-    ProgramTriangles.Create();
-    ProgramTriangles.Attach(sphere_shaders);
-    ProgramTriangles.Link();
     // setup UBO
     const OpenGL::Program::UniformBlock* pub = ProgramTriangles.GetUniformBlock("Transformations");
     glCreateBuffers(1, &UBO);
@@ -171,7 +174,7 @@ static void SphereVetices(float radius, size_t n_slices, size_t n_layers, std::v
 }
 
 static void InitDraw() {
-    // VAO
+    // create VAO
     glCreateVertexArrays(1, &VAO);
     // prepare vertices
     std::vector<glm::vec3> vertices;
@@ -226,9 +229,8 @@ static void Draw() {
     ProgramLines.Use();
     const OpenGL::Program::UniformBlock* pub = ProgramLines.GetUniformBlock("Transformations");
     assert(pub);
-    for (size_t i = 0; i < pub->uniforms.size(); ++i) {
-        const OpenGL::Program::Resource& r = pub->uniforms[i];
-        if (r.name == "World_Model") {
+    for (auto&& r : pub->uniforms) {
+        if (r.name.get() == std::string("World_Model")) {
             glNamedBufferSubData(UBO, r.offset, OpenGL::TypeSize(r.type), glm::value_ptr(MyAxis.GetTransform()));
         }
     }
@@ -239,9 +241,9 @@ static void Draw() {
     ProgramTriangles.Use();
     for (size_t i = 0; i < pub->uniforms.size(); ++i) {
         const OpenGL::Program::Resource& r = pub->uniforms[i];
-        if (r.name == "NDC_World") {
+        if (r.name.get() == std::string("NDC_World")) {
             glNamedBufferSubData(UBO, r.offset, OpenGL::TypeSize(r.type), glm::value_ptr(NDC_View * View_World));
-        } else if (r.name == "World_Model") {
+        } else if (r.name.get() == std::string("World_Model")) {
             glNamedBufferSubData(UBO, r.offset, OpenGL::TypeSize(r.type), glm::value_ptr(MyModel.GetTransform()));
         }
     }

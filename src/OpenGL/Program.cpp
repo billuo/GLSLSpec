@@ -35,7 +35,7 @@ void Program::Link() {
         }
         glLinkProgram(Name());
         if (aux_Get(GL_LINK_STATUS) == GL_FALSE) {
-            DEBUG("Shader program linking failed:\n%s", aux_GetInfoLog().c_str());
+            DEBUG("Shader program linking failed:\n%s", aux_GetInfoLog().get());
         }
     }
 }
@@ -76,18 +76,12 @@ void Program::List(GLenum interface) const {
     delete[] name;
 }
 
-struct UniformBlockHasName {
-    UniformBlockHasName(const GLchar* name) : name(name) {}
-    bool operator()(const Program::UniformBlock& lhs) const { return lhs.name == name; }
-    std::string name;
-};
-
 const Program::UniformBlock* Program::GetUniformBlock(const GLchar* name) const {
     // look up cached uniform blocks
-    std::vector<UniformBlock>::const_iterator it =
-            std::find_if(m_uniform_blocks.begin(), m_uniform_blocks.end(), UniformBlockHasName(name));
+    auto it = std::find_if(m_uniform_blocks.begin(), m_uniform_blocks.end(),
+                           [name](const UniformBlock& b) { return b.name == name; });
     if (it != m_uniform_blocks.end()) {
-        return &*it;
+        return std::addressof(*it);
     }
     UniformBlock ret;
     // get index and size of uniform block
@@ -103,39 +97,36 @@ const Program::UniformBlock* Program::GetUniformBlock(const GLchar* name) const 
     ret.name.assign(name);
     ret.uniforms.resize(n_uniforms);
     // get indices of uniforms
-    GLint* uniform_indices = new GLint[n_uniforms];
-    glGetActiveUniformBlockiv(
-            Name(), ret.index, GL_UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES,
-            uniform_indices); // XXX glGetProgramResourceiv return -1 for GL_LOCATION of uniforms in uniform block.
+    auto&& uniform_indices = std::make_unique<GLint[]>(n_uniforms);
+    // XXX glGetProgramResourceiv return -1 for GL_LOCATION of uniforms in uniform block.
+    glGetActiveUniformBlockiv(Name(), ret.index, GL_UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES, uniform_indices.get());
     for (GLint i = 0; i < n_uniforms; ++i) {
         ret.uniforms[i].index = uniform_indices[i];
     }
-    delete[] uniform_indices;
     // get name, type and offset of uniforms
     const GLenum properties[] = { GL_NAME_LENGTH, GL_TYPE, GL_OFFSET };
     GLint results[countof(properties)];
     const size_t N = countof(properties);
     for (GLint i = 0; i < n_uniforms; ++i) {
         glGetProgramResourceiv(Name(), GL_UNIFORM, i, N, properties, N, nullptr, results);
-        GLchar* uniform_name = new GLchar[results[0] + 1];
-        glGetProgramResourceName(Name(), GL_UNIFORM, i, results[0] + 1, nullptr, uniform_name);
+        auto&& name = std::make_unique<GLchar[]>(results[0] + 1); // XXX one more unnecessary byte, just in case
+        glGetProgramResourceName(Name(), GL_UNIFORM, i, results[0] + 1, nullptr, name.get());
         ret.uniforms[i].type = results[1];
         ret.uniforms[i].offset = results[2];
-        ret.uniforms[i].name = uniform_name;
-        delete[] uniform_name;
+        ret.uniforms[i].name = std::move(name);
     }
     // cache and return
-    m_uniform_blocks.push_back(ret);
+    m_uniform_blocks.emplace_back(std::move(ret));
     return &m_uniform_blocks.back();
 }
 
-std::string Program::aux_GetInfoLog() const {
-    std::string ret;
+std::unique_ptr<GLchar[]> Program::aux_GetInfoLog() const {
+    std::unique_ptr<GLchar[]> ret;
     if (aux_CheckInitialized(true)) {
         GLint length = aux_Get(GL_INFO_LOG_LENGTH);
         assert(length >= 0);
-        ret.resize(length);
-        glGetProgramInfoLog(Name(), length, nullptr, &ret[0]);
+        ret = std::make_unique<GLchar[]>(length);
+        glGetProgramInfoLog(Name(), length, nullptr, ret.get());
     }
     return ret;
 }

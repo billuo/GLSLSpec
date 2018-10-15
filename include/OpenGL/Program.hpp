@@ -22,8 +22,9 @@ public:
         GLint type;
         GLint index;
         GLint offset;
-        std::string name;
+        std::unique_ptr<GLchar[]> name;
         Resource() : type(0), index(-1), offset(0), name() {}
+        Resource(Resource&& obj) = default;
         bool operator<(const Resource& rhs) const { return index < rhs.index; }
     };
     struct UniformBlock {
@@ -62,10 +63,8 @@ public:
     /// Attach shaders to this program.
     void Attach(const std::vector<const Shader*>& shaders);
 
-    /// Detach shader from this program.
-    // void Detach(const Shader* shader);
-
-    /// Link all attached shaders together, forming a valid program. Program must be created first.
+    /// Link all attached shaders together, forming a valid program.
+    /// @note Program must be created first.
     void Link();
 
     /// Make shader program current in current OpenGL context.
@@ -86,7 +85,7 @@ private:
     /// Query about a property an interface of this program.
     GLint aux_GetStage(GLenum stage, GLenum pname) const;
     /// Retrive information log safely.
-    std::string aux_GetInfoLog() const;
+    std::unique_ptr<GLchar[]> aux_GetInfoLog() const;
 
 private:
     mutable std::vector<UniformBlock> m_uniform_blocks;
