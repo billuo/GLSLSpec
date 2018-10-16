@@ -17,7 +17,7 @@ namespace {
 
 static GLuint VAO;
 
-static OpenGL::Program ProgramTriangles, ProgramLines;
+static std::unique_ptr<OpenGL::Program> ProgramTriangles, ProgramLines;
 static Model MyModel, MyAxis;
 static GLuint UBO;
 
@@ -139,22 +139,22 @@ static void InitShaderProgram() {
     const std::string shader_dir("./shaders/");
     // prepare main program
     std::vector<const OpenGL::Shader*> sphere_shaders;
-    sphere_shaders.push_back(&OpenGL::ShaderResource::GetShader(shader_dir, "shader.vert"));
-    sphere_shaders.push_back(&OpenGL::ShaderResource::GetShader(shader_dir, "shader.geom"));
-    sphere_shaders.push_back(&OpenGL::ShaderResource::GetShader(shader_dir, "shader.frag"));
-    ProgramTriangles.Create();
-    ProgramTriangles.Attach(sphere_shaders);
-    ProgramTriangles.Link();
+    sphere_shaders.push_back(&OpenGL::Shader::CompileFrom(shader_dir, "shader.vert"));
+    sphere_shaders.push_back(&OpenGL::Shader::CompileFrom(shader_dir, "shader.geom"));
+    sphere_shaders.push_back(&OpenGL::Shader::CompileFrom(shader_dir, "shader.frag"));
+    ProgramTriangles.reset(new OpenGL::Program);
+    ProgramTriangles->Attach(sphere_shaders);
+    ProgramTriangles->Link();
     // prepare program to draw axes
     std::vector<const OpenGL::Shader*> axes_shaders;
-    axes_shaders.push_back(&OpenGL::ShaderResource::GetShader(shader_dir, "shader.vert"));
-    axes_shaders.push_back(&OpenGL::ShaderResource::GetShader(shader_dir, "shader2.geom"));
-    axes_shaders.push_back(&OpenGL::ShaderResource::GetShader(shader_dir, "shader.frag"));
-    ProgramLines.Create();
-    ProgramLines.Attach(axes_shaders);
-    ProgramLines.Link();
+    axes_shaders.push_back(&OpenGL::Shader::CompileFrom(shader_dir, "shader.vert"));
+    axes_shaders.push_back(&OpenGL::Shader::CompileFrom(shader_dir, "shader2.geom"));
+    axes_shaders.push_back(&OpenGL::Shader::CompileFrom(shader_dir, "shader.frag"));
+    ProgramLines.reset(new OpenGL::Program);
+    ProgramLines->Attach(axes_shaders);
+    ProgramLines->Link();
     // setup UBO
-    const OpenGL::Program::UniformBlock* pub = ProgramTriangles.GetUniformBlock("Transformations");
+    const OpenGL::Program::UniformBlock* pub = ProgramTriangles->GetUniformBlock("Transformations");
     glCreateBuffers(1, &UBO);
     glNamedBufferStorage(UBO, pub->size, nullptr, GL_DYNAMIC_STORAGE_BIT);
     glBindBufferBase(GL_UNIFORM_BUFFER, pub->index, UBO);
@@ -243,10 +243,10 @@ static void Render() {
     // init
     glClearBufferfv(GL_COLOR, 0, glm::value_ptr(bg_color));
     glClear(GL_DEPTH_BUFFER_BIT);
-    auto* pub = ProgramLines.GetUniformBlock("Transformations");
+    auto* pub = ProgramLines->GetUniformBlock("Transformations");
     assert(pub);
     if (Draw::Axes) {
-        ProgramLines.Use();
+        ProgramLines->Use();
         // prepare to draw axes
         glVertexAttrib3fv(2, glm::value_ptr(axis_color));
         for (auto&& r : pub->uniforms) {

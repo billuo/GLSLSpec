@@ -127,15 +127,4 @@ const char* TypeString(GLenum type) {
     }
 }
 
-const char* InterfaceString(GLenum interface) {
-    switch (interface) {
-    case GL_PROGRAM_INPUT: return "attribtues";
-    case GL_UNIFORM: return "uniforms";
-    case GL_UNIFORM_BLOCK: return "uniform blocks";
-    case GL_PROGRAM_OUTPUT: return "outputs";
-    case GL_ATOMIC_COUNTER_BUFFER: return "atomic counter buffers";
-    default: return "TODO";
-    }
-}
-
 } // namespace OpenGL

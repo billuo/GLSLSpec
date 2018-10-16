@@ -9,9 +9,10 @@
 
 #include <cmath>
 #include <cstdlib>
+#include <memory>
 #include <new>
-#include <utility>
 #include <string>
+#include <utility>
 
 /// Return size of static array at compile time
 #define countof(Array) (sizeof(Array) / sizeof(Array[0]))

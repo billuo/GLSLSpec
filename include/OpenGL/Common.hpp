@@ -4,18 +4,19 @@
 
 #include <GL/freeglut.h> // must be after <GL/glew.h>
 
+/// OpenGL C++ wrapper
 namespace OpenGL {
 
-static inline GLint GetIneger(GLenum param) {
-    GLint ret;
-    glGetIntegerv(param, &ret);
-    return ret;
-}
-
-size_t TypeSize(GLenum type);
-
-const char* TypeString(GLenum type);
-const char* InterfaceString(GLenum interface);
+// static inline GLint GetIneger(GLenum param) {
+//     GLint ret;
+//     glGetIntegerv(param, &ret);
+//     return ret;
+// }
+//
+// size_t TypeSize(GLenum type);
+//
+// const char* TypeString(GLenum type);
+// const char* InterfaceString(GLenum interface);
 
 } // namespace OpenGL
 

@@ -11,28 +11,20 @@
 
 namespace OpenGL {
 
-class Buffer : public Object<Buffer> {
+class Buffer : public Object {
+    using Base = Object;
+
+    static decltype(MakeNamePool(glCreateBuffers, glDeleteBuffers)) Pool;
+
 public:
-    Buffer() = default;
+    static void Bind(GLenum target, Buffer& buffer) { glBindBuffer(target, buffer.m_name.get()); }
+    static void Unbind(GLenum target) { glBindBuffer(target, 0); }
+
+public:
+    Buffer() : Base(Pool.Get()) {}
     Buffer(Buffer&&) = default;
     Buffer& operator=(Buffer&&) = default;
-    ~Buffer() { Delete(); }
-
-    void Create() {
-        if (aux_CheckInitialized(false)) {
-            GLuint name;
-            glCreateBuffers(1, &name);
-            SetName(name);
-        }
-    }
-    void Delete() {
-        GLuint name = Name();
-        glDeleteBuffers(1, &name); // XXX Deleting buffer 0 is valid.
-    }
-
-    // void Bind(GLenum target) {
-    //     glBindBuffer(target, Name()); // XXX Binding buffer 0 is valid.
-    // }
+    ~Buffer() { Pool.Put(std::move(m_name)); }
 
     // void Data(GLsizeiptr size, const GLvoid* data, GLenum usage);
     // void Storage(GLsizei size, const GLvoid* data, GLbitfield flags);
