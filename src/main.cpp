@@ -157,8 +157,8 @@ static void InitShaderProgram() {
     // setup UBO
     UI = std::make_unique<OpenGL::ProgramInterface<OpenGL::Uniform>>(*ProgramTriangles);
     UBI = std::make_unique<OpenGL::ProgramInterface<OpenGL::UniformBlock>>(*ProgramTriangles);
-    UI->dump();
-    UBI->dump();
+    // UI->dump();
+    // UBI->dump();
     auto ub_xform = UBI->find("Transformations");
     assert(ub_xform);
     glCreateBuffers(1, &UBO);
@@ -252,30 +252,30 @@ static void Render() {
     auto ub_xform = UBI->find("Transformations");
     assert(ub_xform);
     CHECK_OPENGL();
+    // prepare to draw axes
+    glVertexAttrib3fv(2, glm::value_ptr(axis_color));
+    for (auto&& r : ub_xform->uniforms) {
+        if (r.name == std::string("World_Model")) {
+            glNamedBufferSubData(UBO, r.offset, OpenGL::TypeSize(r.type), glm::value_ptr(MyAxis.GetTransform()));
+        }
+    }
+    // draw axes
     if (Draw::Axes) {
         OpenGL::Program::Use(*ProgramLines);
-        // prepare to draw axes
-        glVertexAttrib3fv(2, glm::value_ptr(axis_color));
-        for (auto&& r : ub_xform->uniforms) {
-            if (r.name == std::string("World_Model")) {
-                glNamedBufferSubData(UBO, r.offset, OpenGL::TypeSize(r.type), glm::value_ptr(MyAxis.GetTransform()));
-            }
-        }
-        // draw axes
         MyAxis.GetMesh().Draw(VAO, GL_LINES);
     }
     CHECK_OPENGL();
+    // prepare to draw main object
+    glVertexAttrib3fv(2, glm::value_ptr(fg_color));
+    for (auto&& r : ub_xform->uniforms) {
+        if (r.name == std::string("NDC_World")) {
+            glNamedBufferSubData(UBO, r.offset, OpenGL::TypeSize(r.type), glm::value_ptr(NDC_View * View_World));
+        } else if (r.name == std::string("World_Model")) {
+            glNamedBufferSubData(UBO, r.offset, OpenGL::TypeSize(r.type), glm::value_ptr(MyModel.GetTransform()));
+        }
+    }
     if (Draw::Back != Draw::None || Draw::Front != Draw::None) {
         OpenGL::Program::Use(*ProgramTriangles);
-        // prepare to draw main object
-        glVertexAttrib3fv(2, glm::value_ptr(fg_color));
-        for (auto&& r : ub_xform->uniforms) {
-            if (r.name == std::string("NDC_World")) {
-                glNamedBufferSubData(UBO, r.offset, OpenGL::TypeSize(r.type), glm::value_ptr(NDC_View * View_World));
-            } else if (r.name == std::string("World_Model")) {
-                glNamedBufferSubData(UBO, r.offset, OpenGL::TypeSize(r.type), glm::value_ptr(MyModel.GetTransform()));
-            }
-        }
         // draw front face
         if (Draw::Front != Draw::None) {
             glPolygonMode(GL_FRONT_AND_BACK, Draw::Front);
