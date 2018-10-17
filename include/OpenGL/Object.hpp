@@ -53,14 +53,36 @@ protected:
 
 public:
     Object() = default;
-    Object(Name&& name) : m_name(std::move(name)), m_label() {}
-    Object(Name&& name, const std::string& label) : m_name(std::move(name)), m_label(new std::string(label)) {}
+    Object(Name&& name, const GLchar* label, GLenum identifier) : m_name(std::move(name)) {
+        static size_t max_label_length = get_max_label_length();
+        if (label) {
+            m_label.reset(new std::string(label));
+            if (m_label->size() <= max_label_length) {
+                glObjectLabel(identifier, m_name.get(), -1, m_label->c_str());
+                // FIX when name is invalid, GL_INVALID_VALUE instead of GL_INVALID_OPERATION is reported.
+            } else {
+                // DEBUG("label too long:%s\n", m_label->c_str());
+                m_label.reset();
+            }
+        }
+    }
 
     GLuint name() const { return m_name.get(); }
 
 protected:
     Name m_name;
     std::unique_ptr<std::string> m_label;
+
+private:
+    static GLsizei get_max_label_length() {
+        GLsizei ret;
+        glGetIntegerv(GL_MAX_LABEL_LENGTH, &ret);
+        if (ret < 0) {
+            throw "glGet with GL_MAX_LABEL_LENGTH returned negative result";
+        }
+        // DEBUG("Maximum label length=%d\n", ret);
+        return ret;
+    }
 };
 
 /**

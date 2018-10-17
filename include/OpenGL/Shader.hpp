@@ -32,10 +32,10 @@ public:
     static const GLenum GL_UNKNOWN_SHADER = 0;
 
     static const Shader* CompileFrom(const std::string& dir, const std::string& source, GLenum type = GL_UNKNOWN_SHADER,
-                               bool force_compile = false);
+                                     bool force_compile = false);
 
 public:
-    Shader(GLenum type) : Base(Get(type)) {}
+    Shader(GLenum type, const GLchar* label = nullptr) : Base(Get(type), label, GL_SHADER) {}
     Shader(Shader&&) = default;
     Shader& operator=(Shader&&) = default;
     ~Shader() { Put(std::move(m_name)); }

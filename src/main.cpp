@@ -19,6 +19,8 @@ static GLuint VAO;
 static std::unique_ptr<OpenGL::Program> ProgramTriangles, ProgramLines;
 static std::unique_ptr<OpenGL::ProgramInterface<OpenGL::Uniform>> UI;
 static std::unique_ptr<OpenGL::ProgramInterface<OpenGL::UniformBlock>> UBI;
+static std::unique_ptr<OpenGL::ProgramInterface<OpenGL::ProgramInput>> PII;
+static std::unique_ptr<OpenGL::ProgramInterface<OpenGL::ProgramOutput>> POI;
 static Model MyModel, MyAxis;
 static GLuint UBO;
 
@@ -137,13 +139,15 @@ void MyDebugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum server
                             const GLchar* message, const void* user);
 
 static void InitShaderProgram() {
+    CHECK_OPENGL();
     const std::string shader_dir("../shaders/");
     // prepare main program
     std::vector<const OpenGL::Shader*> sphere_shaders;
     sphere_shaders.push_back(OpenGL::Shader::CompileFrom(shader_dir, "shader.vert"));
     sphere_shaders.push_back(OpenGL::Shader::CompileFrom(shader_dir, "shader.geom"));
     sphere_shaders.push_back(OpenGL::Shader::CompileFrom(shader_dir, "shader.frag"));
-    ProgramTriangles.reset(new OpenGL::Program);
+    ProgramTriangles.reset(new OpenGL::Program("Triangles"));
+    CHECK_OPENGL();
     ProgramTriangles->Attach(sphere_shaders);
     ProgramTriangles->Link();
     // prepare program to draw axes
@@ -151,14 +155,20 @@ static void InitShaderProgram() {
     axes_shaders.push_back(OpenGL::Shader::CompileFrom(shader_dir, "shader.vert"));
     axes_shaders.push_back(OpenGL::Shader::CompileFrom(shader_dir, "shader2.geom"));
     axes_shaders.push_back(OpenGL::Shader::CompileFrom(shader_dir, "shader.frag"));
-    ProgramLines.reset(new OpenGL::Program);
+    ProgramLines.reset(new OpenGL::Program("Lines"));
+    CHECK_OPENGL();
     ProgramLines->Attach(axes_shaders);
     ProgramLines->Link();
     // setup UBO
     UI = std::make_unique<OpenGL::ProgramInterface<OpenGL::Uniform>>(*ProgramTriangles);
     UBI = std::make_unique<OpenGL::ProgramInterface<OpenGL::UniformBlock>>(*ProgramTriangles);
-    // UI->dump();
-    // UBI->dump();
+    PII = std::make_unique<OpenGL::ProgramInterface<OpenGL::ProgramInput>>(*ProgramTriangles);
+    POI = std::make_unique<OpenGL::ProgramInterface<OpenGL::ProgramOutput>>(*ProgramTriangles);
+    CHECK_OPENGL();
+    UI->dump();
+    UBI->dump();
+    PII->dump();
+    POI->dump();
     auto ub_xform = UBI->find("Transformations");
     assert(ub_xform);
     glCreateBuffers(1, &UBO);
@@ -361,8 +371,8 @@ int main(int argc, char** argv) {
         DEBUG("OpenGL 4.5 support");
     }
     // init for draw
-    InitShaderProgram();
     InitDraw();
+    InitShaderProgram();
     InitMisc();
     // glut setup global callbacks
     glutIdleFunc(Render);

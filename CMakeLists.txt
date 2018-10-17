@@ -38,6 +38,7 @@ set(Main_sources
     OpenGL/Common.cpp
     OpenGL/Introspection.cpp
     OpenGL/Program.cpp
+    OpenGL/Resource.cpp
     OpenGL/Shader.cpp
 )
 foreach(src ${Main_sources})

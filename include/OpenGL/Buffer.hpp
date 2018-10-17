@@ -21,7 +21,7 @@ public:
     static void Unbind(GLenum target) { glBindBuffer(target, 0); }
 
 public:
-    Buffer() : Base(Pool.Get()) {}
+    Buffer(const GLchar* label = nullptr) : Base(Pool.Get(), label, GL_BUFFER) {}
     Buffer(Buffer&&) = default;
     Buffer& operator=(Buffer&&) = default;
     ~Buffer() { Pool.Put(std::move(m_name)); }

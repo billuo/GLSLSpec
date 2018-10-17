@@ -35,7 +35,7 @@ public:
     static void Use(const Program& prog) { glUseProgram(prog.m_name); }
 
 public:
-    Program() : Base(Pool.Get()) {}
+    explicit Program(const GLchar* label = nullptr) : Base(Pool.Get(), label, GL_PROGRAM) {}
     Program(Program&&) = default;
     Program& operator=(Program&&) = default;
     ~Program() { Pool.Put(std::move(m_name)); }
