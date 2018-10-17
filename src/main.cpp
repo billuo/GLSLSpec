@@ -137,7 +137,7 @@ void MyDebugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum server
                             const GLchar* message, const void* user);
 
 static void InitShaderProgram() {
-    const std::string shader_dir("./shaders/");
+    const std::string shader_dir("../shaders/");
     // prepare main program
     std::vector<const OpenGL::Shader*> sphere_shaders;
     sphere_shaders.push_back(OpenGL::Shader::CompileFrom(shader_dir, "shader.vert"));
@@ -157,7 +157,10 @@ static void InitShaderProgram() {
     // setup UBO
     UI = std::make_unique<OpenGL::ProgramInterface<OpenGL::Uniform>>(*ProgramTriangles);
     UBI = std::make_unique<OpenGL::ProgramInterface<OpenGL::UniformBlock>>(*ProgramTriangles);
+    UI->dump();
+    UBI->dump();
     auto ub_xform = UBI->find("Transformations");
+    assert(ub_xform);
     glCreateBuffers(1, &UBO);
     glNamedBufferStorage(UBO, ub_xform->size, nullptr, GL_DYNAMIC_STORAGE_BIT);
     glBindBufferBase(GL_UNIFORM_BUFFER, ub_xform->binding, UBO);
@@ -248,6 +251,7 @@ static void Render() {
     glClear(GL_DEPTH_BUFFER_BIT);
     auto ub_xform = UBI->find("Transformations");
     assert(ub_xform);
+    CHECK_OPENGL();
     if (Draw::Axes) {
         OpenGL::Program::Use(*ProgramLines);
         // prepare to draw axes
@@ -260,6 +264,7 @@ static void Render() {
         // draw axes
         MyAxis.GetMesh().Draw(VAO, GL_LINES);
     }
+    CHECK_OPENGL();
     if (Draw::Back != Draw::None || Draw::Front != Draw::None) {
         OpenGL::Program::Use(*ProgramTriangles);
         // prepare to draw main object

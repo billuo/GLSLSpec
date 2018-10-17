@@ -17,6 +17,8 @@
 /// Return size of static array at compile time
 #define countof(Array) (sizeof(Array) / sizeof(Array[0]))
 
+#define UNUSED(x) (void(x))
+
 template <class T, class O>
 static inline T* pointer_offset(T* ptr, O offset) {
     return (T*)((char*)(ptr) + offset);

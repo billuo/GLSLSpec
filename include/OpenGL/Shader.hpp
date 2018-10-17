@@ -17,7 +17,6 @@ namespace OpenGL {
  * @brief Encapsulated OpenGL shader objects
  */
 class Shader : public Object {
-    friend class Program;
     using Base = Object;
     static Name Get(GLenum type) {
         GLuint name = glCreateShader(type);

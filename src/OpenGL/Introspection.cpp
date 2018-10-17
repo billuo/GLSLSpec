@@ -1,5 +1,15 @@
 #include "OpenGL/Introspection.hpp"
 
+namespace OpenGL {
+
+constexpr GLenum Uniform::properties[];
+constexpr size_t Uniform::n_properties;
+constexpr Uniform::GLintfield Uniform::fields[];
+constexpr size_t Uniform::n_fields;
+
+constexpr GLenum UniformBlock::properties[];
+constexpr size_t UniformBlock::n_properties;
+
 const char* InterfaceString(GLenum interface) {
     switch (interface) {
     case GL_UNIFORM: return "uniform";
@@ -26,3 +36,5 @@ const char* InterfaceString(GLenum interface) {
     default: return "UNKNOWN";
     }
 }
+
+} // namespace OpenGL

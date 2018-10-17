@@ -24,11 +24,11 @@ void Shader::Source(const GLchar** sources, size_t count) {
     for (size_t i = 0; i < count; ++i) {
         lens[i] = strlen(sources[i]);
     }
-    glShaderSource(Name(), count, sources, lens.data());
+    glShaderSource(name(), count, sources, lens.data());
 }
 
 void Shader::Compile() {
-    glCompileShader(Name());
+    glCompileShader(name());
     if (aux_GetParameter(GL_COMPILE_STATUS) == GL_FALSE) {
         DEBUG("%s compilation failed:%s", ShaderTypeString(aux_GetParameter(GL_SHADER_TYPE)), aux_GetInfoLog().get());
     }
@@ -36,7 +36,7 @@ void Shader::Compile() {
 
 GLint Shader::aux_GetParameter(GLenum pname) const {
     GLint result = -1;
-    glGetShaderiv(Name(), pname, &result);
+    glGetShaderiv(name(), pname, &result);
     return result;
 }
 
@@ -44,7 +44,7 @@ std::unique_ptr<char[]> Shader::aux_GetInfoLog() const {
     std::unique_ptr<char[]> ret;
     GLint length = aux_GetParameter(GL_INFO_LOG_LENGTH);
     ret = std::make_unique<char[]>(length + 1); // XXX one more byte, just in case
-    glGetShaderInfoLog(Name(), length, nullptr, ret.get());
+    glGetShaderInfoLog(name(), length, nullptr, ret.get());
     return ret;
 }
 
@@ -91,6 +91,9 @@ const Shader* Shader::CompileFrom(const std::string& dir, const std::string& sou
         return nullptr;
     }
     std::string source_string((std::istreambuf_iterator<char>(file_stream)), std::istreambuf_iterator<char>());
+    assert(!source_string.empty());
+    assert(source_string.size() > 0);
+    // DEBUG("%s shader source:\n%s", file.substr(file.rfind('.') + 1).c_str(), source_string.c_str());
     // add to cache and compile
     auto new_shader = std::make_unique<Shader>(type);
     auto shader = ShaderCache.emplace(file, std::move(new_shader)).first->second.get();
