@@ -10,7 +10,7 @@ namespace OpenGL {
 
 decltype(Program::Pool) Program::Pool;
 
-void Program::Attach(const Shader* shader) {
+Program& Program::Attach(const Shader* shader) {
     auto it = std::find(m_attached_shaders.begin(), m_attached_shaders.end(), shader);
     if (it != m_attached_shaders.end()) {
         DEBUG("Shader<name=%u> already attached to Program<name=%u>.", static_cast<GLuint>(shader->name()),
@@ -18,13 +18,15 @@ void Program::Attach(const Shader* shader) {
     } else {
         m_attached_shaders.push_back(shader);
     }
+    return *this;
 }
 
-void Program::Attach(const std::vector<const Shader*>& shaders) {
+Program& Program::Attach(const std::vector<const Shader*>& shaders) {
     m_attached_shaders.insert(m_attached_shaders.end(), shaders.begin(), shaders.end());
+    return *this;
 }
 
-void Program::Link() {
+Program& Program::Link() {
     for (auto&& p : m_attached_shaders) {
         glAttachShader(m_name, p->name());
         // assert(p->name() != 0);
@@ -39,6 +41,7 @@ void Program::Link() {
     if (aux_Get(GL_LINK_STATUS) == GL_FALSE) {
         DEBUG("Shader program linking failed:\n%s", aux_GetInfoLog().get());
     }
+    return *this;
 }
 
 std::unique_ptr<GLchar[]> Program::aux_GetInfoLog() const {

@@ -33,6 +33,7 @@ target_link_libraries(Main ${GLEW_LIBRARIES})
 
 set(Main_sources
     Debug.cpp
+    Render.cpp
     Utility.cpp
     OpenGL/Buffer.cpp
     OpenGL/Common.cpp
@@ -40,6 +41,7 @@ set(Main_sources
     OpenGL/Program.cpp
     OpenGL/Resource.cpp
     OpenGL/Shader.cpp
+    glutCallback.cpp
 )
 foreach(src ${Main_sources})
     target_sources(Main PUBLIC ${CMAKE_SOURCE_DIR}/src/${src})

@@ -73,10 +73,10 @@ struct ProgramInterface : public ProgramInterfaceBase {
         }
     }
 
-    const Resource* find(const char* str) const {
-        std::string name(str);
-        for (auto&& r : resources) {
-            if (r.name == name) {
+    const Resource* find(const char* name) const {
+        std::string str(name);
+        for (auto& r : resources) {
+            if (r.name == str) {
                 return &r;
             }
         }

@@ -63,6 +63,16 @@ struct UniformBlock : public Resource {
         }
     }
 
+    const Uniform* find(const char* name) const {
+        std::string str(name);
+        for (auto& u : uniforms) {
+            if (u.name == str) {
+                return &u;
+            }
+        }
+        return nullptr;
+    }
+
     void dump() const {
         Resource::dump();
         fprintf(stderr, "binding=%d, size=%d, uniforms:\n", binding, size);

@@ -41,16 +41,13 @@ public:
     ~Program() { Pool.Put(std::move(m_name)); }
 
     /// Attach a shader to this program.
-    void Attach(const Shader* shader);
+    Program& Attach(const Shader* shader);
     /// Attach shaders to this program.
-    void Attach(const std::vector<const Shader*>& shaders);
+    Program& Attach(const std::vector<const Shader*>& shaders);
 
     /// Link all attached shaders together, forming a valid program.
     /// @note Program must be created first.
-    void Link();
-
-    /// Display a list of ...? @TODO
-    void List(GLenum interface) const;
+    Program& Link();
 
 private:
     /// Query about a property of this program.
