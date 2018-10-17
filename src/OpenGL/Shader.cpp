@@ -1,9 +1,9 @@
+#include "OpenGL/Shader.hpp"
+#include "Debug.hpp"
 #include <cstring>
 #include <fstream>
 #include <map>
 #include <vector>
-
-#include "OpenGL/Shader.hpp"
 
 namespace OpenGL {
 
@@ -20,45 +20,33 @@ static const char* ShaderTypeString(GLenum type) {
 }
 
 void Shader::Source(const GLchar** sources, size_t count) {
-    if (aux_CheckInitialized(true)) {
-        std::vector<GLint> lens(count);
-        for (size_t i = 0; i < count; ++i) {
-            lens[i] = strlen(sources[i]);
-        }
-        glShaderSource(Name(), count, sources, lens.data());
+    std::vector<GLint> lens(count);
+    for (size_t i = 0; i < count; ++i) {
+        lens[i] = strlen(sources[i]);
     }
+    glShaderSource(Name(), count, sources, lens.data());
 }
 
 void Shader::Compile() {
-    if (aux_CheckInitialized(true)) {
-        glCompileShader(Name());
-        if (aux_GetParameter(GL_COMPILE_STATUS) == GL_FALSE) {
-            DEBUG("%s compilation failed:%s", ShaderTypeString(aux_GetParameter(GL_SHADER_TYPE)),
-                  aux_GetInfoLog().get());
-        }
+    glCompileShader(Name());
+    if (aux_GetParameter(GL_COMPILE_STATUS) == GL_FALSE) {
+        DEBUG("%s compilation failed:%s", ShaderTypeString(aux_GetParameter(GL_SHADER_TYPE)), aux_GetInfoLog().get());
     }
 }
 
 GLint Shader::aux_GetParameter(GLenum pname) const {
     GLint result = -1;
-    if (aux_CheckInitialized(true)) {
-        glGetShaderiv(Name(), pname, &result);
-    }
+    glGetShaderiv(Name(), pname, &result);
     return result;
 }
 
 std::unique_ptr<char[]> Shader::aux_GetInfoLog() const {
     std::unique_ptr<char[]> ret;
-    if (aux_CheckInitialized(true)) {
-        GLint length = aux_GetParameter(GL_INFO_LOG_LENGTH);
-        assert(length >= 0);
-        ret = std::make_unique<char[]>(length + 1); // XXX one more byte, just in case
-        glGetShaderInfoLog(Name(), length, nullptr, ret.get());
-    }
+    GLint length = aux_GetParameter(GL_INFO_LOG_LENGTH);
+    ret = std::make_unique<char[]>(length + 1); // XXX one more byte, just in case
+    glGetShaderInfoLog(Name(), length, nullptr, ret.get());
     return ret;
 }
-
-namespace ShaderResource {
 
 static GLenum SuffixType(std::string suffix) {
     static const auto map = std::map<std::string, GLenum>{
@@ -69,22 +57,21 @@ static GLenum SuffixType(std::string suffix) {
     if (it != map.end()) {
         return it->second;
     } else {
-        return GL_UNKNOWN_SHADER;
+        return Shader::GL_UNKNOWN_SHADER;
     }
 }
 
 static std::map<std::string, std::unique_ptr<Shader>> ShaderCache;
 
-Shader& GetShader(const std::string& dir, const std::string& source, GLenum type, bool force_compile) {
-    static Shader EmptyShader;
+const Shader* Shader::CompileFrom(const std::string& dir, const std::string& source, GLenum type, bool force_compile) {
     // look up cache
     const auto file = dir + source;
-    const auto it = ShaderCache.find(file);
+    auto it = ShaderCache.find(file);
     if (it != ShaderCache.end()) {
         if (force_compile) {
-            it->second->Delete();
+            ShaderCache.erase(it);
         } else {
-            return *it->second;
+            return it->second.get();
         }
     }
     // identify shader type
@@ -93,7 +80,7 @@ Shader& GetShader(const std::string& dir, const std::string& source, GLenum type
         type = SuffixType(file.substr(beyond_dot_pos));
         if (type == GL_UNKNOWN_SHADER) {
             DEBUG("Can not identify the shader type of %s", file.substr(beyond_dot_pos).c_str());
-            return EmptyShader;
+            return nullptr;
         }
     }
     // fetch source
@@ -101,20 +88,15 @@ Shader& GetShader(const std::string& dir, const std::string& source, GLenum type
     file_stream.open(file.c_str());
     if (!file_stream) {
         DEBUG("Failed to open %s", file.c_str());
-        return EmptyShader;
+        return nullptr;
     }
     std::string source_string((std::istreambuf_iterator<char>(file_stream)), std::istreambuf_iterator<char>());
     // add to cache and compile
-    auto&& shader = ShaderCache[file];
-    if (!shader) {
-        shader.reset(new Shader());
-    }
-    shader->Create(type);
+    auto new_shader = std::make_unique<Shader>(type);
+    auto shader = ShaderCache.emplace(file, std::move(new_shader)).first->second.get();
     shader->Source(source_string.c_str());
     shader->Compile();
-    return *shader;
+    return shader;
 }
-
-} // namespace ShaderResource
 
 } // namespace OpenGL

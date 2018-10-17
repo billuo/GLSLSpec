@@ -3,7 +3,7 @@
 
 namespace OpenGL {
 
-size_t TypeSize(GLenum type) {
+GLsizei TypeSize(GLenum type) {
     switch (type) {
     case GL_FLOAT: return sizeof(float);
     case GL_FLOAT_VEC2: return sizeof(glm::vec2);

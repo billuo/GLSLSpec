@@ -21,7 +21,10 @@ class Shader : public Object {
     using Base = Object;
     static Name Get(GLenum type) {
         GLuint name = glCreateShader(type);
-        assert(name);
+        if (name == 0) {
+            glDebugMessageInsert(GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_ERROR, 0, GL_DEBUG_SEVERITY_LOW, -1,
+                                 "Failed to create shader");
+        }
         return Name(name);
     }
     static void Put(Name&& name) { glDeleteShader(name.get()); }
@@ -29,7 +32,7 @@ class Shader : public Object {
 public:
     static const GLenum GL_UNKNOWN_SHADER = 0;
 
-    static Shader& CompileFrom(const std::string& dir, const std::string& source, GLenum type = GL_UNKNOWN_SHADER,
+    static const Shader* CompileFrom(const std::string& dir, const std::string& source, GLenum type = GL_UNKNOWN_SHADER,
                                bool force_compile = false);
 
 public:

@@ -49,14 +49,8 @@ public:
     /// @note Program must be created first.
     void Link();
 
-    /// Query a property of an interface in a program.
-    GLint GetInterface(GLenum program_interface, GLenum pname) const;
-
     /// Display a list of ...? @TODO
     void List(GLenum interface) const;
-
-    /// @TODO
-    const UniformBlock* GetUniformBlock(const GLchar* block_name);
 
 private:
     /// Query about a property of this program.
@@ -67,7 +61,6 @@ private:
     std::unique_ptr<GLchar[]> aux_GetInfoLog() const;
 
 private:
-    std::vector<UniformBlock> m_uniform_blocks;
     std::vector<const Shader*> m_attached_shaders;
 };
 

@@ -13,9 +13,10 @@ namespace OpenGL {
 //     return ret;
 // }
 //
-// size_t TypeSize(GLenum type);
-//
-// const char* TypeString(GLenum type);
+
+GLsizei TypeSize(GLenum type);
+const char* TypeString(GLenum type);
+
 // const char* InterfaceString(GLenum interface);
 
 } // namespace OpenGL

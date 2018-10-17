@@ -47,8 +47,8 @@ protected:
     template <typename F1, typename F2>
     class NamePool;
     template <typename F1, typename F2>
-    static Object::NamePool<F1, F2> MakeNamePool(F1&& f1, F2&& f2) {
-        return NamePool<F1, F2>(std::forward<F1>(f1), std::forward<F2>(f2));
+    static Object::NamePool<F1, F2> MakeNamePool(F1 f1, F2 f2) {
+        return NamePool<F1, F2>(f1, f2);
     }
 
 public:
@@ -71,9 +71,7 @@ protected:
 template <typename F1, typename F2>
 class Object::NamePool {
 public:
-    NamePool(F1&& create_n, F2&& delete_n) :
-            m_create_n(std::forward<F1>(create_n)),
-            m_delete_n(std::forward<F2>(delete_n)) {}
+    NamePool(F1 create_n, F2 delete_n) : m_create_n(create_n), m_delete_n(delete_n) {}
 
     /// Get a single name.
     Name Get() {

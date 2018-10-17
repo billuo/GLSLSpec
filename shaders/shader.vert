@@ -28,7 +28,7 @@ uniform light_t Light;
 // };
 // uniform material_t Material;
 
-layout(binding = 0) uniform Transformations {
+layout(binding = 2) uniform Transformations {
     mat4 NDC_World;
     mat4 World_Model;
 };
