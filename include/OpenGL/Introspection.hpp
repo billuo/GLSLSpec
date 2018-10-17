@@ -80,6 +80,7 @@ struct ProgramInterface : public ProgramInterfaceBase {
                 return &r;
             }
         }
+        fprintf(stderr, "in %s, %s not found\n", type_name<decltype(*this)>(), name);
         return nullptr;
     }
 
@@ -101,6 +102,12 @@ struct ProgramInterface : public ProgramInterfaceBase {
 private:
     GLuint m_name; // should not be used other than dump()
 };
+
+using UniformInterface = ProgramInterface<Uniform>;
+using UniformBlockInterface = ProgramInterface<UniformBlock>;
+using ProgramInputInterface = ProgramInterface<ProgramInput>;
+using ProgramOutputInterface = ProgramInterface<ProgramOutput>;
+/// @TODO
 
 } // namespace OpenGL
 

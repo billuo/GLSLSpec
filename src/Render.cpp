@@ -12,18 +12,19 @@ namespace Render {
 
 namespace {
 GLuint VAO, UBO;
-Model MyModel, MyAxis;
+Model MyModel;
 
 enum RasterizationMode { None = 0, Fill = GL_FILL, Line = GL_LINE, Point = GL_POINT };
 bool Axes = true;
 RasterizationMode FrontMode = Fill;
 RasterizationMode BackMode = None;
 
-std::unique_ptr<OpenGL::Program> ProgramTriangles, ProgramLines;
-std::unique_ptr<OpenGL::ProgramInterface<OpenGL::Uniform>> UI;
-std::unique_ptr<OpenGL::ProgramInterface<OpenGL::UniformBlock>> UBI;
-std::unique_ptr<OpenGL::ProgramInterface<OpenGL::ProgramInput>> PII;
-std::unique_ptr<OpenGL::ProgramInterface<OpenGL::ProgramOutput>> POI;
+std::unique_ptr<OpenGL::Program> ProgramSphere, ProgramAxes;
+std::unique_ptr<OpenGL::UniformInterface> UI_axes;
+std::unique_ptr<OpenGL::UniformInterface> UI;
+std::unique_ptr<OpenGL::UniformBlockInterface> UBI;
+std::unique_ptr<OpenGL::ProgramInputInterface> PII;
+std::unique_ptr<OpenGL::ProgramOutputInterface> POI;
 
 glm::mat4 NDC_View = glm::identity<glm::mat4>();
 glm::mat4 View_World = glm::identity<glm::mat4>();
@@ -74,21 +75,23 @@ static void InitShaderProgram() {
     for (auto&& file : { "shader.vert", "shader.geom", "shader.frag" }) {
         sphere_shaders.push_back(OpenGL::Shader::CompileFrom(shader_dir, file));
     }
-    ProgramTriangles.reset(new OpenGL::Program("Triangles"));
-    ProgramTriangles->Attach(sphere_shaders).Link();
+    ProgramSphere.reset(new OpenGL::Program("Sphere"));
+    ProgramSphere->Attach(sphere_shaders).Link();
     // prepare program to draw axes
     std::vector<const OpenGL::Shader*> axes_shaders;
-    for (auto&& file : { "shader.vert", "shader2.geom", "shader.frag" }) {
+    for (auto&& file : { "axes.vert", "axes.frag" }) {
         axes_shaders.push_back(OpenGL::Shader::CompileFrom(shader_dir, file));
     }
-    ProgramLines.reset(new OpenGL::Program("Lines"));
-    ProgramLines->Attach(axes_shaders).Link();
+    ProgramAxes.reset(new OpenGL::Program("Axes"));
+    ProgramAxes->Attach(axes_shaders).Link();
     // setup UBO
-    UI = std::make_unique<OpenGL::ProgramInterface<OpenGL::Uniform>>(*ProgramTriangles);
-    UBI = std::make_unique<OpenGL::ProgramInterface<OpenGL::UniformBlock>>(*ProgramTriangles);
-    PII = std::make_unique<OpenGL::ProgramInterface<OpenGL::ProgramInput>>(*ProgramTriangles);
-    POI = std::make_unique<OpenGL::ProgramInterface<OpenGL::ProgramOutput>>(*ProgramTriangles);
+    UI_axes = std::make_unique<OpenGL::UniformInterface>(*ProgramAxes);
+    UI = std::make_unique<OpenGL::UniformInterface>(*ProgramSphere);
+    UBI = std::make_unique<OpenGL::UniformBlockInterface>(*ProgramSphere);
+    PII = std::make_unique<OpenGL::ProgramInputInterface>(*ProgramSphere);
+    POI = std::make_unique<OpenGL::ProgramOutputInterface>(*ProgramSphere);
     CHECK_OPENGL();
+    UI_axes->dump();
     UI->dump();
     UBI->dump();
     PII->dump();
@@ -142,30 +145,13 @@ void Init() {
     std::vector<glm::vec3> normals;
     SphereVetices(0.8f, 120, 60, vertices, normals);
     /// @TODO use 'normals'
-    std::vector<glm::vec3> axes_vertices;
-    axes_vertices.push_back(glm::vec3(0.0f, 0.0f, 0.0f));
-    axes_vertices.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
-    axes_vertices.push_back(glm::vec3(0.0f, 0.0f, 0.0f));
-    axes_vertices.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
-    axes_vertices.push_back(glm::vec3(0.0f, 0.0f, 0.0f));
-    axes_vertices.push_back(glm::vec3(0.0f, 0.0f, 1.0f));
     // upload vertices
-    {
-        Mesh& mesh = MyModel.GetMesh();
-        mesh.InitData(vertices.size());
-        void* ptr = mesh.MapBufferVertex();
-        glm::vec3* out = static_cast<glm::vec3*>(ptr);
-        std::copy(vertices.begin(), vertices.end(), out);
-        mesh.UnmapBufferVertex();
-    }
-    {
-        Mesh& mesh = MyAxis.GetMesh();
-        mesh.InitData(axes_vertices.size());
-        void* ptr = mesh.MapBufferVertex();
-        glm::vec3* out = static_cast<glm::vec3*>(ptr);
-        std::copy(axes_vertices.begin(), axes_vertices.end(), out);
-        mesh.UnmapBufferVertex();
-    }
+    Mesh& mesh = MyModel.GetMesh();
+    mesh.InitData(vertices.size());
+    void* ptr = mesh.MapBufferVertex();
+    glm::vec3* out = static_cast<glm::vec3*>(ptr);
+    std::copy(vertices.begin(), vertices.end(), out);
+    mesh.UnmapBufferVertex();
     InitShaderProgram();
 }
 
@@ -193,31 +179,48 @@ static void RenderBack() {
 void Render() {
     static glm::vec4 bg_color(0.9f, 0.9f, 0.9f, 1.0f);
     static glm::vec3 fg_color(0.9f, 0.8f, 0.05f);
-    static glm::vec3 axis_color(0.0f, 0.2f, 0.9f);
     // init
     glClearBufferfv(GL_COLOR, 0, glm::value_ptr(bg_color));
     glClear(GL_DEPTH_BUFFER_BIT);
-    auto ub_xform = UBI->find("Transformations");
-    assert(ub_xform);
     CHECK_OPENGL();
     // draw axes
-    glVertexAttrib3fv(2, glm::value_ptr(axis_color));
-    auto u0 = ub_xform->find("World_Model");
-    assert(u0);
-    glNamedBufferSubData(UBO, u0->offset, OpenGL::TypeSize(u0->type), glm::value_ptr(MyAxis.GetTransform()));
+    auto u_world_axes = UI_axes->find("NDC_World");
+    assert(u_world_axes);
     if (Render::Axes) {
-        OpenGL::Program::Use(*ProgramLines);
-        MyAxis.GetMesh().Draw(VAO, GL_LINES);
+        OpenGL::Program::Use(*ProgramAxes);
+        glUniformMatrix4fv(u_world_axes->location, 1, GL_FALSE, glm::value_ptr(NDC_View * View_World));
+        glBindVertexArray(VAO);
+        glDrawArrays(GL_LINES, 0, 6);
     }
     CHECK_OPENGL();
     // draw main object
+    OpenGL::Program::Use(*ProgramSphere);
     glVertexAttrib3fv(2, glm::value_ptr(fg_color));
-    auto u1 = ub_xform->find("NDC_World");
-    auto u2 = ub_xform->find("World_Model");
-    assert(u1 && u2);
-    glNamedBufferSubData(UBO, u1->offset, OpenGL::TypeSize(u1->type), glm::value_ptr(NDC_View * View_World));
-    glNamedBufferSubData(UBO, u2->offset, OpenGL::TypeSize(u2->type), glm::value_ptr(MyModel.GetTransform()));
-    OpenGL::Program::Use(*ProgramTriangles);
+    auto u_ld = UI->find("Light.ld");
+    auto u_lpos = UI->find("Light.pos");
+    auto u_kd = UI->find("Material.kd");
+    assert(u_ld && u_lpos && u_kd);
+    glUniform3fv(u_ld->location, 1, glm::value_ptr(glm::vec3(0.9f, 0.8f, 0.03f)));
+    glUniform4fv(u_lpos->location, 1, glm::value_ptr(glm::vec3(0.0f, 0.0f, 1.0f)));
+    glUniform3fv(u_kd->location, 1, glm::value_ptr(glm::vec3(0.9f)));
+    auto ub_xform = UBI->find("Transformations");
+    assert(ub_xform);
+    auto u_model = ub_xform->find("View_Model");
+    auto u_normal = ub_xform->find("NormalMatrix");
+    auto u_view = ub_xform->find("NDC_View");
+    auto u_mvp = ub_xform->find("NDC_Model");
+    assert(u_model && u_normal && u_view && u_mvp);
+    glm::mat4 View_Model = View_World * MyModel.GetTransform();
+    glm::mat3 NormalMatrix = glm::transpose(glm::inverse(glm::mat3(View_Model))); // inverse transpose matrix
+    glNamedBufferSubData(UBO, u_model->offset, OpenGL::TypeSize(u_model->type), glm::value_ptr(View_Model));
+    for (glm::length_t i = 0; i < NormalMatrix.length(); ++i) {
+        glNamedBufferSubData(UBO, u_normal->offset + u_normal->mstride * i, 3 * sizeof(GLfloat),
+                             glm::value_ptr(NormalMatrix[i]));
+    }
+    // glNamedBufferSubData(UBO, u_normal->offset, OpenGL::TypeSize(u_normal->type), glm::value_ptr(NormalMatrix)); //
+    // XXX
+    glNamedBufferSubData(UBO, u_view->offset, OpenGL::TypeSize(u_view->type), glm::value_ptr(NDC_View));
+    glNamedBufferSubData(UBO, u_mvp->offset, OpenGL::TypeSize(u_mvp->type), glm::value_ptr(NDC_View * View_Model));
     RenderFront();
     RenderBack();
     // finish up
