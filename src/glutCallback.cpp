@@ -31,6 +31,9 @@ void OnKeyboardUp(unsigned char key, int x, int y) {
     case 'a':
     case 's':
     case 'd': KeyPressed[key] = false; break;
+    case 'j': Render::Shininess *= 2; break;
+    case 'k': Render::Shininess /= 2; break;
+    case 'r': Render::Shininess = 1.0f; break;
     default: break;
     }
 }

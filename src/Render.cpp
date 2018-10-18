@@ -55,6 +55,8 @@ void SwitchRasterizationMode(Side side) {
 void SetProjectionMatrix(const glm::mat4& mat) { NDC_View = mat; }
 void SetViewMatrix(const glm::mat4& mat) { View_World = mat; }
 
+float Shininess = 1.0f;
+
 //
 // Init
 //
@@ -178,11 +180,12 @@ static void RenderBack() {
 
 void Render() {
     static glm::vec4 bg_color(0.9f, 0.9f, 0.9f, 1.0f);
-    static glm::vec3 fg_color(0.9f, 0.8f, 0.05f);
+    //
     // init
     glClearBufferfv(GL_COLOR, 0, glm::value_ptr(bg_color));
     glClear(GL_DEPTH_BUFFER_BIT);
     CHECK_OPENGL();
+    //
     // draw axes
     auto u_world_axes = UI_axes->find("NDC_World");
     assert(u_world_axes);
@@ -193,23 +196,33 @@ void Render() {
         glDrawArrays(GL_LINES, 0, 6);
     }
     CHECK_OPENGL();
+    //
     // draw main object
     OpenGL::Program::Use(*ProgramSphere);
-    glVertexAttrib3fv(2, glm::value_ptr(fg_color));
+    // light
+    // auto u_lpos = UI->find("Light.pos");
+    auto u_la = UI->find("Light.la");
     auto u_ld = UI->find("Light.ld");
-    auto u_lpos = UI->find("Light.pos");
-    auto u_kd = UI->find("Material.kd");
-    assert(u_ld && u_lpos && u_kd);
+    auto u_ls = UI->find("Light.ls");
+    // glUniform3fv(u_lpos->location, 1, glm::value_ptr(glm::vec3(0.0f, 0.0f, 1.0f)));
+    glUniform3fv(u_la->location, 1, glm::value_ptr(glm::vec3(0.1f, 0.1f, 0.01f)));
     glUniform3fv(u_ld->location, 1, glm::value_ptr(glm::vec3(0.9f, 0.8f, 0.03f)));
-    glUniform4fv(u_lpos->location, 1, glm::value_ptr(glm::vec3(0.0f, 0.0f, 1.0f)));
+    glUniform3fv(u_ls->location, 1, glm::value_ptr(glm::vec3(0.9f, 0.8f, 0.03f)));
+    // material
+    auto u_ka = UI->find("Material.ka");
+    auto u_kd = UI->find("Material.kd");
+    auto u_ks = UI->find("Material.ks");
+    auto u_shiniess = UI->find("Material.shininess");
+    glUniform3fv(u_ka->location, 1, glm::value_ptr(glm::vec3(0.2f, 0.2f, 1.0f)));
     glUniform3fv(u_kd->location, 1, glm::value_ptr(glm::vec3(0.9f)));
+    glUniform3fv(u_ks->location, 1, glm::value_ptr(glm::vec3(0.9f)));
+    glUniform1f(u_shiniess->location, Shininess);
     auto ub_xform = UBI->find("Transformations");
-    assert(ub_xform);
     auto u_model = ub_xform->find("View_Model");
     auto u_normal = ub_xform->find("NormalMatrix");
     auto u_view = ub_xform->find("NDC_View");
     auto u_mvp = ub_xform->find("NDC_Model");
-    assert(u_model && u_normal && u_view && u_mvp);
+    // transformations
     glm::mat4 View_Model = View_World * MyModel.GetTransform();
     glm::mat3 NormalMatrix = glm::transpose(glm::inverse(glm::mat3(View_Model))); // inverse transpose matrix
     glNamedBufferSubData(UBO, u_model->offset, OpenGL::TypeSize(u_model->type), glm::value_ptr(View_Model));
@@ -217,12 +230,12 @@ void Render() {
         glNamedBufferSubData(UBO, u_normal->offset + u_normal->mstride * i, 3 * sizeof(GLfloat),
                              glm::value_ptr(NormalMatrix[i]));
     }
-    // glNamedBufferSubData(UBO, u_normal->offset, OpenGL::TypeSize(u_normal->type), glm::value_ptr(NormalMatrix)); //
-    // XXX
     glNamedBufferSubData(UBO, u_view->offset, OpenGL::TypeSize(u_view->type), glm::value_ptr(NDC_View));
     glNamedBufferSubData(UBO, u_mvp->offset, OpenGL::TypeSize(u_mvp->type), glm::value_ptr(NDC_View * View_Model));
+    // render
     RenderFront();
     RenderBack();
+    //
     // finish up
     glutSwapBuffers();
     if (GLint err = glGetError()) {

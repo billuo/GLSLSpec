@@ -16,6 +16,8 @@ enum class Side { Front, Back };
 void ToggleAxes();
 void SwitchRasterizationMode(Side side);
 
+extern float Shininess;
+
 } // namespace Render
 
 #endif /* end of include guard: RENDER_HPP_1PYP75HW */

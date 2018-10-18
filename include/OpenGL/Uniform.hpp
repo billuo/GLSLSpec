@@ -24,7 +24,7 @@ struct Uniform : public Resource {
     static constexpr GLintfield fields[] = {
         &Uniform::type,    &Uniform::asize,     &Uniform::offset,       &Uniform::block_index, &Uniform::astride,
         &Uniform::mstride, &Uniform::row_major, &Uniform::atomic_index, &Uniform::location,
-    }; // XXX properties and fields must match
+    };
     static constexpr size_t n_fields = countof(fields);
 
     static constexpr GLenum properties[] = {
@@ -58,7 +58,11 @@ struct Uniform : public Resource {
 
     void dump() const {
         Resource::dump();
-        fprintf(stderr, "type=%s, location=%d\n", TypeString(type), location);
+        if (location == -1) {
+            fprintf(stderr, "type=%s, block_index=%d\n", TypeString(type), block_index);
+        } else {
+            fprintf(stderr, "type=%s, location=%d\n", TypeString(type), location);
+        }
         Resource::dump_referenced(referenced);
     }
 
