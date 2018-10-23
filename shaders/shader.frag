@@ -3,8 +3,7 @@
 /* clang-format off */
 in GS_FS {
     vec3 pos;
-    vec3 normal;
-    vec3 color;
+    flat vec3 color;
 } fs_in;
 /* clang-format off */
 

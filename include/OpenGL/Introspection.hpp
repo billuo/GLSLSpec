@@ -12,6 +12,7 @@
 #include "OpenGL/ProgramOutput.hpp"
 #include "OpenGL/Uniform.hpp"
 #include "OpenGL/UniformBlock.hpp"
+#include "OpenGL/SubroutineUniform.hpp"
 
 namespace OpenGL {
 

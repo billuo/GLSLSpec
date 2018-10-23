@@ -200,11 +200,11 @@ void Render() {
     // draw main object
     OpenGL::Program::Use(*ProgramSphere);
     // light
-    // auto u_lpos = UI->find("Light.pos");
+    auto u_lpos = UI->find("Light.pos");
     auto u_la = UI->find("Light.la");
     auto u_ld = UI->find("Light.ld");
     auto u_ls = UI->find("Light.ls");
-    // glUniform3fv(u_lpos->location, 1, glm::value_ptr(glm::vec3(0.0f, 0.0f, 1.0f)));
+    glUniform3fv(u_lpos->location, 1, glm::value_ptr(glm::vec3(0.0f, 0.0f, 1.0f)));
     glUniform3fv(u_la->location, 1, glm::value_ptr(glm::vec3(0.1f, 0.1f, 0.01f)));
     glUniform3fv(u_ld->location, 1, glm::value_ptr(glm::vec3(0.9f, 0.8f, 0.03f)));
     glUniform3fv(u_ls->location, 1, glm::value_ptr(glm::vec3(0.9f, 0.8f, 0.03f)));

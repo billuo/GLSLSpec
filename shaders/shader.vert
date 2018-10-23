@@ -3,7 +3,6 @@
 /* clang-format off */
 out VS_GS {
     vec3 pos;
-    vec3 normal;
     vec3 color;
 } vs_out;
 /* clang-format on */
@@ -28,7 +27,7 @@ struct material_t {
 };
 uniform material_t Material;
 
-layout(binding = 2) uniform Transformations {
+uniform Transformations {
     mat4 View_Model;
     mat3 NormalMatrix;
     mat4 NDC_View;
@@ -41,26 +40,25 @@ void ViewSpace(out vec3 position, out vec3 normal) {
 }
 void NDCSpace(out vec4 position) { position = NDC_Model * vec4(VertexPosition, 1.0f); }
 
-void main(void) {
-    NDCSpace(gl_Position);
-    // diffuse shading
-    vec3 pos, norm;
-    ViewSpace(pos, norm);
+vec3 ADS(vec3 pos, vec3 norm) {
     vec3 s = normalize(Light.pos - pos);
-    // vec3 v = normalize(-pos.xyz);
-    vec3 v = vec3(0, 0, 1); // non-local viewer
+    vec3 v = normalize(-pos.xyz);
+    // vec3 v = vec3(0, 0, 1); // non-local viewer
     vec3 r = reflect(-s, norm);
-    float s_n = max(dot(s, norm), 0.0f);
-    // float s_n = abs(dot(s, n)); // double sides shading
+    float s_n = abs(dot(s, norm));
     vec3 diffuse = Light.ld * Material.kd * s_n;
     vec3 ambient = Light.la * Material.ka;
     vec3 spec = vec3(0.0);
     if (s_n > 0.0f) {
         float r_v = max(dot(r, v), 0.0f);
-        // float r_v = abs(dot(r, v)); // double sides shading
         spec = Light.ls * Material.ks * pow(r_v, Material.shininess);
     }
-    vs_out.normal = norm;
-    vs_out.color = clamp(ambient + diffuse + spec, vec3(0.0f), vec3(1.0f));
-    vs_out.color = ambient + diffuse + spec;
+    return clamp(ambient + diffuse + spec, vec3(0.0f), vec3(1.0f));
+}
+
+void main(void) {
+    vec3 pos, normal;
+    ViewSpace(pos, normal);
+    vs_out.color = ADS(pos, normal);
+    NDCSpace(gl_Position);
 }
