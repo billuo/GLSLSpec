@@ -33,6 +33,7 @@ target_link_libraries(Main ${GLEW_LIBRARIES})
 
 set(Main_sources
     Debug.cpp
+    Mesh.cpp
     Render.cpp
     Utility.cpp
     OpenGL/Buffer.cpp

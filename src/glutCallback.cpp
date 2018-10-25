@@ -103,22 +103,20 @@ void Every15ms(int current_ms) {
     glutTimerFunc(15, Every15ms, current_ms + 15);
     last_ms = current_ms;
     // update based on inputs
+    static float velocity = 1.5f;
+    float step = velocity * 15 / 1000;
     if (KeyPressed[static_cast<unsigned char>('w')]) {
-        EyePos += LookDir * 0.01f;
+        EyePos += LookDir * step;
     }
     if (KeyPressed[static_cast<unsigned char>('s')]) {
-        EyePos -= LookDir * 0.01f;
+        EyePos -= LookDir * step;
     }
     if (KeyPressed[static_cast<unsigned char>('a')]) {
-        EyePos += glm::normalize(glm::cross(Up, LookDir)) * 0.01f;
+        EyePos += glm::normalize(glm::cross(Up, LookDir)) * step;
     }
     if (KeyPressed[static_cast<unsigned char>('d')]) {
-        EyePos -= glm::normalize(glm::cross(Up, LookDir)) * 0.01f;
+        EyePos -= glm::normalize(glm::cross(Up, LookDir)) * step;
     }
-    // MyModel.SetPos(glm::vec3(glm::sin(current_ms * 0.001f) - 0.5f, 0.0f, glm::cos(current_ms * 0.001f) - 0.5f));
-    // MyModel.SetOrientation(
-    //         glm::quat_cast(glm::rotate(glm::mat4(1.0f), delta_ms * 0.0005f, glm::vec3(0.0f, 0.0f, 1.0f))) *
-    //         MyModel.GetOrientation());
     Render::SetViewMatrix(glm::lookAt(EyePos, EyePos + LookDir, Up));
 }
 
