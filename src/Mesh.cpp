@@ -1,4 +1,5 @@
 #include "Mesh.hpp"
+#include "Debug.hpp"
 
 void Mesh::Draw(GLuint VAO, GLenum layout) {
     glBindVertexArray(VAO);
@@ -14,4 +15,41 @@ void Mesh::Draw(GLuint VAO, GLenum layout) {
     glBindVertexBuffer(1, m_buffer_normal, 0, sizeof(Normal));
     // draw
     glDrawArrays(layout, 0, m_n_vertices);
+}
+
+void Mesh::InitData(size_t n_vertices) {
+    if (m_n_vertices) {
+        DEBUG("Mesh already allocated");
+    } else {
+        m_n_vertices = n_vertices;
+        aux_InitBuffers();
+    }
+}
+
+/// map/unmap vertex buffer
+void* Mesh::MapBufferVertex() {
+    glBindBuffer(GL_ARRAY_BUFFER, m_buffer_vertex);
+    void* ret = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+    return ret;
+}
+bool Mesh::UnmapBufferVertex() {
+    GLboolean result = glUnmapNamedBuffer(m_buffer_vertex);
+    if (result == GL_FALSE) {
+        DEBUG("Failed to unmap vertex buffer, data may need to mapped again.");
+    }
+    return result == GL_TRUE;
+}
+
+/// map/unmap normal buffer
+void* Mesh::MapBufferNormal() {
+    glBindBuffer(GL_ARRAY_BUFFER, m_buffer_normal);
+    void* ret = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+    return ret;
+}
+bool Mesh::UnmapBufferNormal() {
+    GLboolean result = glUnmapNamedBuffer(m_buffer_normal);
+    if (result == GL_FALSE) {
+        DEBUG("Failed to unmap normal buffer, data may need to mapped again.");
+    }
+    return result == GL_TRUE;
 }

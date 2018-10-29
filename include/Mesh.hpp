@@ -2,7 +2,6 @@
 #define MESH_HPP_OXR27HFE
 #pragma once
 
-#include "Debug.hpp"
 #include "Math.hpp"
 #include "OpenGL/Object.hpp"
 
@@ -15,42 +14,15 @@ public:
 
     explicit Mesh(size_t n_vertices) : m_n_vertices(n_vertices) { aux_InitBuffers(); }
 
-    void InitData(size_t n_vertices) {
-        if (m_n_vertices) {
-            DEBUG("Mesh already allocated");
-        } else {
-            m_n_vertices = n_vertices;
-            aux_InitBuffers();
-        }
-    }
+    void InitData(size_t n_vertices);
 
     /// map/unmap vertex buffer
-    void* MapBufferVertex() {
-        glBindBuffer(GL_ARRAY_BUFFER, m_buffer_vertex);
-        void* ret = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
-        return ret;
-    }
-    bool UnmapBufferVertex() {
-        GLboolean result = glUnmapNamedBuffer(m_buffer_vertex);
-        if (result == GL_FALSE) {
-            DEBUG("Failed to unmap vertex buffer, data may need to mapped again.");
-        }
-        return result == GL_TRUE;
-    }
+    void* MapBufferVertex();
+    bool UnmapBufferVertex();
 
     /// map/unmap normal buffer
-    void* MapBufferNormal() {
-        glBindBuffer(GL_ARRAY_BUFFER, m_buffer_normal);
-        void* ret = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
-        return ret;
-    }
-    bool UnmapBufferNormal() {
-        GLboolean result = glUnmapNamedBuffer(m_buffer_normal);
-        if (result == GL_FALSE) {
-            DEBUG("Failed to unmap normal buffer, data may need to mapped again.");
-        }
-        return result == GL_TRUE;
-    }
+    void* MapBufferNormal();
+    bool UnmapBufferNormal();
 
     void Draw(GLuint VAO, GLenum layout);
     ~Mesh() { glDeleteBuffers(1, &m_buffer_vertex); }
