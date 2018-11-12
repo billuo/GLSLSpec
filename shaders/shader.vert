@@ -11,7 +11,7 @@ layout(location = 0) in vec3 VertexPosition;
 layout(location = 1) in vec3 VertexNormal;
 
 struct light_t {
-    vec3 pos; // light position [eye]
+    vec3 pos; // light position [eye coord.]
     vec3 la;  // ambient light intensity
     vec3 ld;  // diffuse light intensity
     vec3 ls;  // specular light intensity
@@ -41,15 +41,15 @@ void ViewSpace(out vec3 position, out vec3 normal) {
 void NDCSpace(out vec4 position) { position = NDC_Model * vec4(VertexPosition, 1.0f); }
 
 vec3 ADS(vec3 pos, vec3 norm) {
-    vec3 s = normalize(Light.pos - pos);
+    vec3 l = normalize(Light.pos - pos);
     vec3 v = normalize(-pos.xyz);
-    // vec3 v = vec3(0, 0, 1); // non-local viewer
-    vec3 r = reflect(-s, norm);
-    float s_n = abs(dot(s, norm));
-    vec3 diffuse = Light.ld * Material.kd * s_n;
+    vec3 r = reflect(-l, norm);
+    // float l_n = abs(dot(l, norm));
+    float l_n = max(dot(l, norm), 0.0f);
+    vec3 diffuse = Light.ld * Material.kd * l_n;
     vec3 ambient = Light.la * Material.ka;
     vec3 spec = vec3(0.0);
-    if (s_n > 0.0f) {
+    if (l_n > 0.0f) {
         float r_v = max(dot(r, v), 0.0f);
         spec = Light.ls * Material.ks * pow(r_v, Material.shininess);
     }

@@ -4,6 +4,7 @@
  * @author Zhen Luo 461652354@qq.com
  */
 #include "Render.hpp"
+#include "Debug.hpp"
 #include "Math.hpp"
 #include "Model.hpp"
 #include "OpenGL/Introspection.hpp"
@@ -57,7 +58,7 @@ void SwitchRasterizationMode(Side side) {
 void SetProjectionMatrix(const glm::mat4& mat) { NDC_View = mat; }
 void SetViewMatrix(const glm::mat4& mat) { View_World = mat; }
 
-float Shininess = 1.0f;
+float Shininess = 2.0f;
 
 //
 // Init
@@ -143,8 +144,8 @@ static void SphereVetices(float radius, size_t n_slices, size_t n_layers, std::v
 static void CubeVertices(float a, size_t n_grids, std::vector<glm::vec3>& vertices, std::vector<glm::vec3>& normals) {
     vertices.clear();
     normals.clear();
-    float y = -a / 2;
     const float delta = a / n_grids;
+    float y = -a / 2;
     for (size_t i = 0; i < n_grids; ++i) {
         float x = -a / 2;
         for (size_t j = 0; j < n_grids; ++j) {
@@ -154,20 +155,14 @@ static void CubeVertices(float a, size_t n_grids, std::vector<glm::vec3>& vertic
             vertices.emplace_back(x, y, a / 2);
             vertices.emplace_back(x + delta, y + delta, a / 2);
             vertices.emplace_back(x, y + delta, a / 2);
-            //
-            vertices.emplace_back(x, y, -a / 2);
-            vertices.emplace_back(x + delta, y + delta, -a / 2);
-            vertices.emplace_back(x + delta, y, -a / 2);
-            vertices.emplace_back(x, y, -a / 2);
-            vertices.emplace_back(x, y + delta, -a / 2);
-            vertices.emplace_back(x + delta, y + delta, -a / 2);
             x += delta;
         }
-        y += a / n_grids;
+        y += delta;
     }
-    assert(vertices.size() % 2 == 0);
-    size_t face_size = vertices.size() / 2;
+    size_t face_size = vertices.size();
     vertices.reserve(6 * face_size);
+    std::transform(vertices.rbegin(), vertices.rend(), std::back_inserter(vertices),
+                   [](const glm::vec3& v) { return glm::vec3(v.x, v.y, -v.z); }); // NOTE the reversed_iterator
     std::transform(vertices.begin(), vertices.begin() + 2 * face_size, std::back_inserter(vertices),
                    [](const glm::vec3& v) { return glm::vec3(-v.z, v.y, v.x); });
     std::transform(vertices.begin(), vertices.begin() + 2 * face_size, std::back_inserter(vertices),
@@ -280,8 +275,10 @@ void Render() {
     auto u_la = UI->find("Light.la");
     auto u_ld = UI->find("Light.ld");
     auto u_ls = UI->find("Light.ls");
-    glUniform3fv(u_lpos->location, 1, glm::value_ptr(glm::vec3(0.0f, 0.0f, 1.0f)));
-    glUniform3fv(u_la->location, 1, glm::value_ptr(glm::vec3(0.1f, 0.1f, 0.01f)));
+    static glm::vec3 light_pos_world = glm::vec3(4.0f, 10.0f, 4.0f);
+    // glUniform3fv(u_lpos->location, 1, glm::value_ptr(glm::vec3(0.0f, 0.0f, 1.0f)));
+    glUniform3fv(u_lpos->location, 1, glm::value_ptr(View_World * glm::vec4(light_pos_world, 1.0f)));
+    glUniform3fv(u_la->location, 1, glm::value_ptr(glm::vec3(0.15f, 0.15f, 0.05f)));
     glUniform3fv(u_ld->location, 1, glm::value_ptr(glm::vec3(0.8f, 0.8f, 0.03f)));
     glUniform3fv(u_ls->location, 1, glm::value_ptr(glm::vec3(0.8f, 0.8f, 0.03f)));
     // material
@@ -289,7 +286,7 @@ void Render() {
     auto u_kd = UI->find("Material.kd");
     auto u_ks = UI->find("Material.ks");
     auto u_shiniess = UI->find("Material.shininess");
-    glUniform3fv(u_ka->location, 1, glm::value_ptr(glm::vec3(0.2f, 0.2f, 1.0f)));
+    glUniform3fv(u_ka->location, 1, glm::value_ptr(glm::vec3(0.5f, 0.5f, 1.0f)));
     glUniform3fv(u_kd->location, 1, glm::value_ptr(glm::vec3(0.7f)));
     glUniform3fv(u_ks->location, 1, glm::value_ptr(glm::vec3(0.5f)));
     glUniform1f(u_shiniess->location, Shininess);

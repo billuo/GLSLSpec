@@ -16,6 +16,7 @@ target_compile_options(Main PUBLIC -Wno-unused-variable)
 target_compile_options(Main PUBLIC -Wno-unused-parameter)
 target_compile_options(Main PUBLIC -Wno-unused-function)
 
+set(OpenGL_GL_PREFERENCE LEGACY)
 find_package(OpenGL REQUIRED)
 message(STATUS "OpenGL found at:\n${OPENGL_INCLUDE_DIR};\n${OPENGL_LIBRARIES}")
 include_directories(${OPENGL_INCLUDE_DIR})

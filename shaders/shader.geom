@@ -11,11 +11,13 @@ in VS_GS {
 
 out GS_FS {
     vec3 pos;
-    flat vec3 color;
+    // flat vec3 color;
+    vec3 color;
 } gs_out;
 /* clang-format on */
 
-vec3 GetColor(int i) { return (gs_in[0].color + gs_in[1].color + gs_in[2].color) / gs_in.length(); }
+// vec3 GetColor(int i) { return (gs_in[0].color + gs_in[1].color + gs_in[2].color) / gs_in.length(); }
+vec3 GetColor(int i) { return gs_in[i].color; }
 
 void main(void) {
     for (int i = 0; i < gl_in.length(); ++i) {

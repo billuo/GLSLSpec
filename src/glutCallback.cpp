@@ -25,7 +25,6 @@ static struct {
 } // namespace
 
 void OnKeyboardUp(unsigned char key, int x, int y) {
-    /// @TODO
     switch (key) {
     case 'w':
     case 'a':
@@ -39,8 +38,8 @@ void OnKeyboardUp(unsigned char key, int x, int y) {
 }
 
 void OnSpecial(int key, int x, int y) {
-    /// @TODO
     switch (key) {
+    /// @TODO
     default: break;
     }
 }
@@ -77,6 +76,8 @@ void OnMouse(int button, int state, int x, int y) {
             LastGrabbing.x = x;
             LastGrabbing.y = y;
         } else if (state == GLUT_UP) {
+            LastGrabbing.x = -1;
+            LastGrabbing.y = -1;
             /// @TODO
         }
     }
