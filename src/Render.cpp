@@ -55,6 +55,7 @@ void SwitchRasterizationMode(Side side) {
         FrontMode = NextMode(FrontMode);
     }
 }
+
 void SetProjectionMatrix(const glm::mat4& mat) { NDC_View = mat; }
 void SetViewMatrix(const glm::mat4& mat) { View_World = mat; }
 

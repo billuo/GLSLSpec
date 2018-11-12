@@ -24,12 +24,34 @@ static struct {
 
 } // namespace
 
-void OnKeyboardUp(unsigned char key, int x, int y) {
+void OnKeyboard(unsigned char key, int x, int y) {
     switch (key) {
+    case '\\': Render::ToggleAxes(); break;
+    case '[': Render::SwitchRasterizationMode(Render::Side::Front); break;
+    case ']': Render::SwitchRasterizationMode(Render::Side::Back); break;
+    case 'W':
+    case 'A':
+    case 'S':
+    case 'D':
     case 'w':
     case 'a':
     case 's':
-    case 'd': KeyPressed[key] = false; break;
+    case 'd': KeyPressed[std::tolower(key)] = true; break;
+    case 27: glutLeaveMainLoop(); break;
+    default: break;
+    }
+}
+
+void OnKeyboardUp(unsigned char key, int x, int y) {
+    switch (key) {
+    case 'W':
+    case 'A':
+    case 'S':
+    case 'D':
+    case 'w':
+    case 'a':
+    case 's':
+    case 'd': KeyPressed[std::tolower(key)] = false; break;
     case 'j': Render::Shininess *= 2; break;
     case 'k': Render::Shininess /= 2; break;
     case 'r': Render::Shininess = 1.0f; break;
@@ -80,20 +102,6 @@ void OnMouse(int button, int state, int x, int y) {
             LastGrabbing.y = -1;
             /// @TODO
         }
-    }
-}
-
-void OnKeyboard(unsigned char key, int x, int y) {
-    switch (key) {
-    case '\\': Render::ToggleAxes(); break;
-    case '[': Render::SwitchRasterizationMode(Render::Side::Front); break;
-    case ']': Render::SwitchRasterizationMode(Render::Side::Back); break;
-    case 'w':
-    case 'a':
-    case 's':
-    case 'd': KeyPressed[key] = true; break;
-    case 27: glutLeaveMainLoop(); break;
-    default: break;
     }
 }
 
