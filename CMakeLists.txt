@@ -4,6 +4,7 @@ project(OpenGL-lab)
 set(CMAKE_CXX_STANDARD 14)
 
 include_directories(include)
+include_directories(3rdparty)
 
 add_executable(Main
         src/OpenGL/Buffer.cpp
@@ -38,6 +39,9 @@ find_package(GLEW REQUIRED)
 message(STATUS "glew found at:\n${GLEW_INCLUDE_DIRS};\n${GLEW_LIBRARIES};")
 include_directories(${GLEW_INCLUDE_DIRS})
 target_link_libraries(Main ${GLEW_LIBRARIES})
+
+add_subdirectory(3rdparty/assimp)
+target_link_libraries(Main assimp)
 
 file(COPY shaders DESTINATION ./)
 file(COPY resources DESTINATION ./)
