@@ -11,7 +11,7 @@ static std::bitset<128> KeyPressed;
 static struct {
     float horizontal;
     float vertical;
-} ViewAngle = { 0.0f, 0.0f };
+} Orientation = { 0.0f, 0.0f };
 
 static glm::vec3 EyePos = glm::vec3(0.0f, 0.0f, 2.0f);
 static glm::vec3 LookDir = glm::vec3(0.0f, 0.0f, -1.0f);
@@ -97,20 +97,20 @@ void OnMotion(int x, int y) {
     int h = glutGet(GLUT_WINDOW_HEIGHT);
     const float x_degrees(180.0f / w * x);
     const float y_degrees(180.0f / h * y);
-    ViewAngle.horizontal += x_degrees;
-    ViewAngle.vertical += y_degrees;
-    if (ViewAngle.horizontal > 180.0f || ViewAngle.horizontal <= -180.0f) {
-        ViewAngle.horizontal = std::fmod(ViewAngle.horizontal + 180.0f, 360.0f) - 180.0f;
+    Orientation.horizontal += x_degrees;
+    Orientation.vertical += y_degrees;
+    if (Orientation.horizontal > 180.0f || Orientation.horizontal <= -180.0f) {
+        Orientation.horizontal = std::fmod(Orientation.horizontal + 180.0f, 360.0f) - 180.0f;
     }
     const float y_mag_max = 89.0f;
-    if (ViewAngle.vertical > y_mag_max) {
-        ViewAngle.vertical = y_mag_max;
-    } else if (ViewAngle.vertical < -y_mag_max) {
-        ViewAngle.vertical = -y_mag_max;
+    if (Orientation.vertical > y_mag_max) {
+        Orientation.vertical = y_mag_max;
+    } else if (Orientation.vertical < -y_mag_max) {
+        Orientation.vertical = -y_mag_max;
     }
-    LookDir.x = glm::cos(RadianOfDegree(ViewAngle.vertical)) * glm::sin(RadianOfDegree(ViewAngle.horizontal));
-    LookDir.y = glm::sin(RadianOfDegree(ViewAngle.vertical));
-    LookDir.z = glm::cos(RadianOfDegree(ViewAngle.vertical)) * -glm::cos(RadianOfDegree(ViewAngle.horizontal)); // XXX
+    LookDir.x = glm::cos(RadianOfDegree(Orientation.vertical)) * glm::sin(RadianOfDegree(Orientation.horizontal));
+    LookDir.y = glm::sin(RadianOfDegree(Orientation.vertical));
+    LookDir.z = glm::cos(RadianOfDegree(Orientation.vertical)) * -glm::cos(RadianOfDegree(Orientation.horizontal));
 }
 
 void OnMouse(int button, int state, int x, int y) {

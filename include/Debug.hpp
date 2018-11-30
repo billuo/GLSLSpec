@@ -11,19 +11,27 @@
 #include <cassert>
 #include <cstdio>
 
+#define PRINT_TO_STDERR(fmt, ...) fprintf(stderr, fmt "\n", ##__VA_ARGS__)
+
+#define ERROR(fmt, ...) PRINT_TO_STDERR(fmt, ##__VA_ARGS__)
+
 /// Print format string to stderr
-#define DEBUG(fmt, ...) fprintf(stderr, fmt "\n", ##__VA_ARGS__)
+#if defined(DEBUG_BUILD)
+#define DEBUG(fmt, ...) PRINT_TO_STDERR(fmt, ##__VA_ARGS__)
+#else
+#define DEBUG(...)
+#endif
 
 /// Convert OpenGL error code to error string.
 const char* GLErrorString(int error);
 
 /// Perform OpenGL error checking with given logging verbosity.
-#define CHECK_OPENGL()                                                                                         \
-    do {                                                                                                       \
-        if (GLint err = glGetError()) {                                                                        \
-            DEBUG("Function:%s\nLine:%d\nOpenGL Error(%d):%s", __func__, __LINE__, err, GLErrorString(err)); \
-            exit(err);                                                                                         \
-        }                                                                                                      \
+#define CHECK_OPENGL()                                                                                       \
+    do {                                                                                                     \
+        if (GLint err = glGetError()) {                                                                      \
+            ERROR("Function:%s\nLine:%d\nOpenGL Error(%d):%s", __func__, __LINE__, err, GLErrorString(err)); \
+            exit(err);                                                                                       \
+        }                                                                                                    \
     } while (0)
 
 /// Evaluate expr only ONCE.

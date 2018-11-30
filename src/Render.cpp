@@ -97,11 +97,13 @@ static void InitShaderProgram() {
     PII = std::make_unique<OpenGL::ProgramInputInterface>(*ProgramSphere);
     POI = std::make_unique<OpenGL::ProgramOutputInterface>(*ProgramSphere);
     CHECK_OPENGL();
+#if defined(DEBUG_BUILD)
     UI_axes->dump();
     UI->dump();
     UBI->dump();
     PII->dump();
     POI->dump();
+#endif
     auto ub_xform = UBI->find("Transformations");
     assert(ub_xform);
     glCreateBuffers(1, &UBO);
