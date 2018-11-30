@@ -2,10 +2,9 @@
 #include "OpenGL/Common.hpp"
 
 
-const char* GLErrorString(uint32_t error)
-{ return (const char*) (gluErrorString(error)); }
+namespace {
 
-static inline const char* SourceString(GLenum source)
+inline const char* SourceString(GLenum source)
 {
     switch (source) {
         case GL_DEBUG_SOURCE_API:
@@ -25,7 +24,7 @@ static inline const char* SourceString(GLenum source)
     }
 }
 
-static inline const char* TypeString(GLenum type)
+inline const char* TypeString(GLenum type)
 {
     switch (type) {
         case GL_DEBUG_TYPE_ERROR:
@@ -51,7 +50,7 @@ static inline const char* TypeString(GLenum type)
     }
 }
 
-static inline const char* SeverityString(GLenum severity)
+inline const char* SeverityString(GLenum severity)
 {
     switch (severity) {
         case GL_DEBUG_SEVERITY_NOTIFICATION:
@@ -67,25 +66,36 @@ static inline const char* SeverityString(GLenum severity)
     }
 }
 
+const size_t BufferSize = 1024;
+GLchar Buffer[BufferSize];
+
+}
+
+const char* GLErrorString(uint32_t error)
+{ return (const char*) (gluErrorString(error)); }
+
 void
 myDebugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message,
                        const void* user)
 {
+    snprintf(Buffer,
+             BufferSize,
+             "\tOpenGL debug message:\n"
+             "source:   %-20s\n"
+             "type:     %-20s\n"
+             "serverity:%-20s id:%u\n"
+             "message:  %.*s\n",
+             SourceString(source),
+             TypeString(type),
+             SeverityString(severity),
+             id,
+             length,
+             message);
     if (severity != GL_DEBUG_SEVERITY_NOTIFICATION) {
-        printf("\tOpenGL debug message:\n"
-               "source:   %-20s\n"
-               "type:     %-20s\n"
-               "serverity:%-20s id:%u\n"
-               "message:  %.*s\n", SourceString(source), OpenGL::nameOfType(type), SeverityString(severity), id,
-               length, message);
+        printf("%s", Buffer);
     }
     static FILE* gl_error_log = fopen("GL.log", "w");
     if (gl_error_log) {
-        fprintf(gl_error_log, "\tOpenGL debug message:\n"
-                       "source:   %-20s\n"
-                       "type:     %-20s\n"
-                       "serverity:%-20s id:%u\n"
-                       "message:  %.*s\n", SourceString(source), OpenGL::nameOfType(type), SeverityString(severity),
-                id, length, message);
+        fprintf(gl_error_log, "%s", Buffer);
     }
 }
