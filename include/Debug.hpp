@@ -11,6 +11,7 @@
 #include <cassert>
 #include <cstdio>
 
+
 #define PRINT_TO_STDERR(fmt, ...) fprintf(stderr, fmt "\n", ##__VA_ARGS__)
 
 #define ERROR(fmt, ...) PRINT_TO_STDERR(fmt, ##__VA_ARGS__)

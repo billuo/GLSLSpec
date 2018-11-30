@@ -8,7 +8,9 @@
 #include "Render.hpp"
 #include "glutCallback.hpp"
 
-int main(int argc, char** argv) {
+
+int main(int argc, char** argv)
+{
     glutInit(&argc, argv);
     // glut window setup
     glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGB);
@@ -19,14 +21,14 @@ int main(int argc, char** argv) {
     glutInitWindowPosition(0, 0);
     glutCreateWindow("Sphere");
     // glut setup window specific callbacks
-    glutDisplayFunc(Render::Render);
-    glutReshapeFunc(OnReshape);
-    glutKeyboardFunc(OnKeyboard);
-    glutKeyboardUpFunc(OnKeyboardUp);
-    glutSpecialFunc(OnSpecial);
-    glutMotionFunc(OnMotion);
-    glutMouseFunc(OnMouse);
-    glutCloseFunc(OnClose);
+    glutDisplayFunc(Render::render);
+    glutReshapeFunc(onReshape);
+    glutKeyboardFunc(onKeyboard);
+    glutKeyboardUpFunc(onKeyboardUp);
+    glutSpecialFunc(onSpecial);
+    glutMotionFunc(onMotion);
+    glutMouseFunc(onMouse);
+    glutCloseFunc(onClose);
     // init glew for OpenGL 4+
     GLenum err = glewInit();
     if (err != GLEW_OK) {
@@ -35,10 +37,10 @@ int main(int argc, char** argv) {
         DEBUG("Found OpenGL 4.5 support");
     }
     // init for draw
-    Render::Init();
+    Render::init();
     // glut setup global callbacks
-    glutIdleFunc(Render::Render);
-    glutTimerFunc(15, Every15ms, 0);
+    glutIdleFunc(Render::render);
+    glutTimerFunc(15, onTimer, 0);
     // main loop
     glutMainLoop();
 }

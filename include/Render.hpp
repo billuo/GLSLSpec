@@ -4,20 +4,26 @@
 
 #include <glm/fwd.hpp>
 
+
 namespace Render {
 
-void Init();
-void Render();
+void init();
 
-void SetProjectionMatrix(const glm::mat4& mat);
-void SetViewMatrix(const glm::mat4& mat);
+void render();
 
-enum class Side { Front, Back };
-void ToggleAxes();
-void SwitchRasterizationMode(Side side);
+void setProjectionMatrix(const glm::mat4& mat);
+
+void setViewMatrix(const glm::mat4& mat);
+
+enum class Side {
+    Front, Back
+};
+
+void toggleAxes();
+
+void switchRasterizationMode(Side side);
 
 extern float Shininess;
-
 } // namespace Render
 
 #endif /* end of include guard: RENDER_HPP_1PYP75HW */

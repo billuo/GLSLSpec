@@ -4,15 +4,28 @@
 
 #include "Mesh.hpp"
 
+
 class Model {
-public:
-    Model() : m_scale(1.0f), m_orientation(glm::identity<glm::quat>()), m_pos(0.0f), m_valid(false) {}
-    ~Model() {}
+  public:
+    Model() noexcept : m_scale(1.0f), m_orientation(glm::identity<glm::quat>()), m_pos(0.0f), m_valid(false),
+                       m_world_model(1.0f)
+    {}
 
-    Mesh& GetMesh() { return m_mesh; } /// @TODO encapsulate
-    const Mesh& GetMesh() const { return m_mesh; }
+    ~Model() = default;
 
-    glm::mat4 GetTransform() const {
+    Model(const Model&) = delete;
+
+    Model& operator=(const Model&) = delete;
+
+    /// @TODO encapsulate
+    Mesh& getMesh()
+    { return m_mesh; }
+
+    const Mesh& getMesh() const
+    { return m_mesh; }
+
+    glm::mat4 getTransform() const
+    {
         if (!m_valid) {
             m_world_model = glm::translate(glm::mat4(1.0f), m_pos) * glm::scale(glm::mat4_cast(m_orientation), m_scale);
             m_valid = true;
@@ -20,29 +33,38 @@ public:
         return m_world_model;
     }
 
-    void SetPos(glm::vec3 pos) {
+    void setPos(glm::vec3 pos)
+    {
         m_valid = false;
         m_pos = pos;
     }
-    void SetScale(glm::vec3 scale) {
+
+    void setScale(glm::vec3 scale)
+    {
         m_valid = false;
         m_scale = scale;
     }
-    void SetOrientation(glm::quat orientation) {
+
+    void setOrientation(glm::quat orientation)
+    {
         m_valid = false;
         m_orientation = orientation;
     }
 
-    glm::vec3 GetScale() const { return m_scale; }
-    glm::vec3 GetPos() const { return m_pos; }
-    glm::quat GetOrientation() const { return m_orientation; }
+    glm::vec3 getScale() const
+    { return m_scale; }
 
-private:
-    Model(const Model&);
-    Model& operator=(const Model&);
+    glm::vec3 getPos() const
+    { return m_pos; }
+
+    glm::quat getOrientation() const
+    { return m_orientation; }
+
+  private:
 
     Mesh m_mesh;
     // XXX these are additional transformation upon model coordinates to get world coordinates.
+
     glm::vec3 m_scale;
     glm::quat m_orientation;
     glm::vec3 m_pos;

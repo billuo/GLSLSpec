@@ -1,93 +1,96 @@
-#include "glutCallback.hpp"
 #include "Math.hpp"
 #include "OpenGL/Common.hpp"
 #include "Render.hpp"
 #include <bitset>
 
+
 namespace {
 
-static std::bitset<128> KeyPressed;
+std::bitset<128> KeyPressed;
 
-static struct {
+struct {
     float horizontal;
     float vertical;
-} Orientation = { 0.0f, 0.0f };
+} Orientation = {0.0f, 0.0f};
 
-static glm::vec3 EyePos = glm::vec3(0.0f, 0.0f, 2.0f);
-static glm::vec3 LookDir = glm::vec3(0.0f, 0.0f, -1.0f);
-static const glm::vec3 Up = glm::vec3(0.0f, 1.0f, 0.0f);
+glm::vec3 EyePos = glm::vec3(0.0f, 0.0f, 2.0f);
+glm::vec3 LookDir = glm::vec3(0.0f, 0.0f, -1.0f);
+const glm::vec3 Up = glm::vec3(0.0f, 1.0f, 0.0f);
 
-static struct {
+struct {
     int x;
     int y;
 } LastGrabbing;
-
 } // namespace
 
-void OnKeyboard(unsigned char key, int x, int y) {
+void onKeyboard(unsigned char key, int x, int y)
+{
     switch (key) {
-    case '\\':
-        Render::ToggleAxes();
-        break;
-    case '[':
-        Render::SwitchRasterizationMode(Render::Side::Front);
-        break;
-    case ']':
-        Render::SwitchRasterizationMode(Render::Side::Back);
-        break;
-    case 'W':
-    case 'A':
-    case 'S':
-    case 'D':
-    case 'w':
-    case 'a':
-    case 's':
-    case 'd':
-        KeyPressed[std::tolower(key)] = true;
-        break;
-    case 27:
-        glutLeaveMainLoop();
-        break;
-    default:
-        break;
+        case '\\':
+            Render::toggleAxes();
+            break;
+        case '[':
+            Render::switchRasterizationMode(Render::Side::Front);
+            break;
+        case ']':
+            Render::switchRasterizationMode(Render::Side::Back);
+            break;
+        case 'W':
+        case 'A':
+        case 'S':
+        case 'D':
+        case 'w':
+        case 'a':
+        case 's':
+        case 'd':
+            KeyPressed[std::tolower(key)] = true;
+            break;
+        case 27:
+            glutLeaveMainLoop();
+            break;
+        default:
+            break;
     }
 }
 
-void OnKeyboardUp(unsigned char key, int x, int y) {
+void onKeyboardUp(unsigned char key, int x, int y)
+{
     switch (key) {
-    case 'W':
-    case 'A':
-    case 'S':
-    case 'D':
-    case 'w':
-    case 'a':
-    case 's':
-    case 'd':
-        KeyPressed[std::tolower(key)] = false;
-        break;
-    case 'j':
-        Render::Shininess *= 2;
-        break;
-    case 'k':
-        Render::Shininess /= 2;
-        break;
-    case 'r':
-        Render::Shininess = 1.0f;
-        break;
-    default:
-        break;
+        case 'W':
+        case 'A':
+        case 'S':
+        case 'D':
+        case 'w':
+        case 'a':
+        case 's':
+        case 'd':
+            KeyPressed[std::tolower(key)] = false;
+            break;
+        case 'j':
+            Render::Shininess *= 2;
+            break;
+        case 'k':
+            Render::Shininess /= 2;
+            break;
+        case 'r':
+            Render::Shininess = 1.0f;
+            break;
+        default:
+            break;
     }
 }
 
-void OnSpecial(int key, int x, int y) {
+void onSpecial(int key, int x, int y)
+{
     switch (key) {
-    /// @TODO
-    default:
-        break;
+        /// @TODO
+        default:
+            break;
     }
 }
 
-void OnMotion(int x, int y) {
+void onMotion(int x, int y)
+{
     x -= LastGrabbing.x;
     y -= LastGrabbing.y;
     LastGrabbing.x += x;
@@ -113,7 +116,8 @@ void OnMotion(int x, int y) {
     LookDir.z = glm::cos(RadianOfDegree(Orientation.vertical)) * -glm::cos(RadianOfDegree(Orientation.horizontal));
 }
 
-void OnMouse(int button, int state, int x, int y) {
+void onMouse(int button, int state, int x, int y)
+{
     if (button == GLUT_LEFT_BUTTON) {
         if (state == GLUT_DOWN) {
             LastGrabbing.x = x;
@@ -126,11 +130,12 @@ void OnMouse(int button, int state, int x, int y) {
     }
 }
 
-void Every15ms(int current_ms) {
+void onTimer(int current_ms)
+{
     // callback loop
     static int last_ms = current_ms;
     int delta_ms = current_ms - last_ms;
-    glutTimerFunc(15, Every15ms, current_ms + 15);
+    glutTimerFunc(15, onTimer, current_ms + 15);
     last_ms = current_ms;
     // update based on inputs
     static float velocity = 1.5f;
@@ -147,12 +152,14 @@ void Every15ms(int current_ms) {
     if (KeyPressed[static_cast<unsigned char>('d')]) {
         EyePos -= glm::normalize(glm::cross(Up, LookDir)) * step;
     }
-    Render::SetViewMatrix(glm::lookAt(EyePos, EyePos + LookDir, Up));
+    Render::setViewMatrix(glm::lookAt(EyePos, EyePos + LookDir, Up));
 }
 
-void OnReshape(GLint w, GLint h) {
-    Render::SetProjectionMatrix(glm::perspective(Pi / 2, static_cast<float>(w) / h, 0.01f, 100.0f));
+void onReshape(GLint w, GLint h)
+{
+    Render::setProjectionMatrix(glm::perspective(Pi / 2, static_cast<float>(w) / h, 0.01f, 100.0f));
     glViewport(0, 0, w, h);
 }
 
-void OnClose() { glutIdleFunc(nullptr); }
+void onClose()
+{ glutIdleFunc(nullptr); }

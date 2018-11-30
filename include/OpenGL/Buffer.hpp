@@ -3,28 +3,36 @@
  * @brief Encapsulates OpenGL buffer obejcts.
  * @author Zhen Luo 461652354@qq.com
  */
-#ifndef BUFFER_HPP_TSCZKEDV
-#define BUFFER_HPP_TSCZKEDV
+#ifndef OPENGL_LAB_BUFFER_HPP
+#define OPENGL_LAB_BUFFER_HPP
 #pragma once
 
 #include "OpenGL/Object.hpp"
 
+
 namespace OpenGL {
 
 class Buffer : public Object {
-    using Base = Object;
 
     static decltype(MakeNamePool(glCreateBuffers, glDeleteBuffers)) Pool;
 
-public:
-    static void Bind(GLenum target, Buffer& buffer) { glBindBuffer(target, buffer.m_name.get()); }
-    static void Unbind(GLenum target) { glBindBuffer(target, 0); }
+  public:
+    static void bind(GLenum target, Buffer& buffer)
+    { glBindBuffer(target, buffer.m_name.get()); }
 
-public:
-    Buffer(const GLchar* label = nullptr) : Base(Pool.Get(), label, GL_BUFFER) {}
+    static void unbind(GLenum target)
+    { glBindBuffer(target, 0); }
+
+  public:
+    Buffer(const GLchar* label = nullptr) : Object(Pool.Get(), label, GL_BUFFER)
+    {}
+
     Buffer(Buffer&&) = default;
+
     Buffer& operator=(Buffer&&) = default;
-    ~Buffer() { Pool.Put(std::move(m_name)); }
+
+    ~Buffer()
+    { Pool.Put(std::move(m_name)); }
 
     // void Data(GLsizeiptr size, const GLvoid* data, GLenum usage);
     // void Storage(GLsizei size, const GLvoid* data, GLbitfield flags);
@@ -41,7 +49,7 @@ public:
     // GLsizei Size() const { return m_size; }
     // bool Empty() const { return !(m_flags & IsAllocated); }
 
-private:
+  private:
     // enum Flags : GLbitfield {
     //     IsImmutable = 0x1,
     //     IsMapped = 0x2,
@@ -72,7 +80,6 @@ private:
     //     return true;
     // }
 };
-
 } // namespace OpenGL
 
-#endif /* end of include guard: BUFFER_HPP_TSCZKEDV */
+#endif /* end of include guard: OPENGL_LAB_BUFFER_HPP */

@@ -43,7 +43,7 @@ add_executable(Main
         src/main.cpp
         src/Mesh.cpp
         src/Render.cpp
-        src/Utility.cpp)
+        src/Utility.cpp include/OpenGL/Texture.hpp)
 
 target_compile_definitions(Main PUBLIC $<$<CONFIG:Debug>:DEBUG_BUILD>)
 target_compile_options(Main PUBLIC $<$<CONFIG:Release>:-O2>)

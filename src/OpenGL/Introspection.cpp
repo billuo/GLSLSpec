@@ -1,5 +1,6 @@
 #include "OpenGL/Introspection.hpp"
 
+
 namespace OpenGL {
 
 constexpr GLenum Uniform::properties[];

@@ -4,6 +4,7 @@
 
 #include "OpenGL/Program.hpp"
 
+
 namespace OpenGL {
 
 /**
@@ -11,9 +12,7 @@ namespace OpenGL {
  */
 class ProgramPipeline : Object {
     using Base = Object;
-
 };
-
 } // namespace OpenGL
 
 #endif /* end of include guard: PROGRAMPIPELINE_HPP_FOIB1IJ8 */

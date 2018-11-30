@@ -5,6 +5,7 @@
 #include "OpenGL/Uniform.hpp"
 #include <vector>
 
+
 namespace OpenGL {
 
 struct UniformBlock : public Resource {
@@ -15,20 +16,14 @@ struct UniformBlock : public Resource {
     GLint referenced[MaxShaderStage] = {};
     std::vector<Uniform> uniforms;
 
-    static constexpr GLenum properties[] = {
-        GL_BUFFER_BINDING,
-        GL_BUFFER_DATA_SIZE,
-        GL_NUM_ACTIVE_VARIABLES,
-        GL_REFERENCED_BY_VERTEX_SHADER,
-        GL_REFERENCED_BY_TESS_CONTROL_SHADER,
-        GL_REFERENCED_BY_TESS_EVALUATION_SHADER,
-        GL_REFERENCED_BY_GEOMETRY_SHADER,
-        GL_REFERENCED_BY_FRAGMENT_SHADER,
-        GL_REFERENCED_BY_COMPUTE_SHADER,
-    };
+    static constexpr GLenum properties[] = {GL_BUFFER_BINDING, GL_BUFFER_DATA_SIZE, GL_NUM_ACTIVE_VARIABLES,
+                                            GL_REFERENCED_BY_VERTEX_SHADER, GL_REFERENCED_BY_TESS_CONTROL_SHADER,
+                                            GL_REFERENCED_BY_TESS_EVALUATION_SHADER, GL_REFERENCED_BY_GEOMETRY_SHADER,
+                                            GL_REFERENCED_BY_FRAGMENT_SHADER, GL_REFERENCED_BY_COMPUTE_SHADER,};
     static constexpr size_t n_properties = countof(properties);
 
-    UniformBlock(GLuint program, GLint index, GLchar* name, GLint* values) : Resource(index, name) {
+    UniformBlock(GLuint program, GLint index, GLchar* name, GLint* values) : Resource(index, name)
+    {
         //
         // per block property
         binding = values[0];
@@ -63,7 +58,8 @@ struct UniformBlock : public Resource {
         }
     }
 
-    const Uniform* find(const char* name) const {
+    const Uniform* find(const char* name) const
+    {
         std::string str(name);
         for (auto& u : uniforms) {
             if (u.name == str) {
@@ -73,7 +69,8 @@ struct UniformBlock : public Resource {
         return nullptr;
     }
 
-    void dump() const {
+    void dump() const
+    {
         Resource::dump();
         fprintf(stderr, "binding=%d, size=%d, uniforms:\n", binding, size);
         for (auto&& u : uniforms) {
@@ -82,7 +79,6 @@ struct UniformBlock : public Resource {
         Resource::dump_referenced(referenced);
     }
 };
-
 } // namespace OpenGL
 
 #endif /* end of include guard: UNIFORMBLOCK_HPP_NJWVEP58 */

@@ -5,30 +5,41 @@
 #include "Math.hpp"
 #include "OpenGL/Object.hpp"
 
+
 class Mesh {
-public:
+  public:
     using Vertex = glm::vec3;
     using Normal = glm::vec3;
 
-    Mesh() : m_n_vertices(0), m_buffer_vertex(0), m_buffer_normal(0) {}
+    Mesh() noexcept : m_n_vertices(0), m_buffer_vertex(0), m_buffer_normal(0)
+    {}
 
-    explicit Mesh(size_t n_vertices) : m_n_vertices(n_vertices) { aux_InitBuffers(); }
+    Mesh(const Mesh&) = delete;
 
-    void InitData(size_t n_vertices);
+    Mesh& operator=(const Mesh&) = delete;
+
+    // explicit Mesh(size_t n_vertices) : m_n_vertices(n_vertices) { aux_initBuffers(); }
+
+    void initData(GLsizei n_vertices);
 
     /// map/unmap vertex buffer
-    void* MapBufferVertex();
-    bool UnmapBufferVertex();
+    void* mapBufferVertex();
+
+    bool unmapBufferVertex();
 
     /// map/unmap normal buffer
-    void* MapBufferNormal();
-    bool UnmapBufferNormal();
+    void* mapBufferNormal();
 
-    void Draw(GLuint VAO, GLenum layout);
-    ~Mesh() { glDeleteBuffers(1, &m_buffer_vertex); }
+    bool unmapBufferNormal();
 
-private:
-    void aux_InitBuffers() {
+    void draw(GLuint VAO, GLenum layout);
+
+    ~Mesh()
+    { glDeleteBuffers(1, &m_buffer_vertex); }
+
+  private:
+    void aux_initBuffers()
+    {
         assert(m_n_vertices);
         //
         glCreateBuffers(1, &m_buffer_vertex);
@@ -39,10 +50,8 @@ private:
         assert(m_buffer_vertex);
         glNamedBufferStorage(m_buffer_normal, m_n_vertices * sizeof(Normal), nullptr, GL_MAP_WRITE_BIT);
     }
-    Mesh(const Mesh&) = delete;
-    Mesh& operator=(const Mesh&) = delete;
 
-    size_t m_n_vertices;
+    GLsizei m_n_vertices;
     GLuint m_buffer_vertex;
     GLuint m_buffer_normal;
 };

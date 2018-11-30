@@ -1,5 +1,6 @@
-#ifndef COMMON_HPP_FEDV9M4C
-#define COMMON_HPP_FEDV9M4C
+#ifndef OPENGL_LAB_COMMON_HPP
+#define OPENGL_LAB_COMMON_HPP
+
 #include <GL/glew.h>
 
 #include <GL/freeglut.h> // must be after <GL/glew.h>
@@ -7,20 +8,23 @@
 /// OpenGL C++ wrapper
 namespace OpenGL {
 
-static inline GLint GetIneger(GLenum param) {
+static inline GLint getInteger(GLenum param)
+{
     GLint ret;
     glGetIntegerv(param, &ret);
     return ret;
 }
 
-GLsizei TypeSize(GLenum type);
-const char* TypeString(GLenum type);
+GLsizei sizeOfType(GLenum type);
+
+const char* nameOfType(GLenum type);
 
 // const char* InterfaceString(GLenum interface);
 
 } // namespace OpenGL
 
-void MyDebugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum serverity, GLsizei length,
-                            const GLchar* message, const void* user);
+void
+myDebugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum serverity, GLsizei length, const GLchar* message,
+                       const void* user);
 
-#endif /* end of include guard: COMMON_HPP_FEDV9M4C */
+#endif /* end of include guard: OPENGL_LAB_COMMON_HPP */

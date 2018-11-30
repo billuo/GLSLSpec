@@ -14,6 +14,7 @@
 #include "OpenGL/UniformBlock.hpp"
 #include "OpenGL/SubroutineUniform.hpp"
 
+
 namespace OpenGL {
 
 // const char* InterfaceString(GLenum interface);
@@ -24,6 +25,7 @@ struct ProgramInterfaceBase {
     GLint max_n_variables = 0;
     GLint max_n_compatible_subroutines = 0;
 };
+
 /**
  * @brief Template class of different program interfaces.
  * @tparam Resource Resource type of this interface.
@@ -31,19 +33,23 @@ struct ProgramInterfaceBase {
 template <typename Resource>
 struct ProgramInterface : public ProgramInterfaceBase {
     static constexpr GLenum interface = Resource::interface;
-    static constexpr bool InterfaceResourceNamed =
-            !(interface == GL_ATOMIC_COUNTER_BUFFER || interface == GL_TRANSFORM_FEEDBACK_BUFFER);
-    static constexpr bool InterfaceMultipleVariables =
-            (interface == GL_UNIFORM_BLOCK || interface == GL_SHADER_STORAGE_BLOCK ||
-             interface == GL_ATOMIC_COUNTER_BUFFER || interface == GL_TRANSFORM_FEEDBACK_BUFFER);
-    static constexpr bool InterfaceSubroutine =
-            (interface == GL_VERTEX_SUBROUTINE_UNIFORM || interface == GL_TESS_CONTROL_SUBROUTINE_UNIFORM ||
-             interface == GL_TESS_EVALUATION_SUBROUTINE_UNIFORM || interface == GL_GEOMETRY_SUBROUTINE_UNIFORM ||
-             interface == GL_FRAGMENT_SUBROUTINE_UNIFORM || interface == GL_COMPUTE_SUBROUTINE_UNIFORM);
+    static constexpr bool InterfaceResourceNamed = !(interface == GL_ATOMIC_COUNTER_BUFFER ||
+                                                     interface == GL_TRANSFORM_FEEDBACK_BUFFER);
+    static constexpr bool InterfaceMultipleVariables = (interface == GL_UNIFORM_BLOCK ||
+                                                        interface == GL_SHADER_STORAGE_BLOCK ||
+                                                        interface == GL_ATOMIC_COUNTER_BUFFER ||
+                                                        interface == GL_TRANSFORM_FEEDBACK_BUFFER);
+    static constexpr bool InterfaceSubroutine = (interface == GL_VERTEX_SUBROUTINE_UNIFORM ||
+                                                 interface == GL_TESS_CONTROL_SUBROUTINE_UNIFORM ||
+                                                 interface == GL_TESS_EVALUATION_SUBROUTINE_UNIFORM ||
+                                                 interface == GL_GEOMETRY_SUBROUTINE_UNIFORM ||
+                                                 interface == GL_FRAGMENT_SUBROUTINE_UNIFORM ||
+                                                 interface == GL_COMPUTE_SUBROUTINE_UNIFORM);
 
     std::vector<Resource> resources;
 
-    ProgramInterface(const Program& program) : m_name(program.name()) {
+    ProgramInterface(const Program& program) : m_name(program.name())
+    {
         // per interface properties
         GLint n_resources;
         GLuint name = program.name();
@@ -74,7 +80,8 @@ struct ProgramInterface : public ProgramInterfaceBase {
         }
     }
 
-    const Resource* find(const char* name) const {
+    const Resource* find(const char* name) const
+    {
         std::string str(name);
         for (auto& r : resources) {
             if (r.name == str) {
@@ -85,22 +92,22 @@ struct ProgramInterface : public ProgramInterfaceBase {
         return nullptr;
     }
 
-    void dump() const {
+    void dump() const
+    {
         GLsizei name_length;
         glGetObjectLabel(GL_PROGRAM, m_name, 0, &name_length, nullptr);
         auto&& name = std::make_unique<GLchar[]>(name_length + 1);
         glGetObjectLabel(GL_PROGRAM, m_name, name_length + 1, nullptr, name.get());
-        fprintf(stderr,
-                "##################################################\n"
-                "Dumping interface %s of program[%u]'%s'\n"
-                "##################################################\n",
-                type_name<Resource>(), m_name, name_length ? name.get() : "");
+        fprintf(stderr, "##################################################\n"
+                        "Dumping interface %s of program[%u]'%s'\n"
+                        "##################################################\n", type_name<Resource>(), m_name,
+                name_length ? name.get() : "");
         for (auto&& r : resources) {
             r.dump();
         }
     }
 
-private:
+  private:
     GLuint m_name; // should not be used other than dump()
 };
 

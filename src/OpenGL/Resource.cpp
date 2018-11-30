@@ -1,8 +1,10 @@
 #include "OpenGL/Resource.hpp"
 
+
 namespace OpenGL {
 
-void Resource::dump_referenced(const GLint referenced[MaxShaderStage]) {
+void Resource::dump_referenced(const GLint referenced[MaxShaderStage])
+{
     fprintf(stderr, "Referenced by:\n");
 
 #define STAGE(stage)       \
@@ -19,5 +21,4 @@ void Resource::dump_referenced(const GLint referenced[MaxShaderStage]) {
 #undef STAGE
     putc('\n', stderr);
 }
-
 } // namespace OpenGL
