@@ -32,7 +32,7 @@ int main(int argc, char** argv) {
     if (err != GLEW_OK) {
         DEBUG("Failed to init glew:%s", glewGetErrorString(err));
     } else if (GLEW_VERSION_4_5) {
-        DEBUG("OpenGL 4.5 support");
+        DEBUG("Found OpenGL 4.5 support");
     }
     // init for draw
     Render::Init();
