@@ -23,7 +23,7 @@ struct Resource {
     GLint index = 0;
     std::string name;
 
-    Resource(GLint index) : index(index)
+    explicit Resource(GLint index) : index(index)
     {}
 
     Resource(GLint index, GLchar* name) : index(index), name(name)

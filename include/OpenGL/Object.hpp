@@ -66,7 +66,7 @@ class Object {
     template <typename F1, typename F2>
     static Object::NamePool<F1, F2> MakeNamePool(F1 f1, F2 f2)
     {
-        return NamePool<F1, F2>(f1, f2);
+        return Object::NamePool<F1, F2>(f1, f2);
     }
 
   public:
@@ -74,6 +74,8 @@ class Object {
 
     Object(Name&& name, const GLchar* label, GLenum identifier) : m_name(std::move(name))
     {
+        // by the time an OpenGL object is constructed, OpenGL should have been
+        // initialized and get_max_label_length() should work just fine.
         static GLsizei max_label_length = get_max_label_length();
         if (label) {
             m_label = std::make_unique<std::string>(label);
@@ -81,7 +83,6 @@ class Object {
                 glObjectLabel(identifier, m_name.get(), -1, m_label->c_str());
                 // FIX when name is invalid, GL_INVALID_VALUE instead of GL_INVALID_OPERATION is reported.
             } else {
-                // DEBUG("label too long:%s\n", m_label->c_str());
                 m_label.reset();
             }
         }
@@ -97,12 +98,12 @@ class Object {
   private:
     static GLsizei get_max_label_length()
     {
+        // Assumed OpenGL context has been initialized
         GLsizei ret;
         glGetIntegerv(GL_MAX_LABEL_LENGTH, &ret);
         if (ret < 0) {
-            throw "glGet with GL_MAX_LABEL_LENGTH returned negative result";
+            throw std::runtime_error("glGet with GL_MAX_LABEL_LENGTH returned negative result");
         }
-        // DEBUG("Maximum label length=%d\n", ret);
         return ret;
     }
 };
@@ -165,7 +166,7 @@ class Object::NamePool {
         size_t old_size = m_pool.size();
         size_t new_size = std::max(16lu, old_size * 7 / 4);
         m_pool.resize(new_size);
-        m_create_n(new_size - old_size, reinterpret_cast<GLuint*>(&m_pool[old_size]));
+        m_create_n(new_size - old_size, &m_pool[old_size]);
     }
 
     void Delete()
@@ -177,7 +178,7 @@ class Object::NamePool {
     void ClearAll()
     {
         Delete();
-        m_delete_n(m_pool.size(), reinterpret_cast<GLuint*>(m_pool.data()));
+        m_delete_n(m_pool.size(), m_pool.data());
         m_pool.clear();
     }
 

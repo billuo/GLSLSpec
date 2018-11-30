@@ -84,9 +84,9 @@ GLsizei sizeOfType(GLenum type)
         case GL_DOUBLE_MAT4x3:
             return sizeof(glm::dmat4x3);
         default:
-            assert(false && "Unknown type");
-            return 0;
+            __builtin_unreachable();
     }
+    return 0;
 }
 
 const char* nameOfType(GLenum type)
@@ -241,7 +241,8 @@ const char* nameOfType(GLenum type)
         case GL_UNSIGNED_INT_SAMPLER_2D_RECT:
             return "usampler2DRect";
         default:
-            return "UNKNOWN";
+            __builtin_unreachable();
     }
+    return "UNKNOWN";
 }
 } // namespace OpenGL

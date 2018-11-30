@@ -31,9 +31,9 @@ void Shader::Source(const GLchar** sources, size_t count)
 {
     std::vector<GLint> lens(count);
     for (size_t i = 0; i < count; ++i) {
-        lens[i] = strlen(sources[i]);
+        lens[i] = static_cast<int>(strlen(sources[i]));
     }
-    glShaderSource(name(), count, sources, lens.data());
+    glShaderSource(name(), static_cast<GLsizei>(count), sources, lens.data());
 }
 
 void Shader::Compile()
@@ -60,7 +60,7 @@ std::unique_ptr<char[]> Shader::aux_GetInfoLog() const
     return ret;
 }
 
-static GLenum SuffixType(std::string suffix)
+static GLenum SuffixType(const std::string& suffix)
 {
     static const auto map = std::map<std::string, GLenum>{{"vert", GL_VERTEX_SHADER},
                                                           {"tesc", GL_TESS_CONTROL_SHADER},
@@ -108,7 +108,6 @@ const Shader* Shader::CompileFrom(const std::string& dir, const std::string& sou
     }
     std::string source_string((std::istreambuf_iterator<char>(file_stream)), std::istreambuf_iterator<char>());
     assert(!source_string.empty());
-    assert(source_string.size() > 0);
     // DEBUG("%s shader source:\n%s", file.substr(file.rfind('.') + 1).c_str(), source_string.c_str());
     // add to cache and compile
     auto new_shader = std::make_unique<Shader>(type);

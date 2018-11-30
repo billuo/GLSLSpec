@@ -2,7 +2,7 @@
 #include "OpenGL/Common.hpp"
 
 
-const char* GLErrorString(int error)
+const char* GLErrorString(uint32_t error)
 { return (const char*) (gluErrorString(error)); }
 
 static inline const char* SourceString(GLenum source)
@@ -51,9 +51,9 @@ static inline const char* TypeString(GLenum type)
     }
 }
 
-static inline const char* ServerityString(GLenum serverity)
+static inline const char* SeverityString(GLenum severity)
 {
-    switch (serverity) {
+    switch (severity) {
         case GL_DEBUG_SEVERITY_NOTIFICATION:
             return "Notification";
         case GL_DEBUG_SEVERITY_LOW:
@@ -68,24 +68,24 @@ static inline const char* ServerityString(GLenum serverity)
 }
 
 void
-myDebugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum serverity, GLsizei length, const GLchar* message,
+myDebugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message,
                        const void* user)
 {
-    if (serverity != GL_DEBUG_SEVERITY_NOTIFICATION) {
+    if (severity != GL_DEBUG_SEVERITY_NOTIFICATION) {
         printf("\tOpenGL debug message:\n"
                "source:   %-20s\n"
                "type:     %-20s\n"
                "serverity:%-20s id:%u\n"
-               "message:  %.*s\n", SourceString(source), OpenGL::nameOfType(type), ServerityString(serverity), id,
+               "message:  %.*s\n", SourceString(source), OpenGL::nameOfType(type), SeverityString(severity), id,
                length, message);
     }
-    static FILE* glerr = fopen("GL.log", "w");
-    if (glerr) {
-        fprintf(glerr, "\tOpenGL debug message:\n"
+    static FILE* gl_error_log = fopen("GL.log", "w");
+    if (gl_error_log) {
+        fprintf(gl_error_log, "\tOpenGL debug message:\n"
                        "source:   %-20s\n"
                        "type:     %-20s\n"
                        "serverity:%-20s id:%u\n"
-                       "message:  %.*s\n", SourceString(source), OpenGL::nameOfType(type), ServerityString(serverity),
+                       "message:  %.*s\n", SourceString(source), OpenGL::nameOfType(type), SeverityString(severity),
                 id, length, message);
     }
 }

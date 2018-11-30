@@ -24,12 +24,12 @@
 #endif
 
 /// Convert OpenGL error code to error string.
-const char* GLErrorString(int error);
+const char* GLErrorString(uint32_t error);
 
 /// Perform OpenGL error checking with given logging verbosity.
 #define CHECK_OPENGL()                                                                                       \
     do {                                                                                                     \
-        if (GLint err = glGetError()) {                                                                      \
+        if (GLenum err = glGetError()) {                                                                      \
             ERROR("Function:%s\nLine:%d\nOpenGL Error(%d):%s", __func__, __LINE__, err, GLErrorString(err)); \
             exit(err);                                                                                       \
         }                                                                                                    \

@@ -48,7 +48,7 @@ struct ProgramInterface : public ProgramInterfaceBase {
 
     std::vector<Resource> resources;
 
-    ProgramInterface(const Program& program) : m_name(program.name())
+    explicit ProgramInterface(const Program& program) : m_name(program.name())
     {
         // per interface properties
         GLint n_resources;

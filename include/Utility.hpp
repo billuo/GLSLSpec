@@ -15,7 +15,7 @@
 #include <utility>
 
 /// Return size of static array at compile time
-#define countof(Array) (sizeof(Array) / sizeof(Array[0]))
+#define countof(Array) (sizeof(Array) / sizeof((Array)[0]))
 
 #define UNUSED(x) (void(x))
 

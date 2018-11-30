@@ -22,7 +22,7 @@ struct UniformBlock : public Resource {
                                             GL_REFERENCED_BY_FRAGMENT_SHADER, GL_REFERENCED_BY_COMPUTE_SHADER,};
     static constexpr size_t n_properties = countof(properties);
 
-    UniformBlock(GLuint program, GLint index, GLchar* name, GLint* values) : Resource(index, name)
+    UniformBlock(GLuint program, GLint index, GLchar* name, const GLint* values) : Resource(index, name)
     {
         //
         // per block property

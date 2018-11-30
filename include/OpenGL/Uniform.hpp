@@ -35,7 +35,7 @@ struct Uniform : public Resource {
                                             GL_REFERENCED_BY_FRAGMENT_SHADER, GL_REFERENCED_BY_COMPUTE_SHADER,};
     static constexpr size_t n_properties = countof(properties);
 
-    Uniform(GLuint program, GLint index, GLchar* name, GLint* values) : Resource(index, name)
+    Uniform(GLuint program, GLint index, GLchar* name, const GLint* values) : Resource(index, name)
     {
         UNUSED(program);
         for (size_t i = 0; i < n_fields; ++i) {

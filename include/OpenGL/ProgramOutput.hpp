@@ -33,7 +33,7 @@ struct ProgramOutput : public Resource {
     static constexpr size_t n_properties = countof(properties);
     static_assert(n_fields + MaxShaderStage == n_properties, "");
 
-    ProgramOutput(GLuint program, GLint index, GLchar* name, GLint* values) : Resource(index, name)
+    ProgramOutput(GLuint program, GLint index, GLchar* name, const GLint* values) : Resource(index, name)
     {
         for (size_t i = 0; i < n_fields; ++i) {
             this->*fields[i] = values[i];

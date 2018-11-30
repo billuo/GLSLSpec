@@ -34,7 +34,7 @@ class Shader : public Object {
     static const Shader* CompileFrom(const std::string& dir, const std::string& source, GLenum type = GL_UNKNOWN_SHADER,
                                      bool force_compile = false);
 
-    Shader(GLenum type, const GLchar* label = nullptr) : Object(Get(type), label, GL_SHADER)
+    explicit Shader(GLenum type, const GLchar* label = nullptr) : Object(Get(type), label, GL_SHADER)
     {}
 
     Shader(Shader&&) = default;

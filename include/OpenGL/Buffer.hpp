@@ -1,6 +1,6 @@
 /**
  * @file OpenGL/Buffer.hpp
- * @brief Encapsulates OpenGL buffer obejcts.
+ * @brief Encapsulates OpenGL buffer objects.
  * @author Zhen Luo 461652354@qq.com
  */
 #ifndef OPENGL_LAB_BUFFER_HPP
@@ -24,7 +24,7 @@ class Buffer : public Object {
     { glBindBuffer(target, 0); }
 
   public:
-    Buffer(const GLchar* label = nullptr) : Object(Pool.Get(), label, GL_BUFFER)
+    explicit Buffer(const GLchar* label = nullptr) : Object(Pool.Get(), label, GL_BUFFER)
     {}
 
     Buffer(Buffer&&) = default;

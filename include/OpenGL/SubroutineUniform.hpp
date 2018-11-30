@@ -20,7 +20,7 @@ struct SubroutineUniform : public Resource {
     static constexpr GLenum properties[] = {GL_ARRAY_SIZE, GL_LOCATION,};
     static constexpr size_t n_properties = countof(properties);
 
-    SubroutineUniform(GLuint program, GLenum stage, GLint index, GLchar* name, GLint* values) : Resource(index, name)
+    SubroutineUniform(GLuint program, GLenum stage, GLint index, GLchar* name, const GLint* values) : Resource(index, name)
     {
         asize = values[0];
         location = values[1];
@@ -50,8 +50,10 @@ struct VertexSubroutineUniform : public SubroutineUniform {
     static constexpr GLenum stage = GL_VERTEX_SHADER;
 
     VertexSubroutineUniform(GLuint program, GLint index, GLchar* name, GLint* values) : SubroutineUniform(program,
-                                                                                                          stage, index,
-                                                                                                          name, values)
+                                                                                                          stage,
+                                                                                                          index,
+                                                                                                          name,
+                                                                                                          values)
     {}
 };
 
@@ -72,7 +74,11 @@ struct TessEvaluationSubroutineUniform : public SubroutineUniform {
     static constexpr GLenum stage = GL_TESS_EVALUATION_SHADER;
 
     TessEvaluationSubroutineUniform(GLuint program, GLint index, GLchar* name, GLint* values) : SubroutineUniform(
-            program, stage, index, name, values)
+            program,
+            stage,
+            index,
+            name,
+            values)
     {}
 };
 
@@ -82,7 +88,8 @@ struct GeometrySubroutineUniform : public SubroutineUniform {
 
     GeometrySubroutineUniform(GLuint program, GLint index, GLchar* name, GLint* values) : SubroutineUniform(program,
                                                                                                             stage,
-                                                                                                            index, name,
+                                                                                                            index,
+                                                                                                            name,
                                                                                                             values)
     {}
 };
@@ -93,7 +100,8 @@ struct FragmentSubroutineUniform : public SubroutineUniform {
 
     FragmentSubroutineUniform(GLuint program, GLint index, GLchar* name, GLint* values) : SubroutineUniform(program,
                                                                                                             stage,
-                                                                                                            index, name,
+                                                                                                            index,
+                                                                                                            name,
                                                                                                             values)
     {}
 };
@@ -103,8 +111,10 @@ struct ComputeSubroutineUniform : public SubroutineUniform {
     static constexpr GLenum stage = GL_COMPUTE_SHADER;
 
     ComputeSubroutineUniform(GLuint program, GLint index, GLchar* name, GLint* values) : SubroutineUniform(program,
-                                                                                                           stage, index,
-                                                                                                           name, values)
+                                                                                                           stage,
+                                                                                                           index,
+                                                                                                           name,
+                                                                                                           values)
     {}
 };
 } // namespace OpenGL
