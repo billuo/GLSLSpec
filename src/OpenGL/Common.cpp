@@ -86,7 +86,6 @@ GLsizei sizeOfType(GLenum type)
         default:
             __builtin_unreachable();
     }
-    return 0;
 }
 
 const char* nameOfType(GLenum type)
@@ -243,6 +242,5 @@ const char* nameOfType(GLenum type)
         default:
             __builtin_unreachable();
     }
-    return "UNKNOWN";
 }
 } // namespace OpenGL
