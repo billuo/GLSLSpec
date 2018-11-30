@@ -6,3 +6,5 @@ tags
 include/glm
 
 \.idea/workspace\.xml
+
+\.idea/
