@@ -187,10 +187,14 @@ static void cubeVertices(float a, size_t n_grids, std::vector<glm::vec3>& vertic
     vertices.reserve(6 * face_size);
     std::transform(vertices.rbegin(), vertices.rend(), std::back_inserter(vertices), [](const glm::vec3& v)
     { return glm::vec3(v.x, v.y, -v.z); }); // NOTE the reversed_iterator
-    std::transform(vertices.begin(), vertices.begin() + 2 * face_size, std::back_inserter(vertices),
+    std::transform(vertices.begin(),
+                   vertices.begin() + 2 * face_size,
+                   std::back_inserter(vertices),
                    [](const glm::vec3& v)
                    { return glm::vec3(-v.z, v.y, v.x); });
-    std::transform(vertices.begin(), vertices.begin() + 2 * face_size, std::back_inserter(vertices),
+    std::transform(vertices.begin(),
+                   vertices.begin() + 2 * face_size,
+                   std::back_inserter(vertices),
                    [](const glm::vec3& v)
                    { return glm::vec3(v.x, -v.z, v.y); });
     normals.reserve(6 * face_size);
@@ -228,11 +232,11 @@ void init()
     std::vector<glm::vec3> normals;
     sphereVetices(0.8f, 120, 60, vertices, normals);
     DEBUG("Sphere vertices ready");
-    initMesh(MyModel.getMesh(), vertices, normals);
+    initMesh(MyModel.mesh, vertices, normals);
     DEBUG("Sphere ready");
     cubeVertices(1.0f, 50, vertices, normals);
     DEBUG("Cube vertices ready");
-    initMesh(Cube.getMesh(), vertices, normals);
+    initMesh(Cube.mesh, vertices, normals);
     DEBUG("Cube ready");
     initShaderProgram();
 }
@@ -246,7 +250,7 @@ static void renderFront(Model& model)
     if (FrontMode != None) {
         glFrontFace(GL_CCW);
         glPolygonMode(GL_FRONT_AND_BACK, FrontMode);
-        model.getMesh().draw(VAO, GL_TRIANGLES);
+        model.mesh.draw(VAO, GL_TRIANGLES);
         CHECK_OPENGL();
     }
 }
@@ -256,7 +260,7 @@ static void renderBack(Model& model)
     if (BackMode != None) {
         glPolygonMode(GL_FRONT_AND_BACK, BackMode);
         glFrontFace(GL_CW);
-        model.getMesh().draw(VAO, GL_TRIANGLES);
+        model.mesh.draw(VAO, GL_TRIANGLES);
         CHECK_OPENGL();
     }
 }
@@ -268,17 +272,33 @@ static void renderFrontBack(Model& model)
     auto u_normal = ub_xform->find("NormalMatrix");
     auto u_view = ub_xform->find("NDC_View");
     auto u_mvp = ub_xform->find("NDC_Model");
-    glm::mat4 View_Model = View_World * model.getTransform();
+    auto temp_print = [&model]()
+    {
+        DEBUG("position:\n%s", glm::prettyPrint(model.transform.position).c_str());
+        DEBUG("rotation:\n%s", glm::prettyPrint(static_cast<glm::mat4>(model.transform.rotation)).c_str());
+        DEBUG("scale:\n%s", glm::prettyPrint(model.transform.scale).c_str());
+        DEBUG("transform matrix:\n%s", glm::prettyPrint(static_cast<glm::mat4>(model.transform)).c_str());
+    };
+    ONCE(temp_print());
+    glm::mat4 View_Model = View_World * static_cast<glm::mat4>(model.transform);
     glm::mat3 NormalMatrix = glm::transpose(glm::inverse(glm::mat3(View_Model))); // inverse transpose matrix
-    glNamedBufferSubData(UBO, u_model->offset, OpenGL::sizeOfType(static_cast<GLenum>(u_model->type)),
+    glNamedBufferSubData(UBO,
+                         u_model->offset,
+                         OpenGL::sizeOfType(static_cast<GLenum>(u_model->type)),
                          glm::value_ptr(View_Model));
     for (glm::length_t i = 0; i < glm::mat3::length(); ++i) {
-        glNamedBufferSubData(UBO, u_normal->offset + u_normal->mstride * i, 3 * sizeof(GLfloat),
+        glNamedBufferSubData(UBO,
+                             u_normal->offset + u_normal->mstride * i,
+                             3 * sizeof(GLfloat),
                              glm::value_ptr(NormalMatrix[i]));
     }
-    glNamedBufferSubData(UBO, u_view->offset, OpenGL::sizeOfType(static_cast<GLenum>(u_view->type)),
+    glNamedBufferSubData(UBO,
+                         u_view->offset,
+                         OpenGL::sizeOfType(static_cast<GLenum>(u_view->type)),
                          glm::value_ptr(NDC_View));
-    glNamedBufferSubData(UBO, u_mvp->offset, OpenGL::sizeOfType(static_cast<GLenum>(u_mvp->type)),
+    glNamedBufferSubData(UBO,
+                         u_mvp->offset,
+                         OpenGL::sizeOfType(static_cast<GLenum>(u_mvp->type)),
                          glm::value_ptr(NDC_View * View_Model));
     renderFront(model);
     renderBack(model);
@@ -321,23 +341,20 @@ void render()
     auto u_ka = UI->find("Material.ka");
     auto u_kd = UI->find("Material.kd");
     auto u_ks = UI->find("Material.ks");
-    auto u_shiniess = UI->find("Material.shininess");
+    auto u_shininess = UI->find("Material.shininess");
     glUniform3fv(u_ka->location, 1, glm::value_ptr(glm::vec3(0.5f, 0.5f, 1.0f)));
     glUniform3fv(u_kd->location, 1, glm::value_ptr(glm::vec3(0.7f)));
     glUniform3fv(u_ks->location, 1, glm::value_ptr(glm::vec3(0.5f)));
-    glUniform1f(u_shiniess->location, Shininess);
+    glUniform1f(u_shininess->location, Shininess);
     // render
     renderFrontBack(MyModel);
-    // Cube.setOrientation(glm::quat());
-    Cube.setPos(glm::vec3(1.5f, 0.0f, 0.0f));
+    Cube.transform.position = glm::vec3(1.5f, 0.0f, 0.0f);
     renderFrontBack(Cube);
-    Cube.setPos(glm::vec3(-1.5f, 0.0f, 0.0f));
+    Cube.transform.position = glm::vec3(-1.5f, 0.0f, 0.0f);
     renderFrontBack(Cube);
     //
     // finish up
     glutSwapBuffers();
-    if (GLint err = glGetError()) {
-        exit(err);
-    }
+    CHECK_OPENGL();
 }
 } // namespace Render

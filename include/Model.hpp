@@ -5,71 +5,44 @@
 #include "Mesh.hpp"
 
 
-class Model {
+class Transform {
   public:
-    Model() noexcept : m_scale(1.0f), m_orientation(glm::identity<glm::quat>()), m_pos(0.0f), m_valid(false),
-                       m_world_model(1.0f)
+    Transform()
+            : scale(1.0f), rotation(glm::identity<glm::quat>()), position(0.0f)
     {}
 
+    explicit Transform(glm::mat4 matrix) : Transform()
+    {
+        if (glm::transpose(matrix)[3] == glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)) {
+            // OPT rid of transpose
+            position = glm::vec3(matrix[3][0], matrix[3][1], matrix[3][2]);
+            scale.x = Math::sign(glm::prod(matrix[0])) * glm::length(matrix[0]);
+            scale.y = Math::sign(glm::prod(matrix[1])) * glm::length(matrix[1]);
+            scale.z = Math::sign(glm::prod(matrix[2])) * glm::length(matrix[2]);
+            rotation = glm::quat(glm::mat3(matrix));
+        }
+    }
+
+    explicit operator glm::mat4()
+    {
+        return glm::translate(glm::mat4(1.0f), position) *
+               glm::scale(glm::mat4_cast(rotation), scale);
+    }
+
+    glm::vec3 scale;
+    glm::quat rotation;
+    glm::vec3 position;
+};
+
+class Model {
+  public:
+    Model() = default;
     ~Model() = default;
-
     Model(const Model&) = delete;
-
     Model& operator=(const Model&) = delete;
 
-    /// @TODO encapsulate
-    Mesh& getMesh()
-    { return m_mesh; }
-
-    const Mesh& getMesh() const
-    { return m_mesh; }
-
-    glm::mat4 getTransform() const
-    {
-        if (!m_valid) {
-            m_world_model = glm::translate(glm::mat4(1.0f), m_pos) * glm::scale(glm::mat4_cast(m_orientation), m_scale);
-            m_valid = true;
-        }
-        return m_world_model;
-    }
-
-    void setPos(glm::vec3 pos)
-    {
-        m_valid = false;
-        m_pos = pos;
-    }
-
-    void setScale(glm::vec3 scale)
-    {
-        m_valid = false;
-        m_scale = scale;
-    }
-
-    void setOrientation(glm::quat orientation)
-    {
-        m_valid = false;
-        m_orientation = orientation;
-    }
-
-    glm::vec3 getScale() const
-    { return m_scale; }
-
-    glm::vec3 getPos() const
-    { return m_pos; }
-
-    glm::quat getOrientation() const
-    { return m_orientation; }
-
-  private:
-
-    Mesh m_mesh;
-    // XXX these are additional transformation upon model coordinates to get world coordinates.
-
-    glm::vec3 m_scale;
-    glm::quat m_orientation;
-    glm::vec3 m_pos;
-    mutable bool m_valid;
-    mutable glm::mat4 m_world_model;
+    Transform transform;
+    Mesh mesh;
 };
 
 #endif /* end of include guard: MODEL_HPP_DW4MRMVP */

@@ -7,6 +7,9 @@
 #include <glm/gtc/type_ptr.hpp>
 // #include <glm/gtx/matrix_operation.hpp>
 #include <glm/gtx/string_cast.hpp>
+#include <type_traits>
+#include <sstream>
+#include <iomanip>
 
 
 namespace glm {
@@ -14,23 +17,19 @@ namespace glm {
 /// Compare two numbers for near equality.
 template <typename T>
 GLM_FUNC_DECL GLM_INLINE bool nearlyEqual(const T x, const T y)
-{
-    return x == y;
-}
+{ return x == y; }
 
+/// Specialization over float
 template <>
 GLM_FUNC_DECL GLM_INLINE bool nearlyEqual<float>(const float x, const float y)
-{
-    return abs(x - y) < 0.001f;
-}
+{ return abs(x - y) < 0.001f; }
 
+/// Specialization over double
 template <>
 GLM_FUNC_DECL GLM_INLINE bool nearlyEqual<double>(const double x, const double y)
-{
-    return abs(x - y) < 0.001;
-}
+{ return abs(x - y) < 0.001; }
 
-/// Compare two vec/mat for near equality.
+/// Compare two vec for near equality.
 template <length_t L, typename T, qualifier Q>
 GLM_FUNC_DECL bool nearlyEqual(vec<L, T, Q> const& x, vec<L, T, Q> const& y)
 {
@@ -42,7 +41,7 @@ GLM_FUNC_DECL bool nearlyEqual(vec<L, T, Q> const& x, vec<L, T, Q> const& y)
     return true;
 }
 
-/// Compare two vec/mat for near equality.
+/// Compare two mat for near equality.
 template <length_t C, length_t R, typename T, qualifier Q>
 GLM_FUNC_DECL bool nearlyEqual(mat<C, R, T, Q> const& x, mat<C, R, T, Q> const& y)
 {
@@ -56,33 +55,32 @@ GLM_FUNC_DECL bool nearlyEqual(mat<C, R, T, Q> const& x, mat<C, R, T, Q> const& 
     return true;
 }
 
-/// Test against identity vec/mat.
+/// Test vec against identity
 template <length_t L, typename T, qualifier Q>
 GLM_FUNC_DECL GLM_INLINE bool isIdentity(vec<L, T, Q> const& x)
-{
-    return nearlyEqual(x, identity<vec<L, T, Q> >());
-}
+{ return nearlyEqual(x, identity<vec<L, T, Q> >()); }
 
+/// Test mat against identity
 template <length_t L, typename T, qualifier Q>
 GLM_FUNC_DECL GLM_INLINE bool isIdentity(mat<L, L, T, Q> const& x)
-{
-    return nearlyEqual(x, identity<mat<L, L, T, Q> >());
-}
+{ return nearlyEqual(x, identity<mat<L, L, T, Q> >()); }
 
-/// Test against zero vec/mat.
+/// Test vec against zero
 template <length_t L, typename T, qualifier Q>
 GLM_FUNC_DECL GLM_INLINE bool isZero(vec<L, T, Q> const& x)
-{
-    return nearlyEqual(x, zero<vec<L, T, Q> >());
-}
+{ return nearlyEqual(x, zero<vec<L, T, Q> >()); }
 
+/// Test mat against zero
 template <length_t C, length_t R, typename T, qualifier Q>
 GLM_FUNC_DECL GLM_INLINE bool isZero(mat<C, R, T, Q> const& x)
-{
-    return nearlyEqual(x, zero<mat<C, R, T, Q> >());
-}
+{ return nearlyEqual(x, zero<mat<C, R, T, Q> >()); }
 
-/// Test mat for disagonality.
+/// Always false for non square matrix.
+template <length_t C, length_t R, typename T, qualifier Q>
+GLM_FUNC_DECL bool isDiagonal(mat<C, R, T, Q> const& x)
+{ return false; }
+
+/// True if mat is diagonal.
 template <length_t L, typename T, qualifier Q>
 GLM_FUNC_DECL bool isDiagonal(mat<L, L, T, Q> const& x)
 {
@@ -96,13 +94,60 @@ GLM_FUNC_DECL bool isDiagonal(mat<L, L, T, Q> const& x)
     return true;
 }
 
-/// Test vec against normalized version.
+/// True if vec is normal (length(vec) == 1)
 template <length_t L, typename T, qualifier Q>
-GLM_FUNC_DECL GLM_INLINE bool normalized(vec<L, T, Q> const& x)
+GLM_FUNC_DECL GLM_INLINE bool isNormal(vec<L, T, Q> const& x)
+{ return nearlyEqual(length(x), T(1)); }
+
+template <length_t L, typename T, qualifier Q>
+GLM_FUNC_DECL GLM_INLINE T prod(vec<L, T, Q> const& x)
 {
-    return nearlyEqual(length(x), T(1));
+    T ret = x[0];
+    for (length_t i = 1; i < L; ++i) {
+        ret *= x[i];
+    }
+    return ret;
 }
+
+template <length_t L, typename T, qualifier Q>
+GLM_FUNC_DECL std::string prettyPrint(vec<L, T, Q> const& x)
+{
+    std::stringstream ss;
+    ss << std::setprecision(2) << std::fixed;
+    ss << '{' << x[0];
+    for (length_t i = 1; i < L; ++i) {
+        ss << ", " << x[i];
+    }
+    ss << '}';
+    return ss.str();
+}
+
+template <length_t C, length_t R, typename T, qualifier Q>
+GLM_FUNC_DECL std::string prettyPrint(mat<C, R, T, Q> const& x)
+{
+    std::stringstream ss;
+    ss << std::setprecision(2) << std::fixed;
+    auto x_t = glm::transpose(x);
+    ss << "{\n";
+    for (length_t i = 0; i < x_t.length(); ++i) {
+        ss << std::string("  ") + prettyPrint(x_t[i]) + '\n';
+    }
+    ss << "}";
+    return ss.str();
+}
+
 } // namespace glm
+
+namespace Math {
+
+template <typename T>
+T sign(T x)
+{
+    static_assert(std::is_arithmetic<T>::value, "");
+    static_assert(std::numeric_limits<T>::is_signed, "");
+    return std::signbit(x) ? T(-1) : T(1);
+}
+} // namespace Math
 
 static const float Pi = 3.1415926f;
 
