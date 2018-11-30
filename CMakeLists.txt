@@ -4,34 +4,8 @@ project(OpenGL-lab)
 set(CMAKE_CXX_STANDARD 14)
 
 include_directories(include)
-include_directories(include/OpenGL)
 
 add_executable(Main
-        include/OpenGL/Buffer.hpp
-        include/OpenGL/Common.hpp
-        include/OpenGL/Introspection.hpp
-        include/OpenGL/Object.hpp
-        include/OpenGL/Program.hpp
-        include/OpenGL/ProgramInput.hpp
-        include/OpenGL/ProgramOutput.hpp
-        include/OpenGL/ProgramPipeline.hpp
-        include/OpenGL/Resource.hpp
-        include/OpenGL/Shader.hpp
-        include/OpenGL/SubroutineUniform.hpp
-        include/OpenGL/Uniform.hpp
-        include/OpenGL/UniformBlock.hpp
-        include/Debug.hpp
-        include/glutCallback.hpp
-        include/Math.hpp
-        include/Mesh.hpp
-        include/Model.hpp
-        include/Render.hpp
-        include/Utility.hpp
-        shaders/axes.frag
-        shaders/axes.vert
-        shaders/shader.frag
-        shaders/shader.geom
-        shaders/shader.vert
         src/OpenGL/Buffer.cpp
         src/OpenGL/Common.cpp
         src/OpenGL/Introspection.cpp
@@ -43,13 +17,13 @@ add_executable(Main
         src/main.cpp
         src/Mesh.cpp
         src/Render.cpp
-        src/Utility.cpp include/OpenGL/Texture.hpp)
+        src/Utility.cpp)
 
 target_compile_definitions(Main PUBLIC $<$<CONFIG:Debug>:DEBUG_BUILD>)
 target_compile_options(Main PUBLIC $<$<CONFIG:Release>:-O2>)
 target_compile_options(Main PUBLIC $<$<CONFIG:Debug>:-O0 -g>)
 
-set(OpenGL_GL_PREFERENCE LEGACY)
+#set(OpenGL_GL_PREFERENCE LEGACY)
 find_package(OpenGL REQUIRED)
 message(STATUS "OpenGL found at:\n${OPENGL_INCLUDE_DIR};\n${OPENGL_LIBRARIES};")
 include_directories(${OPENGL_INCLUDE_DIR})
