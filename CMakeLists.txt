@@ -3,6 +3,9 @@ project(OpenGL-lab)
 
 set(CMAKE_CXX_STANDARD 14)
 
+set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/3rdparty)
+include(cotire/cotire)
+
 include_directories(include)
 include_directories(3rdparty)
 
@@ -42,6 +45,11 @@ target_link_libraries(Main ${GLEW_LIBRARIES})
 
 add_subdirectory(3rdparty/assimp)
 target_link_libraries(Main assimp)
+
+option(UNITY_BUILD "Use cotire to enable unity build, speeding up compilation.")
+if (UNITY_BUILD)
+    cotire(Main)
+endif()
 
 file(COPY shaders DESTINATION ./)
 file(COPY resources DESTINATION ./)
