@@ -2,7 +2,8 @@
 #include "Debug.hpp"
 
 
-void Mesh::draw(GLuint VAO, GLenum layout)
+void
+Mesh::draw(GLuint VAO, GLenum layout)
 {
     glBindVertexArray(VAO);
     // [0] in vec3 pos
@@ -19,7 +20,8 @@ void Mesh::draw(GLuint VAO, GLenum layout)
     glDrawArrays(layout, 0, m_n_vertices);
 }
 
-void Mesh::initData(GLsizei n_vertices)
+void
+Mesh::initData(GLsizei n_vertices)
 {
     if (m_n_vertices) {
         ERROR("Mesh already allocated");
@@ -30,14 +32,16 @@ void Mesh::initData(GLsizei n_vertices)
 }
 
 /// map/unmap vertex buffer
-void* Mesh::mapBufferVertex()
+void*
+Mesh::mapBufferVertex()
 {
     glBindBuffer(GL_ARRAY_BUFFER, m_buffer_vertex);
     void* ret = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
     return ret;
 }
 
-bool Mesh::unmapBufferVertex()
+bool
+Mesh::unmapBufferVertex()
 {
     GLboolean result = glUnmapNamedBuffer(m_buffer_vertex);
     if (result == GL_FALSE) {
@@ -47,14 +51,16 @@ bool Mesh::unmapBufferVertex()
 }
 
 /// map/unmap normal buffer
-void* Mesh::mapBufferNormal()
+void*
+Mesh::mapBufferNormal()
 {
     glBindBuffer(GL_ARRAY_BUFFER, m_buffer_normal);
     void* ret = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
     return ret;
 }
 
-bool Mesh::unmapBufferNormal()
+bool
+Mesh::unmapBufferNormal()
 {
     GLboolean result = glUnmapNamedBuffer(m_buffer_normal);
     if (result == GL_FALSE) {

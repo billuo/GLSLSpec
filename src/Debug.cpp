@@ -4,7 +4,8 @@
 
 namespace {
 
-inline const char* SourceString(GLenum source)
+inline const char*
+SourceString(GLenum source)
 {
     switch (source) {
         case GL_DEBUG_SOURCE_API:
@@ -24,7 +25,8 @@ inline const char* SourceString(GLenum source)
     }
 }
 
-inline const char* TypeString(GLenum type)
+inline const char*
+TypeString(GLenum type)
 {
     switch (type) {
         case GL_DEBUG_TYPE_ERROR:
@@ -50,7 +52,8 @@ inline const char* TypeString(GLenum type)
     }
 }
 
-inline const char* SeverityString(GLenum severity)
+inline const char*
+SeverityString(GLenum severity)
 {
     switch (severity) {
         case GL_DEBUG_SEVERITY_NOTIFICATION:
@@ -71,7 +74,8 @@ GLchar Buffer[BufferSize];
 
 }
 
-const char* GLErrorString(uint32_t error)
+const char*
+GLErrorString(uint32_t error)
 { return (const char*) (gluErrorString(error)); }
 
 void

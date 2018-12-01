@@ -9,7 +9,8 @@
 #include "glutCallback.hpp"
 
 
-int main(int argc, char** argv)
+int
+main(int argc, char** argv)
 {
     glutInit(&argc, argv);
     // glut window setup

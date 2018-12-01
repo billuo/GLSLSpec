@@ -20,14 +20,16 @@
 #define UNUSED(x) (void(x))
 
 template <class T, class O>
-static inline T* pointer_offset(T* ptr, O offset)
+static inline T*
+pointer_offset(T* ptr, O offset)
 {
     return (T*) ((char*) (ptr) + offset);
 }
 
 #if !CXX_MSVC
 
-char* SafeDemangle(const char* mangled_name, char* output_buffer, size_t* length);
+char*
+SafeDemangle(const char* mangled_name, char* output_buffer, size_t* length);
 
 #endif
 
@@ -35,7 +37,8 @@ char* SafeDemangle(const char* mangled_name, char* output_buffer, size_t* length
 /// @author Howard Hinnant
 /// @see https://stackoverflow.com/questions/81870/is-it-possible-to-print-a-variables-type-in-standard-c
 template <typename T>
-const char* type_name()
+const char*
+type_name()
 {
     using TR = typename std::remove_reference<T>::type;
     static std::string r;

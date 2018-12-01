@@ -16,39 +16,53 @@ class Mesh {
 
     Mesh(const Mesh&) = delete;
 
-    Mesh& operator=(const Mesh&) = delete;
+    Mesh&
+    operator=(const Mesh&) = delete;
 
     // explicit Mesh(size_t n_vertices) : m_n_vertices(n_vertices) { aux_initBuffers(); }
 
-    void initData(GLsizei n_vertices);
+    void
+    initData(GLsizei n_vertices);
 
     /// map/unmap vertex buffer
-    void* mapBufferVertex();
+    void*
+    mapBufferVertex();
 
-    bool unmapBufferVertex();
+    bool
+    unmapBufferVertex();
 
     /// map/unmap normal buffer
-    void* mapBufferNormal();
+    void*
+    mapBufferNormal();
 
-    bool unmapBufferNormal();
+    bool
+    unmapBufferNormal();
 
-    void draw(GLuint VAO, GLenum layout);
+    void
+    draw(GLuint VAO, GLenum layout);
 
     ~Mesh()
     { glDeleteBuffers(1, &m_buffer_vertex); }
 
   private:
-    void aux_initBuffers()
+    void
+    aux_initBuffers()
     {
         assert(m_n_vertices);
         //
         glCreateBuffers(1, &m_buffer_vertex);
         assert(m_buffer_vertex);
-        glNamedBufferStorage(m_buffer_vertex, m_n_vertices * sizeof(Vertex), nullptr, GL_MAP_WRITE_BIT);
+        glNamedBufferStorage(m_buffer_vertex,
+                             m_n_vertices * sizeof(Vertex),
+                             nullptr,
+                             GL_MAP_WRITE_BIT);
         //
         glCreateBuffers(1, &m_buffer_normal);
         assert(m_buffer_vertex);
-        glNamedBufferStorage(m_buffer_normal, m_n_vertices * sizeof(Normal), nullptr, GL_MAP_WRITE_BIT);
+        glNamedBufferStorage(m_buffer_normal,
+                             m_n_vertices * sizeof(Normal),
+                             nullptr,
+                             GL_MAP_WRITE_BIT);
     }
 
     GLsizei m_n_vertices;

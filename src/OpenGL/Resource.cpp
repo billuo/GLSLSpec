@@ -3,7 +3,8 @@
 
 namespace OpenGL {
 
-void Resource::dump_referenced(const GLint referenced[MaxShaderStage])
+void
+Resource::dump_referenced(const GLint referenced[MaxShaderStage])
 {
     fprintf(stderr, "Referenced by:\n");
 

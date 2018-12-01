@@ -31,12 +31,14 @@ class Object {
 
         Name(const Name&) = delete;
 
-        Name& operator=(const Name&) = delete;
+        Name&
+        operator=(const Name&) = delete;
 
         Name(Name&& obj) noexcept : m_name(obj.m_name)
         { obj.clear(); }
 
-        Name& operator=(Name&& rhs) noexcept
+        Name&
+        operator=(Name&& rhs) noexcept
         {
             GLuint name = rhs.m_name;
             rhs.clear();
@@ -47,10 +49,12 @@ class Object {
         ~Name()
         { clear(); }
 
-        GLuint get() const
+        GLuint
+        get() const
         { return m_name; }
 
-        void clear()
+        void
+        clear()
         { m_name = 0; }
 
         explicit operator GLuint() const
@@ -64,7 +68,8 @@ class Object {
     class NamePool;
 
     template <typename F1, typename F2>
-    static Object::NamePool<F1, F2> MakeNamePool(F1 f1, F2 f2)
+    static Object::NamePool<F1, F2>
+    MakeNamePool(F1 f1, F2 f2)
     {
         return Object::NamePool<F1, F2>(f1, f2);
     }
@@ -72,7 +77,8 @@ class Object {
   public:
     Object() = default;
 
-    Object(Name&& name, const GLchar* label, GLenum identifier) : m_name(std::move(name))
+    Object(Name&& name, const GLchar* label, GLenum identifier)
+            : m_name(std::move(name))
     {
         // by the time an OpenGL object is constructed, OpenGL should have been
         // initialized and get_max_label_length() should work just fine.
@@ -88,7 +94,8 @@ class Object {
         }
     }
 
-    GLuint name() const
+    GLuint
+    name() const
     { return m_name.get(); }
 
   protected:
@@ -96,13 +103,15 @@ class Object {
     std::unique_ptr<std::string> m_label;
 
   private:
-    static GLsizei get_max_label_length()
+    static GLsizei
+    get_max_label_length()
     {
         // Assumed OpenGL context has been initialized
         GLsizei ret;
         glGetIntegerv(GL_MAX_LABEL_LENGTH, &ret);
         if (ret < 0) {
-            throw std::runtime_error("glGet with GL_MAX_LABEL_LENGTH returned negative result");
+            throw std::runtime_error(
+                    "glGet with GL_MAX_LABEL_LENGTH returned negative result");
         }
         return ret;
     }
@@ -116,11 +125,13 @@ class Object {
 template <typename F1, typename F2>
 class Object::NamePool {
   public:
-    NamePool(F1 create_n, F2 delete_n) noexcept : m_create_n(create_n), m_delete_n(delete_n)
+    NamePool(F1 create_n, F2 delete_n) noexcept
+            : m_create_n(create_n), m_delete_n(delete_n)
     {}
 
     /// Get a single name.
-    Name Get()
+    Name
+    Get()
     {
         if (m_pool.empty()) {
             Refill();
@@ -131,7 +142,8 @@ class Object::NamePool {
     }
 
     /// Put a single name.
-    void Put(Name&& name)
+    void
+    Put(Name&& name)
     {
         Name moved = std::move(name);
         m_delete.push_back(moved.get());
@@ -160,7 +172,8 @@ class Object::NamePool {
     // }
 
   private:
-    void Refill()
+    void
+    Refill()
     {
         Delete();
         size_t old_size = m_pool.size();
@@ -169,13 +182,15 @@ class Object::NamePool {
         m_create_n(new_size - old_size, &m_pool[old_size]);
     }
 
-    void Delete()
+    void
+    Delete()
     {
         m_delete_n(m_delete.size(), m_delete.data());
         m_delete.clear();
     }
 
-    void ClearAll()
+    void
+    ClearAll()
     {
         Delete();
         m_delete_n(m_pool.size(), m_pool.data());

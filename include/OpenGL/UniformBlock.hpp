@@ -16,13 +16,18 @@ struct UniformBlock : public Resource {
     GLint referenced[MaxShaderStage] = {};
     std::vector<Uniform> uniforms;
 
-    static constexpr GLenum properties[] = {GL_BUFFER_BINDING, GL_BUFFER_DATA_SIZE, GL_NUM_ACTIVE_VARIABLES,
-                                            GL_REFERENCED_BY_VERTEX_SHADER, GL_REFERENCED_BY_TESS_CONTROL_SHADER,
-                                            GL_REFERENCED_BY_TESS_EVALUATION_SHADER, GL_REFERENCED_BY_GEOMETRY_SHADER,
-                                            GL_REFERENCED_BY_FRAGMENT_SHADER, GL_REFERENCED_BY_COMPUTE_SHADER,};
+    static constexpr GLenum properties[] =
+            {GL_BUFFER_BINDING, GL_BUFFER_DATA_SIZE, GL_NUM_ACTIVE_VARIABLES,
+             GL_REFERENCED_BY_VERTEX_SHADER,
+             GL_REFERENCED_BY_TESS_CONTROL_SHADER,
+             GL_REFERENCED_BY_TESS_EVALUATION_SHADER,
+             GL_REFERENCED_BY_GEOMETRY_SHADER,
+             GL_REFERENCED_BY_FRAGMENT_SHADER,
+             GL_REFERENCED_BY_COMPUTE_SHADER,};
     static constexpr size_t n_properties = countof(properties);
 
-    UniformBlock(GLuint program, GLint index, GLchar* name, const GLint* values) : Resource(index, name)
+    UniformBlock(GLuint program, GLint index, GLchar* name, const GLint* values)
+            : Resource(index, name)
     {
         //
         // per block property
@@ -39,10 +44,20 @@ struct UniformBlock : public Resource {
         // array of uniform indices
         GLenum active_variables = GL_ACTIVE_VARIABLES;
         auto&& indices = std::make_unique<GLint[]>(n_uniforms);
-        glGetProgramResourceiv(program, interface, index, 1, &active_variables, n_uniforms, nullptr, indices.get());
+        glGetProgramResourceiv(program,
+                               interface,
+                               index,
+                               1,
+                               &active_variables,
+                               n_uniforms,
+                               nullptr,
+                               indices.get());
         // uniform name
         GLint max_name_length;
-        glGetProgramInterfaceiv(program, Uniform::interface, GL_MAX_NAME_LENGTH, &max_name_length);
+        glGetProgramInterfaceiv(program,
+                                Uniform::interface,
+                                GL_MAX_NAME_LENGTH,
+                                &max_name_length);
         auto&& name_buffer = std::make_unique<GLchar[]>(max_name_length);
         // uniform properties
         auto&& value_buffer = std::make_unique<GLint[]>(n_props);
@@ -50,15 +65,29 @@ struct UniformBlock : public Resource {
         uniforms.reserve(n_uniforms);
         for (GLint i = 0; i < n_uniforms; ++i) {
             /// OPT simply fetch from interface GL_UNIFORM with known indices[] to avoid duplicate.
-            glGetProgramResourceiv(program, Uniform::interface, indices[i], n_props, props, n_props, nullptr,
+            glGetProgramResourceiv(program,
+                                   Uniform::interface,
+                                   indices[i],
+                                   n_props,
+                                   props,
+                                   n_props,
+                                   nullptr,
                                    value_buffer.get());
-            glGetProgramResourceName(program, Uniform::interface, indices[i], max_name_length, nullptr,
+            glGetProgramResourceName(program,
+                                     Uniform::interface,
+                                     indices[i],
+                                     max_name_length,
+                                     nullptr,
                                      name_buffer.get());
-            uniforms.emplace_back(program, indices[i], name_buffer.get(), value_buffer.get());
+            uniforms.emplace_back(program,
+                                  indices[i],
+                                  name_buffer.get(),
+                                  value_buffer.get());
         }
     }
 
-    const Uniform* find(const char* name) const
+    const Uniform*
+    find(const char* name) const
     {
         std::string str(name);
         for (auto& u : uniforms) {
@@ -69,7 +98,8 @@ struct UniformBlock : public Resource {
         return nullptr;
     }
 
-    void dump() const
+    void
+    dump() const
     {
         Resource::dump();
         fprintf(stderr, "binding=%d, size=%d, uniforms:\n", binding, size);

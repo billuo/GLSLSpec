@@ -9,11 +9,15 @@ namespace OpenGL {
 
 decltype(Program::Pool) Program::Pool;
 
-Program& Program::attach(const Shader* shader)
+Program&
+Program::attach(const Shader* shader)
 {
-    auto it = std::find(m_attached_shaders.begin(), m_attached_shaders.end(), shader);
+    auto it = std::find(m_attached_shaders.begin(),
+                        m_attached_shaders.end(),
+                        shader);
     if (it != m_attached_shaders.end()) {
-        DEBUG("Shader<name=%u> already attached to Program<name=%u>.", static_cast<GLuint>(shader->name()),
+        DEBUG("Shader<name=%u> already attached to Program<name=%u>.",
+              static_cast<GLuint>(shader->name()),
               static_cast<GLuint>(m_name));
     } else {
         m_attached_shaders.push_back(shader);
@@ -21,13 +25,17 @@ Program& Program::attach(const Shader* shader)
     return *this;
 }
 
-Program& Program::attach(const std::vector<const Shader*>& shaders)
+Program&
+Program::attach(const std::vector<const Shader*>& shaders)
 {
-    m_attached_shaders.insert(m_attached_shaders.end(), shaders.begin(), shaders.end());
+    m_attached_shaders.insert(m_attached_shaders.end(),
+                              shaders.begin(),
+                              shaders.end());
     return *this;
 }
 
-Program& Program::link()
+Program&
+Program::link()
 {
     for (auto&& p : m_attached_shaders) {
         glAttachShader(static_cast<GLuint>(m_name), p->name());
@@ -46,24 +54,30 @@ Program& Program::link()
     return *this;
 }
 
-std::unique_ptr<GLchar[]> Program::aux_getInfoLog() const
+std::unique_ptr<GLchar[]>
+Program::aux_getInfoLog() const
 {
     std::unique_ptr<GLchar[]> ret;
     GLint length = aux_get(GL_INFO_LOG_LENGTH);
     assert(length >= 0);
     ret = std::make_unique<GLchar[]>(length);
-    glGetProgramInfoLog(static_cast<GLuint>(m_name), length, nullptr, ret.get());
+    glGetProgramInfoLog(static_cast<GLuint>(m_name),
+                        length,
+                        nullptr,
+                        ret.get());
     return ret;
 }
 
-GLint Program::aux_get(GLenum pname) const
+GLint
+Program::aux_get(GLenum pname) const
 {
     GLint result = -1;
     glGetProgramiv(static_cast<GLuint>(m_name), pname, &result);
     return result;
 }
 
-GLint Program::aux_getStage(GLenum stage, GLenum pname) const
+GLint
+Program::aux_getStage(GLenum stage, GLenum pname) const
 {
     GLint result = -1;
     glGetProgramStageiv(static_cast<GLuint>(m_name), stage, pname, &result);

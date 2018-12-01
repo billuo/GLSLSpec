@@ -23,7 +23,8 @@ struct {
 } LastGrabbing;
 } // namespace
 
-void onKeyboard(unsigned char key, int x, int y)
+void
+onKeyboard(unsigned char key, int x, int y)
 {
     switch (key) {
         case '\\':
@@ -53,7 +54,8 @@ void onKeyboard(unsigned char key, int x, int y)
     }
 }
 
-void onKeyboardUp(unsigned char key, int x, int y)
+void
+onKeyboardUp(unsigned char key, int x, int y)
 {
     switch (key) {
         case 'W':
@@ -80,7 +82,8 @@ void onKeyboardUp(unsigned char key, int x, int y)
     }
 }
 
-void onSpecial(int key, int x, int y)
+void
+onSpecial(int key, int x, int y)
 {
     switch (key) {
         /// @TODO
@@ -89,7 +92,8 @@ void onSpecial(int key, int x, int y)
     }
 }
 
-void onMotion(int x, int y)
+void
+onMotion(int x, int y)
 {
     x -= LastGrabbing.x;
     y -= LastGrabbing.y;
@@ -103,7 +107,8 @@ void onMotion(int x, int y)
     Orientation.horizontal += x_degrees;
     Orientation.vertical += y_degrees;
     if (Orientation.horizontal > 180.0f || Orientation.horizontal <= -180.0f) {
-        Orientation.horizontal = std::fmod(Orientation.horizontal + 180.0f, 360.0f) - 180.0f;
+        Orientation.horizontal =
+                std::fmod(Orientation.horizontal + 180.0f, 360.0f) - 180.0f;
     }
     const float y_mag_max = 89.0f;
     if (Orientation.vertical > y_mag_max) {
@@ -111,12 +116,15 @@ void onMotion(int x, int y)
     } else if (Orientation.vertical < -y_mag_max) {
         Orientation.vertical = -y_mag_max;
     }
-    LookDir.x = glm::cos(RadianOfDegree(Orientation.vertical)) * glm::sin(RadianOfDegree(Orientation.horizontal));
+    LookDir.x = glm::cos(RadianOfDegree(Orientation.vertical)) *
+                glm::sin(RadianOfDegree(Orientation.horizontal));
     LookDir.y = glm::sin(RadianOfDegree(Orientation.vertical));
-    LookDir.z = glm::cos(RadianOfDegree(Orientation.vertical)) * -glm::cos(RadianOfDegree(Orientation.horizontal));
+    LookDir.z = glm::cos(RadianOfDegree(Orientation.vertical)) *
+                -glm::cos(RadianOfDegree(Orientation.horizontal));
 }
 
-void onMouse(int button, int state, int x, int y)
+void
+onMouse(int button, int state, int x, int y)
 {
     if (button == GLUT_LEFT_BUTTON) {
         if (state == GLUT_DOWN) {
@@ -130,7 +138,8 @@ void onMouse(int button, int state, int x, int y)
     }
 }
 
-void onTimer(int current_ms)
+void
+onTimer(int current_ms)
 {
     // callback loop
     static int last_ms = current_ms;
@@ -155,11 +164,16 @@ void onTimer(int current_ms)
     Render::setViewMatrix(glm::lookAt(EyePos, EyePos + LookDir, Up));
 }
 
-void onReshape(GLint w, GLint h)
+void
+onReshape(GLint w, GLint h)
 {
-    Render::setProjectionMatrix(glm::perspective(Pi / 2, static_cast<float>(w) / h, 0.01f, 100.0f));
+    Render::setProjectionMatrix(glm::perspective(Pi / 2,
+                                                 static_cast<float>(w) / h,
+                                                 0.01f,
+                                                 100.0f));
     glViewport(0, 0, w, h);
 }
 
-void onClose()
+void
+onClose()
 { glutIdleFunc(nullptr); }

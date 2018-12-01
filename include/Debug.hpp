@@ -25,7 +25,8 @@
 #endif
 
 /// Convert OpenGL error code to error string.
-const char* GLErrorString(uint32_t error);
+const char*
+GLErrorString(uint32_t error);
 
 /// Perform OpenGL error checking with given logging verbosity.
 #define CHECK_OPENGL()                                                                                       \

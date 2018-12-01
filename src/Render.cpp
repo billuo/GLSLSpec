@@ -17,8 +17,8 @@ namespace Render {
 
 namespace {
 GLuint VAO, UBO;
-Model MyModel;
-Model Cube;
+std::shared_ptr<Model> MyModel;
+std::shared_ptr<Model> Cube;
 
 enum RasterizationMode {
     None = 0, Fill = GL_FILL, Line = GL_LINE, Point = GL_POINT
@@ -42,7 +42,8 @@ glm::mat4 View_World = glm::identity<glm::mat4>();
 // Misc
 //
 
-static inline RasterizationMode NextMode(RasterizationMode mode)
+static inline RasterizationMode
+NextMode(RasterizationMode mode)
 {
     switch (mode) {
         case None:
@@ -58,10 +59,12 @@ static inline RasterizationMode NextMode(RasterizationMode mode)
     }
 }
 
-void toggleAxes()
+void
+toggleAxes()
 { Axes = !Axes; }
 
-void switchRasterizationMode(Side side)
+void
+switchRasterizationMode(Side side)
 {
     if (side == Side::Back) {
         BackMode = NextMode(BackMode);
@@ -70,10 +73,12 @@ void switchRasterizationMode(Side side)
     }
 }
 
-void setProjectionMatrix(const glm::mat4& mat)
+void
+setProjectionMatrix(const glm::mat4& mat)
 { NDC_View = mat; }
 
-void setViewMatrix(const glm::mat4& mat)
+void
+setViewMatrix(const glm::mat4& mat)
 { View_World = mat; }
 
 float Shininess = 2.0f;
@@ -82,17 +87,24 @@ float Shininess = 2.0f;
 // Init
 //
 
-static void initMisc()
+static void
+initMisc()
 {
     glDebugMessageCallback(myDebugMessageCallback, nullptr);
     glEnable(GL_DEBUG_OUTPUT);
-    glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+    glDebugMessageControl(GL_DONT_CARE,
+                          GL_DONT_CARE,
+                          GL_DONT_CARE,
+                          0,
+                          nullptr,
+                          GL_TRUE);
     glPointSize(3.0f);
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
 }
 
-static void initShaderProgram()
+static void
+initShaderProgram()
 {
     const std::string shader_dir("./shaders/");
     // prepare main program
@@ -127,11 +139,15 @@ static void initShaderProgram()
     assert(ub_xform);
     glCreateBuffers(1, &UBO);
     glNamedBufferStorage(UBO, ub_xform->size, nullptr, GL_DYNAMIC_STORAGE_BIT);
-    glBindBufferBase(GL_UNIFORM_BUFFER, static_cast<GLuint>(ub_xform->binding), UBO);
+    glBindBufferBase(GL_UNIFORM_BUFFER,
+                     static_cast<GLuint>(ub_xform->binding),
+                     UBO);
 }
 
-static void sphereVetices(float radius, size_t n_slices, size_t n_layers, std::vector<glm::vec3>& vertices,
-                          std::vector<glm::vec3>& normals)
+static void
+sphereVetices(float radius, size_t n_slices, size_t n_layers,
+              std::vector<glm::vec3>& vertices,
+              std::vector<glm::vec3>& normals)
 {
     const float dtheta = 2 * Pi / n_slices;
     const float dphi = Pi / n_layers;
@@ -143,12 +159,24 @@ static void sphereVetices(float radius, size_t n_slices, size_t n_layers, std::v
         float theta1 = 0.0f;
         float theta2 = theta1 + dtheta;
         for (size_t slice = 0; slice < n_slices; ++slice) {
-            vertices.emplace_back(glm::cos(theta1) * r2, y2, glm::sin(theta1) * r2);
-            vertices.emplace_back(glm::cos(theta1) * r1, y1, glm::sin(theta1) * r1);
-            vertices.emplace_back(glm::cos(theta2) * r2, y2, glm::sin(theta2) * r2);
-            vertices.emplace_back(glm::cos(theta2) * r2, y2, glm::sin(theta2) * r2);
-            vertices.emplace_back(glm::cos(theta1) * r1, y1, glm::sin(theta1) * r1);
-            vertices.emplace_back(glm::cos(theta2) * r1, y1, glm::sin(theta2) * r1);
+            vertices.emplace_back(glm::cos(theta1) * r2,
+                                  y2,
+                                  glm::sin(theta1) * r2);
+            vertices.emplace_back(glm::cos(theta1) * r1,
+                                  y1,
+                                  glm::sin(theta1) * r1);
+            vertices.emplace_back(glm::cos(theta2) * r2,
+                                  y2,
+                                  glm::sin(theta2) * r2);
+            vertices.emplace_back(glm::cos(theta2) * r2,
+                                  y2,
+                                  glm::sin(theta2) * r2);
+            vertices.emplace_back(glm::cos(theta1) * r1,
+                                  y1,
+                                  glm::sin(theta1) * r1);
+            vertices.emplace_back(glm::cos(theta2) * r1,
+                                  y1,
+                                  glm::sin(theta2) * r1);
             theta1 = theta2;
             theta2 = theta1 + dtheta;
         }
@@ -164,7 +192,9 @@ static void sphereVetices(float radius, size_t n_slices, size_t n_layers, std::v
     }
 }
 
-static void cubeVertices(float a, size_t n_grids, std::vector<glm::vec3>& vertices, std::vector<glm::vec3>& normals)
+static void
+cubeVertices(float a, size_t n_grids, std::vector<glm::vec3>& vertices,
+             std::vector<glm::vec3>& normals)
 {
     vertices.clear();
     normals.clear();
@@ -185,8 +215,15 @@ static void cubeVertices(float a, size_t n_grids, std::vector<glm::vec3>& vertic
     }
     size_t face_size = vertices.size();
     vertices.reserve(6 * face_size);
-    std::transform(vertices.rbegin(), vertices.rend(), std::back_inserter(vertices), [](const glm::vec3& v)
-    { return glm::vec3(v.x, v.y, -v.z); }); // NOTE the reversed_iterator
+    std::transform(vertices.rbegin(),
+                   vertices.rend(),
+                   std::back_inserter(vertices),
+                   [](const glm::vec3& v)
+                   {
+                       return glm::vec3(v.x,
+                                        v.y,
+                                        -v.z);
+                   }); // NOTE the reversed_iterator
     std::transform(vertices.begin(),
                    vertices.begin() + 2 * face_size,
                    std::back_inserter(vertices),
@@ -198,15 +235,29 @@ static void cubeVertices(float a, size_t n_grids, std::vector<glm::vec3>& vertic
                    [](const glm::vec3& v)
                    { return glm::vec3(v.x, -v.z, v.y); });
     normals.reserve(6 * face_size);
-    std::fill_n(std::back_inserter(normals), face_size, glm::vec3(0.0f, 0.0f, 1.0f));
-    std::fill_n(std::back_inserter(normals), face_size, glm::vec3(0.0f, 0.0f, -1.0f));
-    std::fill_n(std::back_inserter(normals), face_size, glm::vec3(-1.0f, 0.0f, 0.0f));
-    std::fill_n(std::back_inserter(normals), face_size, glm::vec3(1.0f, 0.0f, 0.0f));
-    std::fill_n(std::back_inserter(normals), face_size, glm::vec3(0.0f, -1.0f, 0.0f));
-    std::fill_n(std::back_inserter(normals), face_size, glm::vec3(0.0f, 1.0f, 0.0f));
+    std::fill_n(std::back_inserter(normals),
+                face_size,
+                glm::vec3(0.0f, 0.0f, 1.0f));
+    std::fill_n(std::back_inserter(normals),
+                face_size,
+                glm::vec3(0.0f, 0.0f, -1.0f));
+    std::fill_n(std::back_inserter(normals),
+                face_size,
+                glm::vec3(-1.0f, 0.0f, 0.0f));
+    std::fill_n(std::back_inserter(normals),
+                face_size,
+                glm::vec3(1.0f, 0.0f, 0.0f));
+    std::fill_n(std::back_inserter(normals),
+                face_size,
+                glm::vec3(0.0f, -1.0f, 0.0f));
+    std::fill_n(std::back_inserter(normals),
+                face_size,
+                glm::vec3(0.0f, 1.0f, 0.0f));
 }
 
-static void initMesh(Mesh& mesh, const std::vector<glm::vec3>& vertices, const std::vector<glm::vec3>& normals)
+static void
+initMesh(Mesh& mesh, const std::vector<glm::vec3>& vertices,
+         const std::vector<glm::vec3>& normals)
 {
     assert(vertices.size() == normals.size());
     mesh.initData(static_cast<GLsizei>(vertices.size()));
@@ -224,20 +275,19 @@ static void initMesh(Mesh& mesh, const std::vector<glm::vec3>& vertices, const s
     }
 }
 
-void init()
+void
+init()
 {
     initMisc();
     glCreateVertexArrays(1, &VAO);
     std::vector<glm::vec3> vertices;
     std::vector<glm::vec3> normals;
+    MyModel = std::make_shared<Model>();
+    Cube = std::make_shared<Model>();
     sphereVetices(0.8f, 120, 60, vertices, normals);
-    DEBUG("Sphere vertices ready");
-    initMesh(MyModel.mesh, vertices, normals);
-    DEBUG("Sphere ready");
+    initMesh(MyModel->mesh, vertices, normals);
     cubeVertices(1.0f, 50, vertices, normals);
-    DEBUG("Cube vertices ready");
-    initMesh(Cube.mesh, vertices, normals);
-    DEBUG("Cube ready");
+    initMesh(Cube->mesh, vertices, normals);
     initShaderProgram();
 }
 
@@ -245,7 +295,8 @@ void init()
 // Render
 //
 
-static void renderFront(Model& model)
+static void
+renderFront(Model& model)
 {
     if (FrontMode != None) {
         glFrontFace(GL_CCW);
@@ -255,7 +306,8 @@ static void renderFront(Model& model)
     }
 }
 
-static void renderBack(Model& model)
+static void
+renderBack(Model& model)
 {
     if (BackMode != None) {
         glPolygonMode(GL_FRONT_AND_BACK, BackMode);
@@ -265,23 +317,17 @@ static void renderBack(Model& model)
     }
 }
 
-static void renderFrontBack(Model& model)
+static void
+renderFrontBack(Model& model)
 {
     auto ub_xform = UBI->find("Transformations");
     auto u_model = ub_xform->find("View_Model");
     auto u_normal = ub_xform->find("NormalMatrix");
     auto u_view = ub_xform->find("NDC_View");
     auto u_mvp = ub_xform->find("NDC_Model");
-    auto temp_print = [&model]()
-    {
-        DEBUG("position:\n%s", glm::prettyPrint(model.transform.position).c_str());
-        DEBUG("rotation:\n%s", glm::prettyPrint(static_cast<glm::mat4>(model.transform.rotation)).c_str());
-        DEBUG("scale:\n%s", glm::prettyPrint(model.transform.scale).c_str());
-        DEBUG("transform matrix:\n%s", glm::prettyPrint(static_cast<glm::mat4>(model.transform)).c_str());
-    };
-    ONCE(temp_print());
     glm::mat4 View_Model = View_World * static_cast<glm::mat4>(model.transform);
-    glm::mat3 NormalMatrix = glm::transpose(glm::inverse(glm::mat3(View_Model))); // inverse transpose matrix
+    glm::mat3 NormalMatrix =
+            glm::transpose(glm::inverse(glm::mat3(View_Model))); // inverse transpose matrix
     glNamedBufferSubData(UBO,
                          u_model->offset,
                          OpenGL::sizeOfType(static_cast<GLenum>(u_model->type)),
@@ -304,7 +350,8 @@ static void renderFrontBack(Model& model)
     renderBack(model);
 }
 
-void render()
+void
+render()
 {
     static glm::vec4 bg_color(0.9f, 0.9f, 0.9f, 1.0f);
     //
@@ -318,7 +365,10 @@ void render()
     assert(u_world_axes);
     if (Render::Axes) {
         OpenGL::Program::Use(*ProgramAxes);
-        glUniformMatrix4fv(u_world_axes->location, 1, GL_FALSE, glm::value_ptr(NDC_View * View_World));
+        glUniformMatrix4fv(u_world_axes->location,
+                           1,
+                           GL_FALSE,
+                           glm::value_ptr(NDC_View * View_World));
         glBindVertexArray(VAO);
         glDrawArrays(GL_LINES, 0, 6);
     }
@@ -333,25 +383,35 @@ void render()
     auto u_ls = UI->find("Light.ls");
     static glm::vec3 light_pos_world = glm::vec3(4.0f, 10.0f, 4.0f);
     // glUniform3fv(u_lpos->location, 1, glm::value_ptr(glm::vec3(0.0f, 0.0f, 1.0f)));
-    glUniform3fv(u_lpos->location, 1, glm::value_ptr(View_World * glm::vec4(light_pos_world, 1.0f)));
-    glUniform3fv(u_la->location, 1, glm::value_ptr(glm::vec3(0.15f, 0.15f, 0.05f)));
-    glUniform3fv(u_ld->location, 1, glm::value_ptr(glm::vec3(0.8f, 0.8f, 0.03f)));
-    glUniform3fv(u_ls->location, 1, glm::value_ptr(glm::vec3(0.8f, 0.8f, 0.03f)));
+    glUniform3fv(u_lpos->location,
+                 1,
+                 glm::value_ptr(View_World * glm::vec4(light_pos_world, 1.0f)));
+    glUniform3fv(u_la->location,
+                 1,
+                 glm::value_ptr(glm::vec3(0.15f, 0.15f, 0.05f)));
+    glUniform3fv(u_ld->location,
+                 1,
+                 glm::value_ptr(glm::vec3(0.8f, 0.8f, 0.03f)));
+    glUniform3fv(u_ls->location,
+                 1,
+                 glm::value_ptr(glm::vec3(0.8f, 0.8f, 0.03f)));
     // material
     auto u_ka = UI->find("Material.ka");
     auto u_kd = UI->find("Material.kd");
     auto u_ks = UI->find("Material.ks");
     auto u_shininess = UI->find("Material.shininess");
-    glUniform3fv(u_ka->location, 1, glm::value_ptr(glm::vec3(0.5f, 0.5f, 1.0f)));
+    glUniform3fv(u_ka->location,
+                 1,
+                 glm::value_ptr(glm::vec3(0.5f, 0.5f, 1.0f)));
     glUniform3fv(u_kd->location, 1, glm::value_ptr(glm::vec3(0.7f)));
     glUniform3fv(u_ks->location, 1, glm::value_ptr(glm::vec3(0.5f)));
     glUniform1f(u_shininess->location, Shininess);
     // render
-    renderFrontBack(MyModel);
-    Cube.transform.position = glm::vec3(1.5f, 0.0f, 0.0f);
-    renderFrontBack(Cube);
-    Cube.transform.position = glm::vec3(-1.5f, 0.0f, 0.0f);
-    renderFrontBack(Cube);
+    renderFrontBack(*MyModel);
+    Cube->transform.position = glm::vec3(1.5f, 0.0f, 0.0f);
+    renderFrontBack(*Cube);
+    Cube->transform.position = glm::vec3(-1.5f, 0.0f, 0.0f);
+    renderFrontBack(*Cube);
     //
     // finish up
     glutSwapBuffers();

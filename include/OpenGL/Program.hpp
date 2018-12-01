@@ -24,50 +24,62 @@ class Program : public Object {
 
     // non-standard object name 'pool'
     static struct {
-        Name Get()
+        Name
+        Get()
         {
             GLuint name = glCreateProgram();
             return Name(name);
         }
 
-        void Put(Name&& name)
+        void
+        Put(Name&& name)
         { glDeleteProgram(name.get()); }
     } Pool;
 
   public:
-    static void Use(const Program& prog)
+    static void
+    Use(const Program& prog)
     { glUseProgram(static_cast<GLuint>(prog.m_name)); }
 
   public:
-    explicit Program(const GLchar* label = nullptr) : Object(Pool.Get(), label, GL_PROGRAM)
+    explicit Program(const GLchar* label = nullptr) : Object(Pool.Get(),
+                                                             label,
+                                                             GL_PROGRAM)
     {}
 
     Program(Program&&) = default;
 
-    Program& operator=(Program&&) = default;
+    Program&
+    operator=(Program&&) = default;
 
     ~Program()
     { Pool.Put(std::move(m_name)); }
 
     /// Attach a shader to this program.
-    Program& attach(const Shader* shader);
+    Program&
+    attach(const Shader* shader);
 
     /// Attach shaders to this program.
-    Program& attach(const std::vector<const Shader*>& shaders);
+    Program&
+    attach(const std::vector<const Shader*>& shaders);
 
     /// Link all attached shaders together, forming a valid program.
     /// @note Program must be created first.
-    Program& link();
+    Program&
+    link();
 
   private:
     /// Query about a property of this program.
-    GLint aux_get(GLenum param) const;
+    GLint
+    aux_get(GLenum param) const;
 
     /// Query about a property an interface of this program.
-    GLint aux_getStage(GLenum stage, GLenum pname) const;
+    GLint
+    aux_getStage(GLenum stage, GLenum pname) const;
 
     /// Retrive information log safely.
-    std::unique_ptr<GLchar[]> aux_getInfoLog() const;
+    std::unique_ptr<GLchar[]>
+    aux_getInfoLog() const;
 
   private:
     std::vector<const Shader*> m_attached_shaders;

@@ -4,7 +4,8 @@
 
 namespace OpenGL {
 
-GLsizei sizeOfType(GLenum type)
+GLsizei
+sizeOfType(GLenum type)
 {
     switch (type) {
         case GL_FLOAT:
@@ -88,7 +89,8 @@ GLsizei sizeOfType(GLenum type)
     }
 }
 
-const char* nameOfType(GLenum type)
+const char*
+nameOfType(GLenum type)
 {
     switch (type) {
         case GL_FLOAT:

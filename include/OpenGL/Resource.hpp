@@ -29,11 +29,13 @@ struct Resource {
     Resource(GLint index, GLchar* name) : index(index), name(name)
     {}
 
-    void dump() const
+    void
+    dump() const
     { fprintf(stderr, "index=%d, name='%s'\n", index, name.c_str()); }
 
   protected:
-    static void dump_referenced(const GLint referenced[MaxShaderStage]);
+    static void
+    dump_referenced(const GLint referenced[MaxShaderStage]);
 };
 } // namespace OpenGL
 

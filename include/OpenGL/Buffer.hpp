@@ -17,19 +17,24 @@ class Buffer : public Object {
     static decltype(MakeNamePool(glCreateBuffers, glDeleteBuffers)) Pool;
 
   public:
-    static void bind(GLenum target, Buffer& buffer)
+    static void
+    bind(GLenum target, Buffer& buffer)
     { glBindBuffer(target, buffer.m_name.get()); }
 
-    static void unbind(GLenum target)
+    static void
+    unbind(GLenum target)
     { glBindBuffer(target, 0); }
 
   public:
-    explicit Buffer(const GLchar* label = nullptr) : Object(Pool.Get(), label, GL_BUFFER)
+    explicit Buffer(const GLchar* label = nullptr) : Object(Pool.Get(),
+                                                            label,
+                                                            GL_BUFFER)
     {}
 
     Buffer(Buffer&&) = default;
 
-    Buffer& operator=(Buffer&&) = default;
+    Buffer&
+    operator=(Buffer&&) = default;
 
     ~Buffer()
     { Pool.Put(std::move(m_name)); }
