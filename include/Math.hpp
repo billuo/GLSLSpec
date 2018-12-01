@@ -3,10 +3,9 @@
 
 #define GLM_ENABLE_EXPERIMENTAL 1
 
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-// #include <glm/gtx/matrix_operation.hpp>
-#include <glm/gtx/string_cast.hpp>
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/type_ptr.hpp"
+#include "glm/gtx/string_cast.hpp"
 #include <type_traits>
 #include <sstream>
 #include <iomanip>
@@ -26,7 +25,8 @@ GLM_FUNC_DECL GLM_INLINE bool nearlyEqual<float>(const float x, const float y)
 
 /// Specialization over double
 template <>
-GLM_FUNC_DECL GLM_INLINE bool nearlyEqual<double>(const double x, const double y)
+GLM_FUNC_DECL GLM_INLINE bool
+nearlyEqual<double>(const double x, const double y)
 { return abs(x - y) < 0.001; }
 
 /// Compare two vec for near equality.
@@ -43,7 +43,8 @@ GLM_FUNC_DECL bool nearlyEqual(vec<L, T, Q> const& x, vec<L, T, Q> const& y)
 
 /// Compare two mat for near equality.
 template <length_t C, length_t R, typename T, qualifier Q>
-GLM_FUNC_DECL bool nearlyEqual(mat<C, R, T, Q> const& x, mat<C, R, T, Q> const& y)
+GLM_FUNC_DECL bool
+nearlyEqual(mat<C, R, T, Q> const& x, mat<C, R, T, Q> const& y)
 {
     for (length_t i = 0; i < C; ++i) {
         for (length_t j = 0; j < R; ++j) {

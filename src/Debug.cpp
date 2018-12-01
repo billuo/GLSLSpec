@@ -75,15 +75,15 @@ const char* GLErrorString(uint32_t error)
 { return (const char*) (gluErrorString(error)); }
 
 void
-myDebugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message,
-                       const void* user)
+myDebugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity,
+                       GLsizei length, const GLchar* message, const void* user)
 {
     snprintf(Buffer,
              BufferSize,
              "\tOpenGL debug message:\n"
              "source:   %-20s\n"
              "type:     %-20s\n"
-             "serverity:%-20s id:%u\n"
+             "severity:%-20s id:%u\n"
              "message:  %.*s\n",
              SourceString(source),
              TypeString(type),
