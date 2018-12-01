@@ -71,13 +71,13 @@ Shader::aux_GetInfoLog() const
 static GLenum
 SuffixType(const std::string& suffix)
 {
-    static const auto
-            map = std::map<std::string, GLenum>{{"vert", GL_VERTEX_SHADER},
-                                                {"tesc", GL_TESS_CONTROL_SHADER},
-                                                {"tese", GL_TESS_EVALUATION_SHADER},
-                                                {"geom", GL_GEOMETRY_SHADER},
-                                                {"frag", GL_FRAGMENT_SHADER},
-                                                {"comp", GL_COMPUTE_SHADER},};
+    static const auto map =
+            std::map<std::string, GLenum>{{"vert", GL_VERTEX_SHADER},
+                                          {"tesc", GL_TESS_CONTROL_SHADER},
+                                          {"tese", GL_TESS_EVALUATION_SHADER},
+                                          {"geom", GL_GEOMETRY_SHADER},
+                                          {"frag", GL_FRAGMENT_SHADER},
+                                          {"comp", GL_COMPUTE_SHADER},};
     auto it = map.find(suffix);
     if (it != map.end()) {
         return it->second;

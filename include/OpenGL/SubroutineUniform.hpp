@@ -91,12 +91,11 @@ struct TessEvaluationSubroutineUniform : public SubroutineUniform {
     static constexpr GLenum stage = GL_TESS_EVALUATION_SHADER;
 
     TessEvaluationSubroutineUniform(GLuint program, GLint index, GLchar* name,
-                                    GLint* values) : SubroutineUniform(
-            program,
-            stage,
-            index,
-            name,
-            values)
+                                    GLint* values) : SubroutineUniform(program,
+                                                                       stage,
+                                                                       index,
+                                                                       name,
+                                                                       values)
     {}
 };
 

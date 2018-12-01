@@ -33,29 +33,21 @@ struct ProgramInterfaceBase {
 template <typename Resource>
 struct ProgramInterface : public ProgramInterfaceBase {
     static constexpr GLenum interface = Resource::interface;
-    static constexpr bool
-            InterfaceResourceNamed = !(interface == GL_ATOMIC_COUNTER_BUFFER ||
-                                       interface ==
-                                       GL_TRANSFORM_FEEDBACK_BUFFER);
-    static constexpr bool
-            InterfaceMultipleVariables = (interface == GL_UNIFORM_BLOCK ||
-                                          interface ==
-                                          GL_SHADER_STORAGE_BLOCK ||
-                                          interface ==
-                                          GL_ATOMIC_COUNTER_BUFFER ||
-                                          interface ==
-                                          GL_TRANSFORM_FEEDBACK_BUFFER);
-    static constexpr bool
-            InterfaceSubroutine = (interface == GL_VERTEX_SUBROUTINE_UNIFORM ||
-                                   interface ==
-                                   GL_TESS_CONTROL_SUBROUTINE_UNIFORM ||
-                                   interface ==
-                                   GL_TESS_EVALUATION_SUBROUTINE_UNIFORM ||
-                                   interface ==
-                                   GL_GEOMETRY_SUBROUTINE_UNIFORM ||
-                                   interface ==
-                                   GL_FRAGMENT_SUBROUTINE_UNIFORM ||
-                                   interface == GL_COMPUTE_SUBROUTINE_UNIFORM);
+    static constexpr bool InterfaceResourceNamed =
+            !(interface == GL_ATOMIC_COUNTER_BUFFER ||
+              interface == GL_TRANSFORM_FEEDBACK_BUFFER);
+    static constexpr bool InterfaceMultipleVariables =
+            (interface == GL_UNIFORM_BLOCK ||
+             interface == GL_SHADER_STORAGE_BLOCK ||
+             interface == GL_ATOMIC_COUNTER_BUFFER ||
+             interface == GL_TRANSFORM_FEEDBACK_BUFFER);
+    static constexpr bool InterfaceSubroutine =
+            (interface == GL_VERTEX_SUBROUTINE_UNIFORM ||
+             interface == GL_TESS_CONTROL_SUBROUTINE_UNIFORM ||
+             interface == GL_TESS_EVALUATION_SUBROUTINE_UNIFORM ||
+             interface == GL_GEOMETRY_SUBROUTINE_UNIFORM ||
+             interface == GL_FRAGMENT_SUBROUTINE_UNIFORM ||
+             interface == GL_COMPUTE_SUBROUTINE_UNIFORM);
 
     std::vector<Resource> resources;
 

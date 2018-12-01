@@ -24,9 +24,8 @@ struct Uniform : public Resource {
     using GLintfield = GLint(Uniform::*);
     static constexpr GLintfield fields[] =
             {&Uniform::type, &Uniform::asize, &Uniform::offset,
-             &Uniform::block_index,
-             &Uniform::astride, &Uniform::mstride, &Uniform::row_major,
-             &Uniform::atomic_index, &Uniform::location,};
+             &Uniform::block_index, &Uniform::astride, &Uniform::mstride,
+             &Uniform::row_major, &Uniform::atomic_index, &Uniform::location,};
     static constexpr size_t n_fields = countof(fields);
 
     static constexpr GLenum properties[] =
@@ -35,8 +34,7 @@ struct Uniform : public Resource {
              GL_LOCATION, GL_REFERENCED_BY_VERTEX_SHADER,
              GL_REFERENCED_BY_TESS_CONTROL_SHADER,
              GL_REFERENCED_BY_TESS_EVALUATION_SHADER,
-             GL_REFERENCED_BY_GEOMETRY_SHADER,
-             GL_REFERENCED_BY_FRAGMENT_SHADER,
+             GL_REFERENCED_BY_GEOMETRY_SHADER, GL_REFERENCED_BY_FRAGMENT_SHADER,
              GL_REFERENCED_BY_COMPUTE_SHADER,};
     static constexpr size_t n_properties = countof(properties);
 

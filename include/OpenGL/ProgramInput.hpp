@@ -25,12 +25,10 @@ struct ProgramInput : public Resource {
 
     static constexpr GLenum properties[] =
             {GL_TYPE, GL_ARRAY_SIZE, GL_LOCATION, GL_IS_PER_PATCH,
-             GL_LOCATION_COMPONENT,
-             GL_REFERENCED_BY_VERTEX_SHADER,
+             GL_LOCATION_COMPONENT, GL_REFERENCED_BY_VERTEX_SHADER,
              GL_REFERENCED_BY_TESS_CONTROL_SHADER,
              GL_REFERENCED_BY_TESS_EVALUATION_SHADER,
-             GL_REFERENCED_BY_GEOMETRY_SHADER,
-             GL_REFERENCED_BY_FRAGMENT_SHADER,
+             GL_REFERENCED_BY_GEOMETRY_SHADER, GL_REFERENCED_BY_FRAGMENT_SHADER,
              GL_REFERENCED_BY_COMPUTE_SHADER,};
     static constexpr size_t n_properties = countof(properties);
     static_assert(n_fields + MaxShaderStage == n_properties, "");

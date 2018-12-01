@@ -21,9 +21,8 @@ struct ProgramOutput : public Resource {
     using GLintfield = GLint(ProgramOutput::*);
     static constexpr GLintfield fields[] =
             {&ProgramOutput::type, &ProgramOutput::asize,
-             &ProgramOutput::location,
-             &ProgramOutput::location_index, &ProgramOutput::per_patch,
-             &ProgramOutput::component,};
+             &ProgramOutput::location, &ProgramOutput::location_index,
+             &ProgramOutput::per_patch, &ProgramOutput::component,};
     static constexpr size_t n_fields = countof(fields);
 
     static constexpr GLenum properties[] = {GL_TYPE, GL_ARRAY_SIZE, GL_LOCATION,

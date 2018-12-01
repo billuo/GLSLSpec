@@ -28,7 +28,6 @@ nameOfType(GLenum type);
 
 void
 myDebugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum serverity,
-                       GLsizei length, const GLchar* message,
-                       const void* user);
+                       GLsizei length, const GLchar* message, const void* user);
 
 #endif /* end of include guard: OPENGL_LAB_COMMON_HPP */

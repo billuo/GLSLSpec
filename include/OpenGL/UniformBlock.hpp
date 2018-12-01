@@ -21,8 +21,7 @@ struct UniformBlock : public Resource {
              GL_REFERENCED_BY_VERTEX_SHADER,
              GL_REFERENCED_BY_TESS_CONTROL_SHADER,
              GL_REFERENCED_BY_TESS_EVALUATION_SHADER,
-             GL_REFERENCED_BY_GEOMETRY_SHADER,
-             GL_REFERENCED_BY_FRAGMENT_SHADER,
+             GL_REFERENCED_BY_GEOMETRY_SHADER, GL_REFERENCED_BY_FRAGMENT_SHADER,
              GL_REFERENCED_BY_COMPUTE_SHADER,};
     static constexpr size_t n_properties = countof(properties);
 

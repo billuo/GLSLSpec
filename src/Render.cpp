@@ -146,8 +146,7 @@ initShaderProgram()
 
 static void
 sphereVetices(float radius, size_t n_slices, size_t n_layers,
-              std::vector<glm::vec3>& vertices,
-              std::vector<glm::vec3>& normals)
+              std::vector<glm::vec3>& vertices, std::vector<glm::vec3>& normals)
 {
     const float dtheta = 2 * Pi / n_slices;
     const float dphi = Pi / n_layers;
@@ -220,9 +219,7 @@ cubeVertices(float a, size_t n_grids, std::vector<glm::vec3>& vertices,
                    std::back_inserter(vertices),
                    [](const glm::vec3& v)
                    {
-                       return glm::vec3(v.x,
-                                        v.y,
-                                        -v.z);
+                       return glm::vec3(v.x, v.y, -v.z);
                    }); // NOTE the reversed_iterator
     std::transform(vertices.begin(),
                    vertices.begin() + 2 * face_size,

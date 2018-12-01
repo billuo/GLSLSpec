@@ -20,7 +20,8 @@ add_library(MainLib
         src/glutCallback.cpp
         src/Mesh.cpp
         src/Render.cpp
-        src/Utility.cpp src/Model.cpp)
+        src/Transform.cpp
+        src/Utility.cpp)
 
 target_compile_definitions(MainLib PUBLIC $<$<CONFIG:Debug>:DEBUG_BUILD>)
 target_compile_options(MainLib PUBLIC $<$<CONFIG:Release>:-O2>)
