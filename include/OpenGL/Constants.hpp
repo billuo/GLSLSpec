@@ -11,16 +11,19 @@ namespace OpenGL {
 static constexpr GLenum GL_UNKNOWN_SHADER = -1;
 
 GLsizei
-sizeOfDataType(unsigned int type);
+sizeOfDataType(GLenum type);
+
+GLsizei
+numelOfDataType(GLenum type);
 
 const char*
-nameOfDataType(unsigned int type);
-
-const char*
-nameOfShaderType(GLenum type);
+nameOfDataType(GLenum type);
 
 GLenum
 shaderTypeOfSuffix(std::string suffix);
+
+const char*
+nameOfShaderType(GLenum type);
 
 const char*
 nameOfProgramInterface(GLenum interface);

@@ -1,7 +1,7 @@
 #ifndef OPENGL_LAB_INTROSPECTOR_HPP
 #define OPENGL_LAB_INTROSPECTOR_HPP
 
-#include "Introspection.hpp"
+#include "Interface.hpp"
 
 
 namespace OpenGL {
@@ -18,6 +18,12 @@ class Introspector {
     const UP<UniformBlockInterface> IUniformBlock;
     const UP<ProgramInputInterface> IInput;
     const UP<ProgramOutputInterface> IOutput;
+    const UP<VertexSubroutineUniformInterface> IVertexSubroutineUniform;
+    const UP<TessControlSubroutineUniformInterface> ITessControlSubroutineUniform;
+    const UP<TessEvaluationSubroutineUniformInterface> ITessEvalutationSubroutineUniform;
+    const UP<GeometrySubroutineUniformInterface> IGeometrySubroutineUniform;
+    const UP<FragmentSubroutineUniformInterface> IFragmentSubroutineUniform;
+    const UP<ComputeSubroutineUniformInterface> IComputeSubroutineUniform;
 
     friend std::ostream& operator<<(std::ostream& os, const Introspector& introspector);
 };

@@ -12,14 +12,19 @@ include_directories(3rdparty)
 add_library(MainLib
         src/OpenGL/Object/Buffer.cpp
         src/OpenGL/Common.cpp
-        src/OpenGL/Utility/Debug.cpp
-        src/OpenGL/Introspection/Introspection.cpp
         src/OpenGL/Constants.cpp
+        src/OpenGL/Introspection/Interface.cpp
         src/OpenGL/Introspection/Introspector.cpp
+        src/OpenGL/Introspection/ProgramInput.cpp
+        src/OpenGL/Introspection/ProgramOutput.cpp
         src/OpenGL/Introspection/Resource.cpp
+        src/OpenGL/Introspection/SubroutineUniform.cpp
+        src/OpenGL/Introspection/Uniform.cpp
+        src/OpenGL/Introspection/UniformBlock.cpp
         src/OpenGL/Object/Object.cpp
         src/OpenGL/Object/Program.cpp
         src/OpenGL/Object/Shader.cpp
+        src/OpenGL/Utility/Debug.cpp
         src/OpenGL/Utility/ShaderCompiler.cpp
         src/glutCallback.cpp
         src/Debug.cpp
@@ -27,7 +32,8 @@ add_library(MainLib
         src/Mesh.cpp
         src/Render.cpp
         src/Transform.cpp
-        src/Utility.cpp src/OpenGL/Introspection/UniformBlock.cpp src/OpenGL/Introspection/ProgramInput.cpp src/OpenGL/Introspection/ProgramOutput.cpp src/OpenGL/Introspection/SubroutineUniform.cpp src/OpenGL/Introspection/Uniform.cpp)
+        src/Utility.cpp
+        )
 
 target_compile_definitions(MainLib PUBLIC $<$<CONFIG:Debug>:DEBUG_BUILD>)
 target_compile_options(MainLib PUBLIC $<$<CONFIG:Release>:-O2>)
@@ -65,8 +71,11 @@ add_executable(test EXCLUDE_FROM_ALL
 add_dependencies(test MainLib)
 target_link_libraries(test MainLib)
 
+# TODO due to timestamp of directories not changed frequently,
+# TODO updates to resource files might not be reflected in new build.
+# TODO think of a new way... may be copy recursively
+file(REMOVE_RECURSE ${CMAKE_BINARY_DIR}/shaders)
 file(COPY shaders DESTINATION ./)
-file(COPY resources DESTINATION ./)
 
 option(UNITY_BUILD "Use cotire to enable unity build, speeding up compilation.")
 if (UNITY_BUILD)

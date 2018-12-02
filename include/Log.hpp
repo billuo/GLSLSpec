@@ -1,3 +1,10 @@
+/**
+ * @File Log.hpp
+ * @brief Logging interface
+ * @details Use spdlog as implementation
+ * @sa https://github.com/gabime/spdlog/wiki/1.-QuickStart
+ * @author Zhen Luo 461652354@qq.com
+ */
 #ifndef OPENGL_LAB_LOG_HPP
 #define OPENGL_LAB_LOG_HPP
 #pragma once

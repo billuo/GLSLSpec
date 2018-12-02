@@ -4,7 +4,6 @@
  * @author Zhen Luo 461652354@qq.com
  */
 #include "Render.hpp"
-#include "Math.hpp"
 #include "Model.hpp"
 #include "OpenGL/Introspection/Introspector.hpp"
 #include "OpenGL/Utility/ShaderCompiler.hpp"
@@ -52,7 +51,7 @@ NextMode(RasterizationMode mode)
         case Point:
             return None;
         default:
-            return None;
+            UNREACHABLE;
     }
 }
 
@@ -99,7 +98,7 @@ static void
 initShaderProgram()
 {
     using namespace OpenGL;
-    const std::string dir("./shaders/");
+    const std::string dir("../shaders/"); // XXX
     auto from_source = [dir](const char* file_name)
     {
         static auto c = ShaderCompiler::Instance();
@@ -107,8 +106,7 @@ initShaderProgram()
     };
     // prepare main program
     ProgramSphere = std::make_unique<Program>("ADS shading");
-    ProgramSphere->attach({from_source("shader.vert"), from_source("shader.geom"),
-                           from_source("shader.frag")}).link();
+    ProgramSphere->attach({from_source("shader.vert"), from_source("shader.geom"), from_source("shader.frag")}).link();
     ISphere = std::make_unique<Introspector>(*ProgramSphere);
     Log::i("{}\n", *ISphere);
     // prepare program to draw axes
@@ -161,8 +159,7 @@ sphereVetices(float radius, size_t n_slices, size_t n_layers, std::vector<glm::v
 }
 
 static void
-cubeVertices(float a, size_t n_grids, std::vector<glm::vec3>& vertices,
-             std::vector<glm::vec3>& normals)
+cubeVertices(float a, size_t n_grids, std::vector<glm::vec3>& vertices, std::vector<glm::vec3>& normals)
 {
     vertices.clear();
     normals.clear();
@@ -183,11 +180,8 @@ cubeVertices(float a, size_t n_grids, std::vector<glm::vec3>& vertices,
     }
     size_t face_size = vertices.size();
     vertices.reserve(6 * face_size);
-    std::transform(vertices.rbegin(),
-                   vertices.rend(),
-                   std::back_inserter(vertices),
-                   [](const glm::vec3& v)
-                   { return glm::vec3(v.x, v.y, -v.z); }); // NOTE the reversed_iterator
+    std::transform(vertices.rbegin(), vertices.rend(), std::back_inserter(vertices), [](const glm::vec3& v)
+    { return glm::vec3(v.x, v.y, -v.z); }); // NOTE the reversed_iterator
     std::transform(vertices.begin(),
                    vertices.begin() + 2 * face_size,
                    std::back_inserter(vertices),
@@ -235,9 +229,9 @@ init()
     std::vector<glm::vec3> normals;
     MyModel = std::make_shared<Model>();
     Cube = std::make_shared<Model>();
-    sphereVetices(0.8f, 120, 60, vertices, normals);
+    sphereVetices(0.8f, 50, 20, vertices, normals);
     initMesh(MyModel->mesh, vertices, normals);
-    cubeVertices(1.0f, 50, vertices, normals);
+    cubeVertices(1.0f, 20, vertices, normals);
     initMesh(Cube->mesh, vertices, normals);
     initShaderProgram();
 }
@@ -275,8 +269,7 @@ renderFrontBack(Model& model)
     auto u_view = ub_xform->find("NDC_View");
     auto u_mvp = ub_xform->find("NDC_Model");
     glm::mat4 View_Model = View_World * static_cast<glm::mat4>(model.transform);
-    glm::mat3 NormalMatrix =
-            glm::transpose(glm::inverse(glm::mat3(View_Model))); // inverse transpose matrix
+    glm::mat3 NormalMatrix = glm::transpose(glm::inverse(glm::mat3(View_Model))); // inverse transpose matrix
     glNamedBufferSubData(UBO,
                          u_model->offset,
                          OpenGL::sizeOfDataType(static_cast<GLenum>(u_model->type)),
@@ -313,10 +306,7 @@ render()
     assert(u_world_axes);
     if (Render::Axes) {
         OpenGL::Program::Use(*ProgramAxes);
-        glUniformMatrix4fv(u_world_axes->location,
-                           1,
-                           GL_FALSE,
-                           glm::value_ptr(NDC_View * View_World));
+        glUniformMatrix4fv(u_world_axes->location, 1, GL_FALSE, glm::value_ptr(NDC_View * View_World));
         glBindVertexArray(VAO);
         glDrawArrays(GL_LINES, 0, 6);
     }
@@ -325,32 +315,21 @@ render()
     OpenGL::Program::Use(*ProgramSphere);
     // light
     const auto& UI = ISphere->IUniform;
-    auto u_lpos = UI->find("Light.pos");
-    auto u_la = UI->find("Light.la");
-    auto u_ld = UI->find("Light.ld");
-    auto u_ls = UI->find("Light.ls");
-    static glm::vec3 light_pos_world = glm::vec3(4.0f, 10.0f, 4.0f);
-    // glUniform3fv(u_lpos->location, 1, glm::value_ptr(glm::vec3(0.0f, 0.0f, 1.0f)));
-    glUniform3fv(u_lpos->location,
-                 1,
-                 glm::value_ptr(View_World * glm::vec4(light_pos_world, 1.0f)));
-    glUniform3fv(u_la->location, 1, glm::value_ptr(glm::vec3(0.15f, 0.15f, 0.05f)));
-    glUniform3fv(u_ld->location, 1, glm::value_ptr(glm::vec3(0.8f, 0.8f, 0.03f)));
-    glUniform3fv(u_ls->location, 1, glm::value_ptr(glm::vec3(0.8f, 0.8f, 0.03f)));
-    // material
-    auto u_ka = UI->find("Material.ka");
-    auto u_kd = UI->find("Material.kd");
-    auto u_ks = UI->find("Material.ks");
-    auto u_shininess = UI->find("Material.shininess");
-    glUniform3fv(u_ka->location, 1, glm::value_ptr(glm::vec3(0.5f, 0.5f, 1.0f)));
-    glUniform3fv(u_kd->location, 1, glm::value_ptr(glm::vec3(0.7f)));
-    glUniform3fv(u_ks->location, 1, glm::value_ptr(glm::vec3(0.5f)));
-    glUniform1f(u_shininess->location, Shininess);
+    static glm::vec3 light_pos_world(4.0f, 10.0f, 4.0f);
+    glm::vec3 light_pos(View_World * glm::vec4(light_pos_world, 1.0f));
+    UI->assign("Light.pos", light_pos.x, light_pos.y, light_pos.z);
+    UI->assign("Light.la", 0.15f, 0.15f, 0.05f);
+    UI->assign("Light.ld", 0.8f, 0.8f, 0.03f);
+    UI->assign("Light.ls", 0.8f, 0.8f, 0.03f);
+    UI->assign("Material.ka", 0.5f, 0.5f, 1.0f);
+    UI->assign("Material.kd", 0.7f, 0.7f, 0.7f);
+    UI->assign("Material.ks", 0.5f, 0.5f, 0.5f);
+    UI->assign("Material.shininess", Shininess);
     // render
     renderFrontBack(*MyModel);
-    Cube->transform.position = glm::vec3(1.5f, 0.0f, 0.0f);
+    Cube->transform.position = {1.5f, 0.0f, 0.0f};
     renderFrontBack(*Cube);
-    Cube->transform.position = glm::vec3(-1.5f, 0.0f, 0.0f);
+    Cube->transform.position = {-1.5f, 0.0f, 0.0f};
     renderFrontBack(*Cube);
     //
     // finish up

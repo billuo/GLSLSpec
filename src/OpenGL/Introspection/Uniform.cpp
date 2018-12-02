@@ -1,3 +1,5 @@
+#include <OpenGL/Introspection/Uniform.hpp>
+
 #include "OpenGL/Introspection/Uniform.hpp"
 
 

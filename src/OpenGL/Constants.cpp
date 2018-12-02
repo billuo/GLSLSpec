@@ -7,8 +7,8 @@ using namespace glm;
 
 namespace OpenGL {
 
-int
-sizeOfDataType(unsigned int type)
+GLsizei
+sizeOfDataType(GLenum type)
 {
     switch (type) {
         case GL_FLOAT:
@@ -19,14 +19,6 @@ sizeOfDataType(unsigned int type)
             return sizeof(vec3);
         case GL_FLOAT_VEC4:
             return sizeof(vec4);
-        case GL_DOUBLE:
-            return sizeof(double);
-        case GL_DOUBLE_VEC2:
-            return sizeof(dvec2);
-        case GL_DOUBLE_VEC3:
-            return sizeof(dvec3);
-        case GL_DOUBLE_VEC4:
-            return sizeof(dvec4);
         case GL_INT:
             return sizeof(int);
         case GL_INT_VEC2:
@@ -69,31 +61,61 @@ sizeOfDataType(unsigned int type)
             return sizeof(mat4x2);
         case GL_FLOAT_MAT4x3:
             return sizeof(mat4x3);
+            /// TODO double floating point not yet fully supported
+        case GL_DOUBLE:
+//            return sizeof(double);
+        case GL_DOUBLE_VEC2:
+//            return sizeof(dvec2);
+        case GL_DOUBLE_VEC3:
+//            return sizeof(dvec3);
+        case GL_DOUBLE_VEC4:
+//            return sizeof(dvec4);
         case GL_DOUBLE_MAT2:
-            return sizeof(dmat2x2);
+//            return sizeof(dmat2x2);
         case GL_DOUBLE_MAT3:
-            return sizeof(dmat3x3);
+//            return sizeof(dmat3x3);
         case GL_DOUBLE_MAT4:
-            return sizeof(dmat4x4);
+//            return sizeof(dmat4x4);
         case GL_DOUBLE_MAT2x3:
-            return sizeof(dmat2x3);
+//            return sizeof(dmat2x3);
         case GL_DOUBLE_MAT2x4:
-            return sizeof(dmat2x4);
+//            return sizeof(dmat2x4);
         case GL_DOUBLE_MAT3x2:
-            return sizeof(dmat3x2);
+//            return sizeof(dmat3x2);
         case GL_DOUBLE_MAT3x4:
-            return sizeof(dmat3x4);
+//            return sizeof(dmat3x4);
         case GL_DOUBLE_MAT4x2:
-            return sizeof(dmat4x2);
+//            return sizeof(dmat4x2);
         case GL_DOUBLE_MAT4x3:
-            return sizeof(dmat4x3);
+//            return sizeof(dmat4x3);
+        default:
+            UNREACHABLE;
+    }
+}
+
+GLsizei
+numelOfDataType(GLenum type)
+{
+    switch (type) {
+        case GL_FLOAT:
+        case GL_INT:
+        case GL_UNSIGNED_INT:
+        case GL_DOUBLE:
+        case GL_BOOL:
+            return 1;
+        case GL_FLOAT_VEC2:
+        case GL_INT_VEC2:
+        case GL_UNSIGNED_INT_VEC2:
+        case GL_DOUBLE_VEC2:
+        case GL_BOOL_VEC2:
+            return 2;
         default:
             UNREACHABLE;
     }
 }
 
 const char*
-nameOfDataType(unsigned int type)
+nameOfDataType(GLenum type)
 {
     switch (type) {
         case GL_FLOAT:
@@ -154,24 +176,6 @@ nameOfDataType(unsigned int type)
             return "mat4x2";
         case GL_FLOAT_MAT4x3:
             return "mat4x3";
-        case GL_DOUBLE_MAT2:
-            return "dmat2";
-        case GL_DOUBLE_MAT3:
-            return "dmat3";
-        case GL_DOUBLE_MAT4:
-            return "dmat4";
-        case GL_DOUBLE_MAT2x3:
-            return "dmat2x3";
-        case GL_DOUBLE_MAT2x4:
-            return "dmat2x4";
-        case GL_DOUBLE_MAT3x2:
-            return "dmat3x2";
-        case GL_DOUBLE_MAT3x4:
-            return "dmat3x4";
-        case GL_DOUBLE_MAT4x2:
-            return "dmat4x2";
-        case GL_DOUBLE_MAT4x3:
-            return "dmat4x3";
         case GL_SAMPLER_1D:
             return "sampler1D";
         case GL_SAMPLER_2D:
@@ -244,6 +248,25 @@ nameOfDataType(unsigned int type)
             return "usamplerBuffer";
         case GL_UNSIGNED_INT_SAMPLER_2D_RECT:
             return "usampler2DRect";
+            /// TODO double floating point not yet fully supported
+        case GL_DOUBLE_MAT2:
+//            return "dmat2";
+        case GL_DOUBLE_MAT3:
+//            return "dmat3";
+        case GL_DOUBLE_MAT4:
+//            return "dmat4";
+        case GL_DOUBLE_MAT2x3:
+//            return "dmat2x3";
+        case GL_DOUBLE_MAT2x4:
+//            return "dmat2x4";
+        case GL_DOUBLE_MAT3x2:
+//            return "dmat3x2";
+        case GL_DOUBLE_MAT3x4:
+//            return "dmat3x4";
+        case GL_DOUBLE_MAT4x2:
+//            return "dmat4x2";
+        case GL_DOUBLE_MAT4x3:
+//            return "dmat4x3";
         default:
             UNREACHABLE;
     }

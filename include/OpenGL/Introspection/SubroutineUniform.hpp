@@ -8,7 +8,8 @@
 
 namespace OpenGL {
 
-/// not a category of interface per se!
+/// Base class of subroutine uniform interfaces of various stages.
+/// Not a category of interface per se! It's shader stage needs to be externally specified.
 struct SubroutineUniform : public Resource {
   protected:
     using Subroutine = Resource;
