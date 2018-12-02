@@ -22,4 +22,8 @@ Resource::referenced_stages(const GLint referenced[MaxShaderStage])
     return ss.str();
 }
 
+std::ostream&
+operator<<(std::ostream& os, const Resource& resource)
+{ return os << "index=" << resource.index << ", name=" << resource.name; }
+
 } // namespace OpenGL

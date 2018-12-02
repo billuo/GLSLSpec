@@ -27,7 +27,7 @@ add_library(MainLib
         src/Mesh.cpp
         src/Render.cpp
         src/Transform.cpp
-        src/Utility.cpp)
+        src/Utility.cpp src/OpenGL/Introspection/UniformBlock.cpp src/OpenGL/Introspection/ProgramInput.cpp src/OpenGL/Introspection/ProgramOutput.cpp src/OpenGL/Introspection/SubroutineUniform.cpp src/OpenGL/Introspection/Uniform.cpp)
 
 target_compile_definitions(MainLib PUBLIC $<$<CONFIG:Debug>:DEBUG_BUILD>)
 target_compile_options(MainLib PUBLIC $<$<CONFIG:Release>:-O2>)

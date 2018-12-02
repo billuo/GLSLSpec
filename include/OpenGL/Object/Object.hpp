@@ -1,5 +1,3 @@
-#include <memory>
-
 /**
  * @file OpenGL/Object.hpp
  * @brief Base class representing generic OpenGL objects, each contains a name of type GLuint of OpenGL object.
@@ -10,8 +8,9 @@
 #pragma once
 
 #include "OpenGL/Common.hpp"
-#include <vector>
+#include <memory>
 #include <ostream>
+#include <vector>
 
 
 namespace OpenGL {

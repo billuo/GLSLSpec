@@ -35,31 +35,12 @@ struct ProgramOutput : public Resource {
     static constexpr size_t n_properties = countof(properties);
     static_assert(n_fields + MaxShaderStage == n_properties, "");
 
-    ProgramOutput(GLuint program, GLint index, GLchar* name, const GLint* values) : Resource(index,
-                                                                                             name)
-    {
-        for (size_t i = 0; i < n_fields; ++i) {
-            this->*fields[i] = values[i];
-        }
-        for (size_t i = 0; i < MaxShaderStage; ++i) {
-            referenced[i] = values[n_fields + i];
-        }
-    }
+    ProgramOutput(GLuint program, GLint index, GLchar* name, const GLint* values);
 
-    friend std::ostream& operator<<(std::ostream& os, const ProgramOutput& output)
-    {
-        os << static_cast<const Resource&>(output) << '\n';
-        if (output.per_patch) {
-            os << "[per_patch] ";
-        }
-        os << "type=" << nameOfDataType(output.type) << ", array_size=" << output.asize << '\n';
-        os << "location=" << output.location << ", location index=" << output.location_index
-           << ", component location=" << output.component << '\n';
-        os << Resource::referenced_stages(output.referenced);
-        return os;
-    }
+    friend std::ostream& operator<<(std::ostream& os, const ProgramOutput& output);
 
 };
+
 } // namespace OpenGL
 
 #endif /* end of include guard: PROGRAMOUTPUT_HPP_DN7NRFC6 */

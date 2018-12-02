@@ -4,16 +4,12 @@
  * @author Zhen Luo 461652354@qq.com
  */
 #include "Render.hpp"
-#include "Debug.hpp"
 #include "Math.hpp"
 #include "Model.hpp"
-#include "OpenGL/Utility/Debug.hpp"
 #include "OpenGL/Introspection/Introspector.hpp"
 #include "OpenGL/Utility/ShaderCompiler.hpp"
+#include "OpenGL/Utility/Debug.hpp"
 #include "Log.hpp"
-
-#include <memory>
-#include <algorithm>
 
 
 namespace Render {
@@ -114,12 +110,12 @@ initShaderProgram()
     ProgramSphere->attach({from_source("shader.vert"), from_source("shader.geom"),
                            from_source("shader.frag")}).link();
     ISphere = std::make_unique<Introspector>(*ProgramSphere);
-    Log::i("Sphere\n{}", *ISphere);
+    Log::i("{}\n", *ISphere);
     // prepare program to draw axes
     ProgramAxes = std::make_unique<Program>("Axes");
     ProgramAxes->attach({from_source("axes.vert"), from_source("axes.frag")}).link();
     IAxes = std::make_unique<Introspector>(*ProgramAxes);
-    Log::i("Axes\n{}", *IAxes);
+    Log::i("{}\n", *IAxes);
     // setup UBO
     auto ub_xform = ISphere->IUniformBlock->find("Transformations");
     assert(ub_xform);
@@ -191,9 +187,7 @@ cubeVertices(float a, size_t n_grids, std::vector<glm::vec3>& vertices,
                    vertices.rend(),
                    std::back_inserter(vertices),
                    [](const glm::vec3& v)
-                   {
-                       return glm::vec3(v.x, v.y, -v.z);
-                   }); // NOTE the reversed_iterator
+                   { return glm::vec3(v.x, v.y, -v.z); }); // NOTE the reversed_iterator
     std::transform(vertices.begin(),
                    vertices.begin() + 2 * face_size,
                    std::back_inserter(vertices),

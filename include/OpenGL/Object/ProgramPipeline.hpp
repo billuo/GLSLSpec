@@ -2,7 +2,7 @@
 #define PROGRAMPIPELINE_HPP_FOIB1IJ8
 #pragma once
 
-#include "OpenGL/Object/Program.hpp"
+#include "Program.hpp"
 
 
 namespace OpenGL {

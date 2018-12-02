@@ -7,16 +7,13 @@
 #ifndef INTROSPECTION_HPP_JKHGRKZY
 #define INTROSPECTION_HPP_JKHGRKZY
 
-#include <ostream>
-#include "Log.hpp"
-#include "OpenGL/Object/Program.hpp"
-
+#include "../Constants.hpp"
+#include "../Object/Program.hpp"
 #include "ProgramInput.hpp"
 #include "ProgramOutput.hpp"
 #include "Uniform.hpp"
 #include "UniformBlock.hpp"
 #include "SubroutineUniform.hpp"
-#include "OpenGL/Constants.hpp"
 
 
 namespace OpenGL {
@@ -28,6 +25,8 @@ struct ProgramInterfaceBase {
     GLint max_name_length = 0;
     GLint max_n_variables = 0;
     GLint max_n_compatible_subroutines = 0;
+  protected:
+    ProgramInterfaceBase() = default;
 };
 
 /**
@@ -52,11 +51,10 @@ struct ProgramInterface : public ProgramInterfaceBase {
 
     std::vector<Resource> resources;
 
-    explicit ProgramInterface(const Program& program)
+    explicit ProgramInterface(GLuint name)
     {
         // per interface properties
         GLint n_resources;
-        GLuint name = program.name();
         glGetProgramInterfaceiv(name, interface, GL_ACTIVE_RESOURCES, &n_resources);
         if (InterfaceResourceNamed) {
             glGetProgramInterfaceiv(name, interface, GL_MAX_NAME_LENGTH, &max_name_length);

@@ -30,6 +30,7 @@ struct ShaderSource {
 } // namespace OpenGL
 
 namespace std {
+
 template <>
 struct hash<OpenGL::ShaderSource> {
     using argument_type = OpenGL::ShaderSource;
@@ -40,7 +41,8 @@ struct hash<OpenGL::ShaderSource> {
         return std::hash<std::string>{}(ss.source) ^ std::hash<GLenum>{}(ss.type);
     }
 };
-}
+
+} // namespace std
 
 namespace OpenGL {
 
