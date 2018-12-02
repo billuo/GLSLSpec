@@ -7,12 +7,15 @@
 #ifndef INTROSPECTION_HPP_JKHGRKZY
 #define INTROSPECTION_HPP_JKHGRKZY
 
-#include "OpenGL/Program.hpp"
-#include "OpenGL/ProgramInput.hpp"
-#include "OpenGL/ProgramOutput.hpp"
-#include "OpenGL/Uniform.hpp"
-#include "OpenGL/UniformBlock.hpp"
-#include "OpenGL/SubroutineUniform.hpp"
+#include "Log.hpp"
+#include "OpenGL/Object/Program.hpp"
+
+#include "./Introspection/ProgramInput.hpp"
+#include "./Introspection/ProgramOutput.hpp"
+#include "./Introspection/Uniform.hpp"
+#include "./Introspection/UniformBlock.hpp"
+#include "./Introspection/SubroutineUniform.hpp"
+#include "Constants.hpp"
 
 
 namespace OpenGL {
@@ -107,8 +110,7 @@ struct ProgramInterface : public ProgramInterfaceBase {
         }
     }
 
-    const Resource*
-    find(const char* name) const
+    const Resource* find(const char* name) const
     {
         std::string str(name);
         for (auto& r : resources) {
@@ -123,8 +125,7 @@ struct ProgramInterface : public ProgramInterfaceBase {
         return nullptr;
     }
 
-    void
-    dump() const
+    void dump() const
     {
         GLsizei name_length;
         glGetObjectLabel(GL_PROGRAM, m_name, 0, &name_length, nullptr);
@@ -134,13 +135,12 @@ struct ProgramInterface : public ProgramInterfaceBase {
                          name_length + 1,
                          nullptr,
                          name.get());
-        fprintf(stderr,
-                "##################################################\n"
-                "Dumping interface %s of program[%u]'%s'\n"
-                "##################################################\n",
-                type_name<Resource>(),
-                m_name,
-                name_length ? name.get() : "");
+        Log::d("##################################################\n"
+               "Dumping interface {} of program[{}]'{}'\n"
+               "##################################################\n",
+               type_name<Resource>(),
+               m_name,
+               name_length ? name.get() : "");
         for (auto&& r : resources) {
             r.dump();
         }

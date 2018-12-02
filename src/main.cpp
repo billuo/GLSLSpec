@@ -3,11 +3,17 @@
  * @brief Program entry point.
  * @author Zhen Luo 461652354@qq.com
  */
-#include "Debug.hpp"
+#include "Log.hpp"
 #include "OpenGL/Common.hpp"
 #include "Render.hpp"
 #include "glutCallback.hpp"
 
+
+// TODO load meshes from .obj
+// TODO support simple texture
+// TODO load texture from .obj
+// TODO finish introspection
+// TODO better control over logging (multiple logger)
 
 int
 main(int argc, char** argv)
@@ -33,9 +39,9 @@ main(int argc, char** argv)
     // init glew for OpenGL 4+
     GLenum err = glewInit();
     if (err != GLEW_OK) {
-        DEBUG("Failed to init glew:%s", glewGetErrorString(err));
+        Log::e("Failed to init glew:%s", glewGetErrorString(err));
     } else if (GLEW_VERSION_4_5) {
-        DEBUG("Found OpenGL 4.5 support");
+        Log::i("Found OpenGL 4.5 support");
     }
     // init for draw
     Render::init();

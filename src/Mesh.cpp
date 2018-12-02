@@ -1,4 +1,5 @@
 #include "Mesh.hpp"
+#include "Log.hpp"
 #include "Debug.hpp"
 
 
@@ -24,7 +25,7 @@ void
 Mesh::initData(GLsizei n_vertices)
 {
     if (m_n_vertices) {
-        ERROR("Mesh already allocated");
+        Log::e("Mesh already allocated");
     } else {
         m_n_vertices = n_vertices;
         aux_initBuffers();
@@ -45,7 +46,7 @@ Mesh::unmapBufferVertex()
 {
     GLboolean result = glUnmapNamedBuffer(m_buffer_vertex);
     if (result == GL_FALSE) {
-        DEBUG("Failed to unmap vertex buffer, data may need to mapped again.");
+        Log::w("Failed to unmap vertex buffer, data may need to mapped again.");
     }
     return result == GL_TRUE;
 }
@@ -64,7 +65,7 @@ Mesh::unmapBufferNormal()
 {
     GLboolean result = glUnmapNamedBuffer(m_buffer_normal);
     if (result == GL_FALSE) {
-        DEBUG("Failed to unmap normal buffer, data may need to mapped again.");
+        Log::w("Failed to unmap normal buffer, data may need to mapped again.");
     }
     return result == GL_TRUE;
 }

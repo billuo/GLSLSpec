@@ -86,7 +86,6 @@ void
 onSpecial(int key, int x, int y)
 {
     switch (key) {
-        /// @TODO
         default:
             break;
     }
@@ -133,7 +132,6 @@ onMouse(int button, int state, int x, int y)
         } else if (state == GLUT_UP) {
             LastGrabbing.x = -1;
             LastGrabbing.y = -1;
-            /// @TODO
         }
     }
 }
@@ -170,7 +168,8 @@ onReshape(GLint w, GLint h)
     Render::setProjectionMatrix(glm::perspective(Pi / 2,
                                                  static_cast<float>(w) / h,
                                                  0.01f,
-                                                 100.0f));
+                                                 100.0f
+                                                ));
     glViewport(0, 0, w, h);
 }
 

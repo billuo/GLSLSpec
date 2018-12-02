@@ -1,5 +1,3 @@
-#include <memory>
-
 /**
  * @file Render.cpp
  * @brief Takes care of rendering
@@ -9,7 +7,12 @@
 #include "Debug.hpp"
 #include "Math.hpp"
 #include "Model.hpp"
+#include "OpenGL/Debug.hpp"
 #include "OpenGL/Introspection.hpp"
+#include "OpenGL/Utility/ShaderCompiler.hpp"
+#include "Log.hpp"
+
+#include <memory>
 #include <algorithm>
 
 
@@ -90,14 +93,15 @@ float Shininess = 2.0f;
 static void
 initMisc()
 {
-    glDebugMessageCallback(myDebugMessageCallback, nullptr);
+    glDebugMessageCallback(OpenGL::OpenGLOnDebug, nullptr);
     glEnable(GL_DEBUG_OUTPUT);
     glDebugMessageControl(GL_DONT_CARE,
                           GL_DONT_CARE,
                           GL_DONT_CARE,
                           0,
                           nullptr,
-                          GL_TRUE);
+                          GL_TRUE
+                         );
     glPointSize(3.0f);
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
@@ -106,28 +110,30 @@ initMisc()
 static void
 initShaderProgram()
 {
-    const std::string shader_dir("./shaders/");
+    using namespace OpenGL;
+    const std::string dir("./shaders/");
+    auto from_source = [dir](const char* file_name)
+    {
+        static auto c = ShaderCompiler::Instance();
+        return c.compile(ShaderSource(dir + file_name));
+    };
     // prepare main program
-    std::vector<const OpenGL::Shader*> sphere_shaders;
-    for (auto&& file : {"shader.vert", "shader.geom", "shader.frag"}) {
-        sphere_shaders.push_back(OpenGL::Shader::CompileFrom(shader_dir, file));
-    }
     ProgramSphere = std::make_unique<OpenGL::Program>("ADS shading");
-    ProgramSphere->attach(sphere_shaders).link();
+    ProgramSphere->attach({from_source("shader.vert"),
+                           from_source("shader.geom"),
+                           from_source("shader.frag")}
+                         ).link();
     // prepare program to draw axes
-    std::vector<const OpenGL::Shader*> axes_shaders;
-    for (auto&& file : {"axes.vert", "axes.frag"}) {
-        axes_shaders.push_back(OpenGL::Shader::CompileFrom(shader_dir, file));
-    }
     ProgramAxes = std::make_unique<OpenGL::Program>("Axes");
-    ProgramAxes->attach(axes_shaders).link();
+    ProgramAxes->attach({from_source("axes.vert"),
+                         from_source("axes.frag")}
+                       ).link();
     // setup UBO
-    UI_axes = std::make_unique<OpenGL::UniformInterface>(*ProgramAxes);
-    UI = std::make_unique<OpenGL::UniformInterface>(*ProgramSphere);
-    UBI = std::make_unique<OpenGL::UniformBlockInterface>(*ProgramSphere);
-    PII = std::make_unique<OpenGL::ProgramInputInterface>(*ProgramSphere);
-    POI = std::make_unique<OpenGL::ProgramOutputInterface>(*ProgramSphere);
-    CHECK_OPENGL();
+    UI_axes = std::make_unique<UniformInterface>(*ProgramAxes);
+    UI = std::make_unique<UniformInterface>(*ProgramSphere);
+    UBI = std::make_unique<UniformBlockInterface>(*ProgramSphere);
+    PII = std::make_unique<ProgramInputInterface>(*ProgramSphere);
+    POI = std::make_unique<ProgramOutputInterface>(*ProgramSphere);
 #if defined(DEBUG_BUILD)
     UI_axes->dump();
     UI->dump();
@@ -141,48 +147,38 @@ initShaderProgram()
     glNamedBufferStorage(UBO, ub_xform->size, nullptr, GL_DYNAMIC_STORAGE_BIT);
     glBindBufferBase(GL_UNIFORM_BUFFER,
                      static_cast<GLuint>(ub_xform->binding),
-                     UBO);
+                     UBO
+                    );
 }
 
 static void
 sphereVetices(float radius, size_t n_slices, size_t n_layers,
               std::vector<glm::vec3>& vertices, std::vector<glm::vec3>& normals)
 {
+    using namespace glm;
     const float dtheta = 2 * Pi / n_slices;
     const float dphi = Pi / n_layers;
     float r1 = 0.0f;
-    float r2 = glm::sin(dphi);
+    float r2 = sin(dphi);
     float y1 = 1.0f;
-    float y2 = glm::cos(dphi);
+    float y2 = cos(dphi);
     for (size_t layer = 0; layer <= n_layers; ++layer) {
         float theta1 = 0.0f;
         float theta2 = theta1 + dtheta;
         for (size_t slice = 0; slice < n_slices; ++slice) {
-            vertices.emplace_back(glm::cos(theta1) * r2,
-                                  y2,
-                                  glm::sin(theta1) * r2);
-            vertices.emplace_back(glm::cos(theta1) * r1,
-                                  y1,
-                                  glm::sin(theta1) * r1);
-            vertices.emplace_back(glm::cos(theta2) * r2,
-                                  y2,
-                                  glm::sin(theta2) * r2);
-            vertices.emplace_back(glm::cos(theta2) * r2,
-                                  y2,
-                                  glm::sin(theta2) * r2);
-            vertices.emplace_back(glm::cos(theta1) * r1,
-                                  y1,
-                                  glm::sin(theta1) * r1);
-            vertices.emplace_back(glm::cos(theta2) * r1,
-                                  y1,
-                                  glm::sin(theta2) * r1);
+            vertices.emplace_back(cos(theta1) * r2, y2, sin(theta1) * r2);
+            vertices.emplace_back(cos(theta1) * r1, y1, sin(theta1) * r1);
+            vertices.emplace_back(cos(theta2) * r2, y2, sin(theta2) * r2);
+            vertices.emplace_back(cos(theta2) * r2, y2, sin(theta2) * r2);
+            vertices.emplace_back(cos(theta1) * r1, y1, sin(theta1) * r1);
+            vertices.emplace_back(cos(theta2) * r1, y1, sin(theta2) * r1);
             theta1 = theta2;
             theta2 = theta1 + dtheta;
         }
         r1 = r2;
-        r2 = glm::sin((layer + 1) * dphi);
+        r2 = sin((layer + 1) * dphi);
         y1 = y2;
-        y2 = glm::cos((layer + 1) * dphi);
+        y2 = cos((layer + 1) * dphi);
     }
     normals = vertices;
     const size_t n_vertices = vertices.size();
@@ -220,17 +216,20 @@ cubeVertices(float a, size_t n_grids, std::vector<glm::vec3>& vertices,
                    [](const glm::vec3& v)
                    {
                        return glm::vec3(v.x, v.y, -v.z);
-                   }); // NOTE the reversed_iterator
+                   }
+                  ); // NOTE the reversed_iterator
     std::transform(vertices.begin(),
                    vertices.begin() + 2 * face_size,
                    std::back_inserter(vertices),
                    [](const glm::vec3& v)
-                   { return glm::vec3(-v.z, v.y, v.x); });
+                   { return glm::vec3(-v.z, v.y, v.x); }
+                  );
     std::transform(vertices.begin(),
                    vertices.begin() + 2 * face_size,
                    std::back_inserter(vertices),
                    [](const glm::vec3& v)
-                   { return glm::vec3(v.x, -v.z, v.y); });
+                   { return glm::vec3(v.x, -v.z, v.y); }
+                  );
     normals.reserve(6 * face_size);
     std::fill_n(std::back_inserter(normals),
                 face_size,
@@ -299,7 +298,6 @@ renderFront(Model& model)
         glFrontFace(GL_CCW);
         glPolygonMode(GL_FRONT_AND_BACK, FrontMode);
         model.mesh.draw(VAO, GL_TRIANGLES);
-        CHECK_OPENGL();
     }
 }
 
@@ -310,7 +308,6 @@ renderBack(Model& model)
         glPolygonMode(GL_FRONT_AND_BACK, BackMode);
         glFrontFace(GL_CW);
         model.mesh.draw(VAO, GL_TRIANGLES);
-        CHECK_OPENGL();
     }
 }
 
@@ -327,7 +324,7 @@ renderFrontBack(Model& model)
             glm::transpose(glm::inverse(glm::mat3(View_Model))); // inverse transpose matrix
     glNamedBufferSubData(UBO,
                          u_model->offset,
-                         OpenGL::sizeOfType(static_cast<GLenum>(u_model->type)),
+                         OpenGL::sizeOfDataType(static_cast<GLenum>(u_model->type)),
                          glm::value_ptr(View_Model));
     for (glm::length_t i = 0; i < glm::mat3::length(); ++i) {
         glNamedBufferSubData(UBO,
@@ -337,11 +334,11 @@ renderFrontBack(Model& model)
     }
     glNamedBufferSubData(UBO,
                          u_view->offset,
-                         OpenGL::sizeOfType(static_cast<GLenum>(u_view->type)),
+                         OpenGL::sizeOfDataType(static_cast<GLenum>(u_view->type)),
                          glm::value_ptr(NDC_View));
     glNamedBufferSubData(UBO,
                          u_mvp->offset,
-                         OpenGL::sizeOfType(static_cast<GLenum>(u_mvp->type)),
+                         OpenGL::sizeOfDataType(static_cast<GLenum>(u_mvp->type)),
                          glm::value_ptr(NDC_View * View_Model));
     renderFront(model);
     renderBack(model);
@@ -355,7 +352,6 @@ render()
     // init
     glClearBufferfv(GL_COLOR, 0, glm::value_ptr(bg_color));
     glClear(GL_DEPTH_BUFFER_BIT);
-    CHECK_OPENGL();
     //
     // draw axes
     auto u_world_axes = UI_axes->find("NDC_World");
@@ -369,7 +365,6 @@ render()
         glBindVertexArray(VAO);
         glDrawArrays(GL_LINES, 0, 6);
     }
-    CHECK_OPENGL();
     //
     // draw main object
     OpenGL::Program::Use(*ProgramSphere);
@@ -412,6 +407,5 @@ render()
     //
     // finish up
     glutSwapBuffers();
-    CHECK_OPENGL();
 }
 } // namespace Render

@@ -19,8 +19,7 @@ class Transform {
             : scale(scale), rotation(rotation), position(position)
     {}
 
-    mat4
-    to_mat4() const
+    mat4 to_mat4() const
     {
         return glm::translate(mat4(1.0f), position) *
                glm::scale(glm::mat4_cast(rotation), scale);

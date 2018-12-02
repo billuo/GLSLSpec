@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
 project(OpenGL-lab)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/3rdparty)
 include(cotire/cotire)
@@ -10,18 +10,23 @@ include_directories(include)
 include_directories(3rdparty)
 
 add_library(MainLib
-        src/OpenGL/Buffer.cpp
+        src/OpenGL/Object/Buffer.cpp
         src/OpenGL/Common.cpp
+        src/OpenGL/Debug.cpp
         src/OpenGL/Introspection.cpp
-        src/OpenGL/Program.cpp
-        src/OpenGL/Resource.cpp
-        src/OpenGL/Shader.cpp
-        src/Debug.cpp
+        src/OpenGL/Constants.cpp
+        src/OpenGL/Introspection/Resource.cpp
+        src/OpenGL/Object/Object.cpp
+        src/OpenGL/Object/Program.cpp
+        src/OpenGL/Object/Shader.cpp
         src/glutCallback.cpp
+        src/Debug.cpp
+        src/Log.cpp
         src/Mesh.cpp
         src/Render.cpp
         src/Transform.cpp
-        src/Utility.cpp)
+        src/Utility.cpp
+        src/OpenGL/Utility/ShaderCompiler.cpp)
 
 target_compile_definitions(MainLib PUBLIC $<$<CONFIG:Debug>:DEBUG_BUILD>)
 target_compile_options(MainLib PUBLIC $<$<CONFIG:Release>:-O2>)

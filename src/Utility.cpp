@@ -1,5 +1,5 @@
 #include "Utility.hpp"
-#include "Debug.hpp"
+#include "Log.hpp"
 
 
 namespace {
@@ -31,9 +31,9 @@ SafeDemangle(const char* mangled_name, char* output_buffer, size_t* length)
     char* ret =
             abi::__cxa_demangle(mangled_name, output_buffer, length, &status);
     if (status != 0) {
-        ERROR("Failed to demangle name '%s':%s\n",
-              mangled_name,
-              demangle_error_msg(status));
+        Log::e("Failed to demangle name '{}':{}\n",
+               mangled_name,
+               demangle_error_msg(status));
     }
     return ret;
 }
