@@ -8,7 +8,7 @@
 #include "glm/gtx/string_cast.hpp"
 #include <type_traits>
 #include <sstream>
-#include <iomanip>
+#include <ostream>
 
 
 namespace glm {
@@ -36,8 +36,7 @@ template <typename T, qualifier Q>
 GLM_FUNC_DECL GLM_INLINE bool
 nearlyEqual(tquat<T, Q> const& q1, tquat<T, Q> const& q2)
 {
-    return nearlyEqual(q1.x, q2.x) && nearlyEqual(q1.y, q2.y) && nearlyEqual(q1.z, q2.z) &&
-           nearlyEqual(q1.w, q2.w);
+    return nearlyEqual(q1.x, q2.x) && nearlyEqual(q1.y, q2.y) && nearlyEqual(q1.z, q2.z) && nearlyEqual(q1.w, q2.w);
 }
 
 /// Compare two mat for near equality.
@@ -126,7 +125,6 @@ template <length_t L, typename T, qualifier Q>
 GLM_FUNC_DECL std::ostream&
 operator<<(std::ostream& os, vec<L, T, Q> const& x)
 {
-    os << std::setprecision(2) << std::fixed;
     os << '{' << x[0];
     for (length_t i = 1; i < L; ++i) {
         os << ", " << x[i];
@@ -139,7 +137,6 @@ template <length_t C, length_t R, typename T, qualifier Q>
 GLM_FUNC_DECL std::ostream&
 operator<<(std::ostream& os, mat<C, R, T, Q> const& x)
 {
-    os << std::setprecision(2) << std::fixed;
     auto x_t = glm::transpose(x);
     os << "{\n";
     for (length_t i = 0; i < x_t.length(); ++i) {
@@ -149,46 +146,67 @@ operator<<(std::ostream& os, mat<C, R, T, Q> const& x)
     return os;
 }
 
-template <length_t L, typename T, qualifier Q>
-GLM_FUNC_DECL std::string
-string_cast(vec<L, T, Q> const& x)
-{
-    std::stringstream ss;
-    ss << x;
-    return ss.str();
-}
-
-template <length_t C, length_t R, typename T, qualifier Q>
-GLM_FUNC_DECL std::string
-string_cast(mat<C, R, T, Q> const& x)
-{
-    std::stringstream ss;
-    ss << x;
-    return ss.str();
-}
-
 } // namespace glm
 
+/// @TODO Re-encapsulate into own Vector and Metrix classes.
 namespace Math {
+
+static constexpr float Pi = 3.1415926f;
+
+struct Real {
+    float v;
+
+    constexpr Real(float value = 0.0f) : v(value)
+    {}
+
+    Real& operator=(float value)
+    { return assign(value); }
+
+    Real& assign(float value)
+    {
+        v = value;
+        return *this;
+    }
+
+    /// @TODO many operators
+
+
+    /// @TODO test normalize()
+
+    /// normalize to (-mag, mag)
+    Real& normalize(float mag)
+    { return assign(std::fmod(v, mag)); }
+
+    /// normalize to (min, max)
+    Real& normalize(float min, float max)
+    {
+        if (min >= max) {
+            return assign(0);
+        }
+        auto mid = (min + max) / 2;
+        return assign(std::fmod(v - mid, max - mid) + mid);
+    }
+
+    Real& clamp(float mag)
+    { return assign(std::clamp(v, -mag, mag)); }
+
+    Real& clamp(float min, float max)
+    { return assign(std::clamp(v, min, max)); }
+
+};
 
 template <typename T>
 T
 sign(T x)
 {
-    static_assert(std::is_arithmetic<T>::value, "");
-    static_assert(std::numeric_limits<T>::is_signed, "");
+    static_assert(std::is_arithmetic<T>::value);
+    static_assert(std::numeric_limits<T>::is_signed);
     return std::signbit(x) ? T(-1) : T(1);
 }
+
 } // namespace Math
 
-static const float Pi = 3.1415926f;
+#include "Math/Trigonometric.hpp"
 
-static inline float
-RadianOfDegree(float x)
-{ return x / 180.0f * Pi; }
-
-static inline float
-DegreeOfRadian(float x)
-{ return x * 180.0f / Pi; }
 
 #endif /* end of include guard: MATH_HPP_AUWT35Z6 */

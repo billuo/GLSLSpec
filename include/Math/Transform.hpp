@@ -5,6 +5,8 @@
 #include "Math.hpp"
 
 
+namespace Math {
+
 class Transform {
     using vec3 = glm::vec3;
     using quat = glm::quat;
@@ -15,8 +17,7 @@ class Transform {
 
     explicit Transform(mat4 matrix);
 
-    Transform(vec3 scale, quat rotation, vec3 position)
-            : scale(scale), rotation(rotation), position(position)
+    Transform(vec3 scale, quat rotation, vec3 position) : scale(scale), rotation(rotation), position(position)
     {}
 
     mat4 to_mat4() const
@@ -33,5 +34,9 @@ class Transform {
     quat rotation;
     vec3 position;
 };
+
+} // namespace Math
+
+
 
 #endif //OPENGL_LAB_TRANSFORM_HPP

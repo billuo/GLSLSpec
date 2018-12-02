@@ -7,7 +7,7 @@
 #if defined(DEBUG_BUILD)
 constexpr auto console_sink_level = spdlog::level::trace;
 #else
-constexpr auto console_sink_level = spdlog::level::info;
+constexpr auto console_sink_level = spdlog::level::debug;
 #endif
 
 Log::Log()

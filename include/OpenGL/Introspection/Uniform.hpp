@@ -18,14 +18,13 @@ namespace details {
 template <typename To, typename ...Args> static constexpr auto all_convertible_v = (std::is_convertible_v<Args, To> &&
 ...);
 
-template <typename T> static constexpr auto
-        is_GL_type_v =
+template <typename T> static constexpr auto is_GL_type_v =
         std::is_convertible_v<T, GLfloat> || std::is_convertible_v<T, GLint> || std::is_convertible_v<T, GLuint>;
 
-template <typename ...Args> static constexpr auto
-        all_GL_type_v =
+template <typename ...Args> static constexpr auto all_GL_type_v =
         all_convertible_v<GLfloat, Args...> || all_convertible_v<GLint, Args...> || all_convertible_v<GLuint, Args...>;
 
+/// TODO the order of conditional may have unexpected effect on result...
 template <typename ...Args> using GL_cast =
 std::conditional_t<all_convertible_v<GLfloat, Args...>,
         GLfloat,
@@ -37,22 +36,6 @@ template <typename ...Args>
 static inline void
 glUniformxx(GLint location, Args... args)
 { static_assert(1 <= sizeof...(args) && sizeof...(args) <= 4, "Invalid parameter pack size"); }
-
-template <typename T>
-static inline void
-glUniformxx(GLint, T);
-
-template <typename T>
-static inline void
-glUniformxx(GLint, T, T);
-
-template <typename T>
-static inline void
-glUniformxx(GLint, T, T, T);
-
-template <typename T>
-static inline void
-glUniformxx(GLint, T, T, T, T);
 
 template <>
 void
@@ -131,18 +114,12 @@ struct Uniform : public Resource {
     GLint referenced[MaxShaderStage] = {};
 
     using GLintfield = GLint(Uniform::*);
-    static constexpr GLintfield
-            fields
-    [
-    ] =
+    static constexpr GLintfield fields[] =
             {&Uniform::type, &Uniform::asize, &Uniform::offset, &Uniform::block_index, &Uniform::astride,
              &Uniform::mstride, &Uniform::row_major, &Uniform::atomic_index, &Uniform::location,};
     static constexpr size_t n_fields = countof(fields);
 
-    static constexpr GLenum
-            properties
-    [
-    ] =
+    static constexpr GLenum properties[] =
             {GL_TYPE, GL_ARRAY_SIZE, GL_OFFSET, GL_BLOCK_INDEX, GL_ARRAY_STRIDE, GL_MATRIX_STRIDE, GL_IS_ROW_MAJOR,
              GL_ATOMIC_COUNTER_BUFFER_INDEX, GL_LOCATION, GL_REFERENCED_BY_VERTEX_SHADER,
              GL_REFERENCED_BY_TESS_CONTROL_SHADER, GL_REFERENCED_BY_TESS_EVALUATION_SHADER,

@@ -14,6 +14,7 @@ out GS_FS {
 } gs_out;
 
 subroutine vec3 colorOfIndex(int i);
+
 layout(index = 1)
 subroutine (colorOfIndex)
 vec3 smoothColor(int i) {

@@ -2,7 +2,7 @@
 #define MODEL_HPP_DW4MRMVP
 #pragma once
 
-#include "Transform.hpp"
+#include "Math/Transform.hpp"
 #include "Mesh.hpp"
 
 
@@ -13,7 +13,7 @@ class Model {
     Model(const Model&) = delete;
     Model& operator=(const Model&) = delete;
 
-    Transform transform;
+    Math::Transform transform;
     Mesh mesh;
 };
 

@@ -1,7 +1,9 @@
-#include "Transform.hpp"
+#include "Math/Transform.hpp"
 
 
 using namespace glm;
+
+namespace Math {
 
 Transform::Transform(glm::mat4 m) : Transform()
 {
@@ -19,3 +21,5 @@ Transform::Transform(glm::mat4 m) : Transform()
         rotation = quat(r_m); // r_m needs to be pure rotation matrix
     }
 }
+
+} // namespace Math

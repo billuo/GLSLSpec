@@ -1,17 +1,20 @@
 #include "Math.hpp"
 #include "OpenGL/Common.hpp"
 #include "Render.hpp"
-#include <bitset>
+#include "Log.hpp"
 
 
 namespace {
 
+using Degree = Math::Degree;
+using Radian = Math::Radian;
+
 std::bitset<128> KeyPressed;
 
 struct {
-    float horizontal;
-    float vertical;
-} Orientation = {0.0f, 0.0f};
+    Degree horizontal;
+    Degree vertical;
+} Orientation = {0_deg, 0_deg};
 
 glm::vec3 EyePos = glm::vec3(0.0f, 0.0f, 2.0f);
 glm::vec3 LookDir = glm::vec3(0.0f, 0.0f, -1.0f);
@@ -98,28 +101,18 @@ onMotion(int x, int y)
     y -= LastGrabbing.y;
     LastGrabbing.x += x;
     LastGrabbing.y += y;
-    y = -y; // XXX in glut, window coordinate originates at top left.
+    // XXX in glut, window coordinate origin is located at top left corner.
+    // But we want to calculate as if it's at bottom left corner.
+    y = -y;
     int w = glutGet(GLUT_WINDOW_WIDTH);
     int h = glutGet(GLUT_WINDOW_HEIGHT);
-    const float x_degrees(180.0f / w * x);
-    const float y_degrees(180.0f / h * y);
-    Orientation.horizontal += x_degrees;
-    Orientation.vertical += y_degrees;
-    if (Orientation.horizontal > 180.0f || Orientation.horizontal <= -180.0f) {
-        Orientation.horizontal =
-                std::fmod(Orientation.horizontal + 180.0f, 360.0f) - 180.0f;
-    }
-    const float y_mag_max = 89.0f;
-    if (Orientation.vertical > y_mag_max) {
-        Orientation.vertical = y_mag_max;
-    } else if (Orientation.vertical < -y_mag_max) {
-        Orientation.vertical = -y_mag_max;
-    }
-    LookDir.x = glm::cos(RadianOfDegree(Orientation.vertical)) *
-                glm::sin(RadianOfDegree(Orientation.horizontal));
-    LookDir.y = glm::sin(RadianOfDegree(Orientation.vertical));
-    LookDir.z = glm::cos(RadianOfDegree(Orientation.vertical)) *
-                -glm::cos(RadianOfDegree(Orientation.horizontal));
+    Orientation.horizontal += 180_deg / w * x;
+    Orientation.vertical += 180_deg / h * y;
+    Orientation.horizontal.round_half();
+    Orientation.vertical.clamp(89.0f);
+    LookDir.x = Orientation.vertical.cos() * Orientation.horizontal.sin();
+    LookDir.y = Orientation.vertical.sin();
+    LookDir.z = Orientation.vertical.cos() * -Orientation.horizontal.cos();
 }
 
 void
@@ -165,11 +158,7 @@ onTimer(int current_ms)
 void
 onReshape(GLint w, GLint h)
 {
-    Render::setProjectionMatrix(glm::perspective(Pi / 2,
-                                                 static_cast<float>(w) / h,
-                                                 0.01f,
-                                                 100.0f
-                                                ));
+    Render::setProjectionMatrix(glm::perspective(::Math::Pi / 2, static_cast<float>(w) / h, 0.01f, 100.0f));
     glViewport(0, 0, w, h);
 }
 

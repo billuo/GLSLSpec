@@ -127,6 +127,7 @@ sphereVetices(float radius, size_t n_slices, size_t n_layers, std::vector<glm::v
               std::vector<glm::vec3>& normals)
 {
     using namespace glm;
+    using Math::Pi;
     const float dtheta = 2 * Pi / n_slices;
     const float dphi = Pi / n_layers;
     float r1 = 0.0f;
