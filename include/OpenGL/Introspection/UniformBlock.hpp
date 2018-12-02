@@ -4,6 +4,7 @@
 
 #include "Uniform.hpp"
 #include <vector>
+#include <ostream>
 
 
 namespace OpenGL {
@@ -88,16 +89,21 @@ struct UniformBlock : public Resource {
         return nullptr;
     }
 
-    void dump() const
+    friend std::ostream& operator<<(std::ostream& os, const UniformBlock& block)
     {
-        Resource::dump();
-        fprintf(stderr, "binding=%d, size=%d, uniforms:\n", binding, size);
-        for (auto&& u : uniforms) {
-            u.dump_from_block();
+        os << static_cast<const Resource&>(block) << '\n';
+        os << "binding=" << block.binding << ", size=" << block.size << "\n";
+        os << Resource::referenced_stages(block.referenced) << "\n{";
+        for (auto&& u : block.uniforms) {
+            os << "\n\t" << static_cast<const Resource&>(u);
+            os << "\n\t" << "type=" << nameOfDataType(u.type) << ", offset=" << u.offset << "\n";
         }
-        Resource::dump_referenced(referenced);
+        os << '}';
+        return os;
     }
+
 };
+
 } // namespace OpenGL
 
 #endif /* end of include guard: UNIFORMBLOCK_HPP_NJWVEP58 */

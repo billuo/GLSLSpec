@@ -2,6 +2,7 @@
 #define UNIFORM_HPP_VDQHP3QT
 #pragma once
 
+#include <ostream>
 #include "Resource.hpp"
 #include "OpenGL/Constants.hpp"
 #include "Debug.hpp"
@@ -49,26 +50,21 @@ struct Uniform : public Resource {
         }
     }
 
-    void dump() const
+    friend std::ostream& operator<<(std::ostream& os, const Uniform& uniform)
     {
-        Resource::dump();
-        if (location == -1) {
-            fprintf(stderr, "type=%s, block_index=%d\n", nameOfDataType(type), block_index);
+        os << static_cast<const Resource&>(uniform) << '\n';
+        if (uniform.location == -1) {
+            os << "type=" << nameOfDataType(uniform.type) << ", block_index=" << uniform.block_index
+               << '\n';
         } else {
-            fprintf(stderr, "type=%s, location=%d\n", nameOfDataType(type), location);
+            os << "type=" << nameOfDataType(uniform.type) << ", location=" << uniform.location
+               << '\n';
         }
-        Resource::dump_referenced(referenced);
+        os << referenced_stages(uniform.referenced);
+        return os;
     }
 
-  private:
     friend struct UniformBlock;
-
-    void dump_from_block() const
-    {
-        putc('\t', stderr);
-        Resource::dump();
-        fprintf(stderr, "\ttype=%s, offset=%d\n", nameOfDataType(type), offset);
-    }
 };
 
 } // namespace OpenGL

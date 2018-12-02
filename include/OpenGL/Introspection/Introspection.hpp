@@ -7,6 +7,7 @@
 #ifndef INTROSPECTION_HPP_JKHGRKZY
 #define INTROSPECTION_HPP_JKHGRKZY
 
+#include <ostream>
 #include "Log.hpp"
 #include "OpenGL/Object/Program.hpp"
 
@@ -51,7 +52,7 @@ struct ProgramInterface : public ProgramInterfaceBase {
 
     std::vector<Resource> resources;
 
-    explicit ProgramInterface(const Program& program) : m_name(program.name())
+    explicit ProgramInterface(const Program& program)
     {
         // per interface properties
         GLint n_resources;
@@ -103,32 +104,20 @@ struct ProgramInterface : public ProgramInterfaceBase {
         return nullptr;
     }
 
-    void dump() const
+    friend std::ostream& operator<<(std::ostream& os, const ProgramInterface& interface)
     {
-        GLsizei name_length;
-        glGetObjectLabel(GL_PROGRAM, m_name, 0, &name_length, nullptr);
-        auto&& name = std::make_unique<GLchar[]>(name_length + 1);
-        glGetObjectLabel(GL_PROGRAM, m_name, name_length + 1, nullptr, name.get());
-        Log::d("##################################################\n"
-               "Dumping interface {} of program[{}]'{}'\n"
-               "##################################################\n",
-               type_name<Resource>(),
-               m_name,
-               name_length ? name.get() : "");
-        for (auto&& r : resources) {
-            r.dump();
+        os << "INTERFACE:";
+        for (auto&& r : interface.resources) {
+            os << '\n' << r;
         }
+        return os;
     }
-
-  private:
-    GLuint m_name; // should not be used other than dump()
 };
 
 using UniformInterface = ProgramInterface<Uniform>;
 using UniformBlockInterface = ProgramInterface<UniformBlock>;
 using ProgramInputInterface = ProgramInterface<ProgramInput>;
 using ProgramOutputInterface = ProgramInterface<ProgramOutput>;
-/// @TODO
 
 } // namespace OpenGL
 

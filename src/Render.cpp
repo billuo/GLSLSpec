@@ -114,10 +114,12 @@ initShaderProgram()
     ProgramSphere->attach({from_source("shader.vert"), from_source("shader.geom"),
                            from_source("shader.frag")}).link();
     ISphere = std::make_unique<Introspector>(*ProgramSphere);
+    Log::i("Sphere\n{}", *ISphere);
     // prepare program to draw axes
     ProgramAxes = std::make_unique<Program>("Axes");
     ProgramAxes->attach({from_source("axes.vert"), from_source("axes.frag")}).link();
     IAxes = std::make_unique<Introspector>(*ProgramAxes);
+    Log::i("Axes\n{}", *IAxes);
     // setup UBO
     auto ub_xform = ISphere->IUniformBlock->find("Transformations");
     assert(ub_xform);

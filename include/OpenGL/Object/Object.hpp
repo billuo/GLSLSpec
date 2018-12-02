@@ -56,6 +56,9 @@ class Object {
         explicit operator GLuint() const
         { return m_name; }
 
+        friend std::ostream& operator<<(std::ostream& os, const Object::Name& name)
+        { return os << name.get(); }
+
       private:
         GLuint m_name;
     };
@@ -82,18 +85,10 @@ class Object {
     std::string label() const
     { return m_label ? *m_label : std::string(); }
 
-    friend std::ostream& OpenGL::operator<<(std::ostream& os, const Name& name);
+    friend std::ostream& operator<<(std::ostream& os, const Object& object)
+    { return os << object.label() << '#' << object.name(); }
+
 };
-
-inline std::ostream&
-operator<<(std::ostream& os, const Object::Name& name)
-{ return os << name.get(); }
-
-inline std::ostream&
-operator<<(std::ostream& os, const Object& object)
-{
-    return os << object.label() << '#' << object.name();
-}
 
 /**
  * @brief Name pool for standard OpenGL objects.

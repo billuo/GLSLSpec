@@ -1,6 +1,7 @@
 #ifndef OPENGL_LAB_INTROSPECTOR_HPP
 #define OPENGL_LAB_INTROSPECTOR_HPP
 
+#include <ostream>
 #include "Introspection.hpp"
 
 
@@ -16,6 +17,7 @@ class Introspector {
     const UP<UniformBlockInterface> IUniformBlock;
     const UP<ProgramInputInterface> IInput;
     const UP<ProgramOutputInterface> IOutput;
+    friend std::ostream& operator<<(std::ostream& os, const Introspector& introspector);
 
   private:
     GLuint m_name; // only a weak reference

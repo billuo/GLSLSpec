@@ -2,6 +2,7 @@
 #define PROGRAMOUTPUT_HPP_DN7NRFC6
 #pragma once
 
+#include <ostream>
 #include "Resource.hpp"
 #include "OpenGL/Constants.hpp"
 
@@ -45,19 +46,19 @@ struct ProgramOutput : public Resource {
         }
     }
 
-    void dump() const
+    friend std::ostream& operator<<(std::ostream& os, const ProgramOutput& output)
     {
-        Resource::dump();
-        fprintf(stderr,
-                "type=%s, array_size=%d, location=%d, location_index=%d\nper_patch=%s, component location=%d\n",
-                nameOfDataType(type),
-                asize,
-                location,
-                location_index,
-                per_patch ? "true" : "false",
-                component);
-        Resource::dump_referenced(referenced);
+        os << static_cast<const Resource&>(output) << '\n';
+        if (output.per_patch) {
+            os << "[per_patch] ";
+        }
+        os << "type=" << nameOfDataType(output.type) << ", array_size=" << output.asize << '\n';
+        os << "location=" << output.location << ", location index=" << output.location_index
+           << ", component location=" << output.component << '\n';
+        os << Resource::referenced_stages(output.referenced);
+        return os;
     }
+
 };
 } // namespace OpenGL
 

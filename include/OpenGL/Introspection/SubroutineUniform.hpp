@@ -4,6 +4,7 @@
 
 #include "Resource.hpp"
 #include <vector>
+#include <ostream>
 
 
 namespace OpenGL {
@@ -36,14 +37,16 @@ struct SubroutineUniform : public Resource {
         }
     }
 
-    void dump() const
+    friend std::ostream& operator<<(std::ostream& os, const SubroutineUniform& sub_uniform)
     {
-        Resource::dump();
-        fprintf(stderr, "array_size=%d, location=%d\n", asize, location);
-        for (auto& sr : subroutines) {
-            sr.dump();
+        os << static_cast<const Resource&>(sub_uniform) << '\n';
+        os << "array_size=" << sub_uniform.asize << ", location" << sub_uniform.location;
+        for (auto&& sr : sub_uniform.subroutines) {
+            os << sr << '\n';
         }
+        return os;
     }
+
 };
 
 struct VertexSubroutineUniform : public SubroutineUniform {

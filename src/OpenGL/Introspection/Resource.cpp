@@ -1,25 +1,25 @@
 #include "OpenGL/Introspection/Resource.hpp"
+#include <sstream>
 
 
 namespace OpenGL {
 
-void
-Resource::dump_referenced(const GLint referenced[MaxShaderStage])
+std::string
+Resource::referenced_stages(const GLint referenced[MaxShaderStage])
 {
-    fprintf(stderr, "Referenced by:\n");
+    std::stringstream ss;
+    ss << "Referenced by:";
 
-#define STAGE(stage)       \
-    if (referenced[stage]) \
-    fprintf(stderr, "\t" #stage "\n")
-
+#define STAGE(stage) if (referenced[stage]) ss << "\n\t" << #stage;
     STAGE(VertexShader);
     STAGE(TessellationControlShader);
     STAGE(TessellationEvaluationShader);
     STAGE(GeometryShader);
     STAGE(FragmentShader);
     STAGE(ComputeShader);
-
 #undef STAGE
-    putc('\n', stderr);
+
+    return ss.str();
 }
+
 } // namespace OpenGL

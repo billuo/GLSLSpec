@@ -2,6 +2,7 @@
 #define PROGRAMINPUT_HPP_JCITG7HD
 #pragma once
 
+#include <ostream>
 #include "Resource.hpp"
 #include "OpenGL/Constants.hpp"
 
@@ -43,18 +44,18 @@ struct ProgramInput : public Resource {
         }
     }
 
-    void dump() const
+    friend std::ostream& operator<<(std::ostream& os, const ProgramInput& input)
     {
-        Resource::dump();
-        fprintf(stderr,
-                "type=%s, array_size=%d, location=%d,\nper_patch=%s, component location=%d\n",
-                nameOfDataType(type),
-                asize,
-                location,
-                per_patch ? "true" : "false",
-                component);
-        Resource::dump_referenced(referenced);
+        os << static_cast<const Resource&>(input) << '\n';
+        if (input.per_patch) {
+            os << "[per_patch] ";
+        }
+        os << "type=" << nameOfDataType(input.type) << ", array_size=" << input.asize << '\n';
+        os << "location=" << input.location << ", component location=" << input.component << '\n';
+        os << Resource::referenced_stages(input.referenced);
+        return os;
     }
+
 };
 
 } // namespace OpenGL

@@ -5,6 +5,7 @@
 #include "OpenGL/Common.hpp"
 #include "Utility.hpp"
 #include <string>
+#include <ostream>
 
 
 namespace OpenGL {
@@ -29,11 +30,11 @@ struct Resource {
     Resource(GLint index, GLchar* name) : index(index), name(name)
     {}
 
-    void dump() const
-    { fprintf(stderr, "index=%d, name='%s'\n", index, name.c_str()); }
+    friend std::ostream& operator<<(std::ostream& os, const Resource& resource)
+    { return os << "index=" << resource.index << ", name=" << resource.name; }
 
   protected:
-    static void dump_referenced(const GLint referenced[MaxShaderStage]);
+    static std::string referenced_stages(const GLint referenced[MaxShaderStage]);
 };
 } // namespace OpenGL
 
