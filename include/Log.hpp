@@ -14,8 +14,14 @@ class Log {
     void init();
 
     std::shared_ptr<spdlog::logger> console;
+    std::shared_ptr<spdlog::logger> raw_err;
 
   public:
+
+    /// raw string logging
+    template <typename ...Args>
+    static void raw(const char* fmt, Args&& ...args)
+    { Log::Instance.raw_err->info(fmt, std::forward<Args>(args)...); }
 
 /// verbose(trace) logging
     template <typename ...Args>

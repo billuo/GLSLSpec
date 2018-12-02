@@ -1,4 +1,4 @@
-#include "OpenGL/Debug.hpp"
+#include "OpenGL/Utility/Debug.hpp"
 #include "Log.hpp"
 #include "Debug.hpp"
 

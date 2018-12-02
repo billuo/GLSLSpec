@@ -11,8 +11,8 @@ const char*
 GLErrorString(uint32_t error);
 
 void
-OpenGLOnDebug(GLenum source, GLenum type, GLuint id, GLenum serverity,
-              GLsizei length, const GLchar* message, const void* user);
+OpenGLOnDebug(GLenum source, GLenum type, GLuint id, GLenum serverity, GLsizei length,
+              const GLchar* message, const void* user);
 
 } // namespace OpenGL
 

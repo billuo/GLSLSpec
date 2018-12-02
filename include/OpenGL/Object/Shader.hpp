@@ -19,8 +19,9 @@ using shared_shader = std::shared_ptr<Shader>;
 
 class Shader : public Object {
   public:
-    explicit Shader(GLenum type, const GLchar* label = nullptr) : Object(Get(
-            type), label, GL_SHADER)
+    explicit Shader(GLenum type, const GLchar* label = nullptr) : Object(Get(type),
+                                                                         label,
+                                                                         GL_SHADER)
     {}
 
     Shader(Shader&&) = default;

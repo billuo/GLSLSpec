@@ -36,8 +36,8 @@ template <typename T, qualifier Q>
 GLM_FUNC_DECL GLM_INLINE bool
 nearlyEqual(tquat<T, Q> const& q1, tquat<T, Q> const& q2)
 {
-    return nearlyEqual(q1.x, q2.x) && nearlyEqual(q1.y, q2.y) &&
-           nearlyEqual(q1.z, q2.z) && nearlyEqual(q1.w, q2.w);
+    return nearlyEqual(q1.x, q2.x) && nearlyEqual(q1.y, q2.y) && nearlyEqual(q1.z, q2.z) &&
+           nearlyEqual(q1.w, q2.w);
 }
 
 /// Compare two mat for near equality.

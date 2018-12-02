@@ -7,7 +7,7 @@
 #define DEBUG_HPP_W8W5TH9A
 #pragma once
 
- #include <cassert>
+#include <cassert>
 
 
 #if defined(DEBUG_BUILD)

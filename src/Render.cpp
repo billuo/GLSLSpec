@@ -7,8 +7,8 @@
 #include "Debug.hpp"
 #include "Math.hpp"
 #include "Model.hpp"
-#include "OpenGL/Debug.hpp"
-#include "OpenGL/Introspection.hpp"
+#include "OpenGL/Utility/Debug.hpp"
+#include "OpenGL/Introspection/Introspector.hpp"
 #include "OpenGL/Utility/ShaderCompiler.hpp"
 #include "Log.hpp"
 
@@ -30,12 +30,10 @@ bool Axes = true;
 RasterizationMode FrontMode = Fill;
 RasterizationMode BackMode = None;
 
-std::unique_ptr<OpenGL::Program> ProgramSphere, ProgramAxes;
-std::unique_ptr<OpenGL::UniformInterface> UI_axes;
-std::unique_ptr<OpenGL::UniformInterface> UI;
-std::unique_ptr<OpenGL::UniformBlockInterface> UBI;
-std::unique_ptr<OpenGL::ProgramInputInterface> PII;
-std::unique_ptr<OpenGL::ProgramOutputInterface> POI;
+using namespace OpenGL;
+
+std::unique_ptr<Program> ProgramSphere, ProgramAxes;
+std::unique_ptr<Introspector> ISphere, IAxes;
 
 glm::mat4 NDC_View = glm::identity<glm::mat4>();
 glm::mat4 View_World = glm::identity<glm::mat4>();
@@ -95,13 +93,7 @@ initMisc()
 {
     glDebugMessageCallback(OpenGL::OpenGLOnDebug, nullptr);
     glEnable(GL_DEBUG_OUTPUT);
-    glDebugMessageControl(GL_DONT_CARE,
-                          GL_DONT_CARE,
-                          GL_DONT_CARE,
-                          0,
-                          nullptr,
-                          GL_TRUE
-                         );
+    glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
     glPointSize(3.0f);
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
@@ -118,42 +110,25 @@ initShaderProgram()
         return c.compile(ShaderSource(dir + file_name));
     };
     // prepare main program
-    ProgramSphere = std::make_unique<OpenGL::Program>("ADS shading");
-    ProgramSphere->attach({from_source("shader.vert"),
-                           from_source("shader.geom"),
-                           from_source("shader.frag")}
-                         ).link();
+    ProgramSphere = std::make_unique<Program>("ADS shading");
+    ProgramSphere->attach({from_source("shader.vert"), from_source("shader.geom"),
+                           from_source("shader.frag")}).link();
+    ISphere = std::make_unique<Introspector>(*ProgramSphere);
     // prepare program to draw axes
-    ProgramAxes = std::make_unique<OpenGL::Program>("Axes");
-    ProgramAxes->attach({from_source("axes.vert"),
-                         from_source("axes.frag")}
-                       ).link();
+    ProgramAxes = std::make_unique<Program>("Axes");
+    ProgramAxes->attach({from_source("axes.vert"), from_source("axes.frag")}).link();
+    IAxes = std::make_unique<Introspector>(*ProgramAxes);
     // setup UBO
-    UI_axes = std::make_unique<UniformInterface>(*ProgramAxes);
-    UI = std::make_unique<UniformInterface>(*ProgramSphere);
-    UBI = std::make_unique<UniformBlockInterface>(*ProgramSphere);
-    PII = std::make_unique<ProgramInputInterface>(*ProgramSphere);
-    POI = std::make_unique<ProgramOutputInterface>(*ProgramSphere);
-#if defined(DEBUG_BUILD)
-    UI_axes->dump();
-    UI->dump();
-    UBI->dump();
-    PII->dump();
-    POI->dump();
-#endif
-    auto ub_xform = UBI->find("Transformations");
+    auto ub_xform = ISphere->IUniformBlock->find("Transformations");
     assert(ub_xform);
     glCreateBuffers(1, &UBO);
     glNamedBufferStorage(UBO, ub_xform->size, nullptr, GL_DYNAMIC_STORAGE_BIT);
-    glBindBufferBase(GL_UNIFORM_BUFFER,
-                     static_cast<GLuint>(ub_xform->binding),
-                     UBO
-                    );
+    glBindBufferBase(GL_UNIFORM_BUFFER, static_cast<GLuint>(ub_xform->binding), UBO);
 }
 
 static void
-sphereVetices(float radius, size_t n_slices, size_t n_layers,
-              std::vector<glm::vec3>& vertices, std::vector<glm::vec3>& normals)
+sphereVetices(float radius, size_t n_slices, size_t n_layers, std::vector<glm::vec3>& vertices,
+              std::vector<glm::vec3>& normals)
 {
     using namespace glm;
     const float dtheta = 2 * Pi / n_slices;
@@ -216,44 +191,28 @@ cubeVertices(float a, size_t n_grids, std::vector<glm::vec3>& vertices,
                    [](const glm::vec3& v)
                    {
                        return glm::vec3(v.x, v.y, -v.z);
-                   }
-                  ); // NOTE the reversed_iterator
+                   }); // NOTE the reversed_iterator
     std::transform(vertices.begin(),
                    vertices.begin() + 2 * face_size,
                    std::back_inserter(vertices),
                    [](const glm::vec3& v)
-                   { return glm::vec3(-v.z, v.y, v.x); }
-                  );
+                   { return glm::vec3(-v.z, v.y, v.x); });
     std::transform(vertices.begin(),
                    vertices.begin() + 2 * face_size,
                    std::back_inserter(vertices),
                    [](const glm::vec3& v)
-                   { return glm::vec3(v.x, -v.z, v.y); }
-                  );
+                   { return glm::vec3(v.x, -v.z, v.y); });
     normals.reserve(6 * face_size);
-    std::fill_n(std::back_inserter(normals),
-                face_size,
-                glm::vec3(0.0f, 0.0f, 1.0f));
-    std::fill_n(std::back_inserter(normals),
-                face_size,
-                glm::vec3(0.0f, 0.0f, -1.0f));
-    std::fill_n(std::back_inserter(normals),
-                face_size,
-                glm::vec3(-1.0f, 0.0f, 0.0f));
-    std::fill_n(std::back_inserter(normals),
-                face_size,
-                glm::vec3(1.0f, 0.0f, 0.0f));
-    std::fill_n(std::back_inserter(normals),
-                face_size,
-                glm::vec3(0.0f, -1.0f, 0.0f));
-    std::fill_n(std::back_inserter(normals),
-                face_size,
-                glm::vec3(0.0f, 1.0f, 0.0f));
+    std::fill_n(std::back_inserter(normals), face_size, glm::vec3(0.0f, 0.0f, 1.0f));
+    std::fill_n(std::back_inserter(normals), face_size, glm::vec3(0.0f, 0.0f, -1.0f));
+    std::fill_n(std::back_inserter(normals), face_size, glm::vec3(-1.0f, 0.0f, 0.0f));
+    std::fill_n(std::back_inserter(normals), face_size, glm::vec3(1.0f, 0.0f, 0.0f));
+    std::fill_n(std::back_inserter(normals), face_size, glm::vec3(0.0f, -1.0f, 0.0f));
+    std::fill_n(std::back_inserter(normals), face_size, glm::vec3(0.0f, 1.0f, 0.0f));
 }
 
 static void
-initMesh(Mesh& mesh, const std::vector<glm::vec3>& vertices,
-         const std::vector<glm::vec3>& normals)
+initMesh(Mesh& mesh, const std::vector<glm::vec3>& vertices, const std::vector<glm::vec3>& normals)
 {
     assert(vertices.size() == normals.size());
     mesh.initData(static_cast<GLsizei>(vertices.size()));
@@ -314,7 +273,7 @@ renderBack(Model& model)
 static void
 renderFrontBack(Model& model)
 {
-    auto ub_xform = UBI->find("Transformations");
+    auto ub_xform = ISphere->IUniformBlock->find("Transformations");
     auto u_model = ub_xform->find("View_Model");
     auto u_normal = ub_xform->find("NormalMatrix");
     auto u_view = ub_xform->find("NDC_View");
@@ -354,7 +313,7 @@ render()
     glClear(GL_DEPTH_BUFFER_BIT);
     //
     // draw axes
-    auto u_world_axes = UI_axes->find("NDC_World");
+    auto u_world_axes = IAxes->IUniform->find("NDC_World");
     assert(u_world_axes);
     if (Render::Axes) {
         OpenGL::Program::Use(*ProgramAxes);
@@ -369,6 +328,7 @@ render()
     // draw main object
     OpenGL::Program::Use(*ProgramSphere);
     // light
+    const auto& UI = ISphere->IUniform;
     auto u_lpos = UI->find("Light.pos");
     auto u_la = UI->find("Light.la");
     auto u_ld = UI->find("Light.ld");
@@ -378,23 +338,15 @@ render()
     glUniform3fv(u_lpos->location,
                  1,
                  glm::value_ptr(View_World * glm::vec4(light_pos_world, 1.0f)));
-    glUniform3fv(u_la->location,
-                 1,
-                 glm::value_ptr(glm::vec3(0.15f, 0.15f, 0.05f)));
-    glUniform3fv(u_ld->location,
-                 1,
-                 glm::value_ptr(glm::vec3(0.8f, 0.8f, 0.03f)));
-    glUniform3fv(u_ls->location,
-                 1,
-                 glm::value_ptr(glm::vec3(0.8f, 0.8f, 0.03f)));
+    glUniform3fv(u_la->location, 1, glm::value_ptr(glm::vec3(0.15f, 0.15f, 0.05f)));
+    glUniform3fv(u_ld->location, 1, glm::value_ptr(glm::vec3(0.8f, 0.8f, 0.03f)));
+    glUniform3fv(u_ls->location, 1, glm::value_ptr(glm::vec3(0.8f, 0.8f, 0.03f)));
     // material
     auto u_ka = UI->find("Material.ka");
     auto u_kd = UI->find("Material.kd");
     auto u_ks = UI->find("Material.ks");
     auto u_shininess = UI->find("Material.shininess");
-    glUniform3fv(u_ka->location,
-                 1,
-                 glm::value_ptr(glm::vec3(0.5f, 0.5f, 1.0f)));
+    glUniform3fv(u_ka->location, 1, glm::value_ptr(glm::vec3(0.5f, 0.5f, 1.0f)));
     glUniform3fv(u_kd->location, 1, glm::value_ptr(glm::vec3(0.7f)));
     glUniform3fv(u_ks->location, 1, glm::value_ptr(glm::vec3(0.5f)));
     glUniform1f(u_shininess->location, Shininess);

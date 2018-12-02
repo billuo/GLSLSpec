@@ -12,21 +12,22 @@ include_directories(3rdparty)
 add_library(MainLib
         src/OpenGL/Object/Buffer.cpp
         src/OpenGL/Common.cpp
-        src/OpenGL/Debug.cpp
-        src/OpenGL/Introspection.cpp
+        src/OpenGL/Utility/Debug.cpp
+        src/OpenGL/Introspection/Introspection.cpp
         src/OpenGL/Constants.cpp
+        src/OpenGL/Introspection/Introspector.cpp
         src/OpenGL/Introspection/Resource.cpp
         src/OpenGL/Object/Object.cpp
         src/OpenGL/Object/Program.cpp
         src/OpenGL/Object/Shader.cpp
+        src/OpenGL/Utility/ShaderCompiler.cpp
         src/glutCallback.cpp
         src/Debug.cpp
         src/Log.cpp
         src/Mesh.cpp
         src/Render.cpp
         src/Transform.cpp
-        src/Utility.cpp
-        src/OpenGL/Utility/ShaderCompiler.cpp)
+        src/Utility.cpp)
 
 target_compile_definitions(MainLib PUBLIC $<$<CONFIG:Debug>:DEBUG_BUILD>)
 target_compile_options(MainLib PUBLIC $<$<CONFIG:Release>:-O2>)

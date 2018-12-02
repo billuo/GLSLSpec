@@ -14,8 +14,7 @@ namespace OpenGL {
 struct ShaderSource {
     explicit ShaderSource(const std::string& file);
 
-    explicit ShaderSource(GLenum type, const std::string& source)
-            : type(type), source(source)
+    explicit ShaderSource(GLenum type, const std::string& source) : type(type), source(source)
     {}
 
     bool operator==(const ShaderSource& rhs) const
@@ -38,8 +37,7 @@ struct hash<OpenGL::ShaderSource> {
 
     result_type operator()(const argument_type& ss) const noexcept
     {
-        return std::hash<std::string>{}(ss.source) ^
-               std::hash<GLenum>{}(ss.type);
+        return std::hash<std::string>{}(ss.source) ^ std::hash<GLenum>{}(ss.type);
     }
 };
 }
@@ -57,8 +55,7 @@ class ShaderCompiler {
 
     ShaderCompiler() = default;
 
-    shared_shader
-    compile(const ShaderSource& source, bool force_compile = false);
+    shared_shader compile(const ShaderSource& source, bool force_compile = false);
 
   private:
     std::unordered_map<ShaderSource, shared_shader> m_cache;

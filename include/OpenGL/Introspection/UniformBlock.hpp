@@ -18,15 +18,13 @@ struct UniformBlock : public Resource {
 
     static constexpr GLenum properties[] =
             {GL_BUFFER_BINDING, GL_BUFFER_DATA_SIZE, GL_NUM_ACTIVE_VARIABLES,
-             GL_REFERENCED_BY_VERTEX_SHADER,
-             GL_REFERENCED_BY_TESS_CONTROL_SHADER,
-             GL_REFERENCED_BY_TESS_EVALUATION_SHADER,
-             GL_REFERENCED_BY_GEOMETRY_SHADER, GL_REFERENCED_BY_FRAGMENT_SHADER,
-             GL_REFERENCED_BY_COMPUTE_SHADER,};
+             GL_REFERENCED_BY_VERTEX_SHADER, GL_REFERENCED_BY_TESS_CONTROL_SHADER,
+             GL_REFERENCED_BY_TESS_EVALUATION_SHADER, GL_REFERENCED_BY_GEOMETRY_SHADER,
+             GL_REFERENCED_BY_FRAGMENT_SHADER, GL_REFERENCED_BY_COMPUTE_SHADER,};
     static constexpr size_t n_properties = countof(properties);
 
-    UniformBlock(GLuint program, GLint index, GLchar* name, const GLint* values)
-            : Resource(index, name)
+    UniformBlock(GLuint program, GLint index, GLchar* name, const GLint* values) : Resource(index,
+                                                                                            name)
     {
         //
         // per block property
@@ -53,11 +51,7 @@ struct UniformBlock : public Resource {
                                indices.get());
         // uniform name
         GLint max_name_length;
-        glGetProgramInterfaceiv(program,
-                                Uniform::interface,
-                                GL_MAX_NAME_LENGTH,
-                                &max_name_length
-                               );
+        glGetProgramInterfaceiv(program, Uniform::interface, GL_MAX_NAME_LENGTH, &max_name_length);
         auto&& name_buffer = std::make_unique<GLchar[]>(max_name_length);
         // uniform properties
         auto&& value_buffer = std::make_unique<GLint[]>(n_props);
@@ -79,10 +73,7 @@ struct UniformBlock : public Resource {
                                      max_name_length,
                                      nullptr,
                                      name_buffer.get());
-            uniforms.emplace_back(program,
-                                  indices[i],
-                                  name_buffer.get(),
-                                  value_buffer.get());
+            uniforms.emplace_back(program, indices[i], name_buffer.get(), value_buffer.get());
         }
     }
 

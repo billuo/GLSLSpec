@@ -19,9 +19,7 @@ class Program : public Object {
     static void Use(const Program& prog)
     { glUseProgram(static_cast<GLuint>(prog.m_name)); }
 
-    explicit Program(const GLchar* label = nullptr) : Object(pool.Get(),
-                                                             label,
-                                                             GL_PROGRAM)
+    explicit Program(const GLchar* label = nullptr) : Object(pool.Get(), label, GL_PROGRAM)
     {}
 
     Program(Program&&) = default;

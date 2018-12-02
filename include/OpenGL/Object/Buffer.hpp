@@ -24,9 +24,7 @@ class Buffer : public Object {
     { glBindBuffer(target, 0); }
 
   public:
-    explicit Buffer(const GLchar* label = nullptr) : Object(Pool.Get(),
-                                                            label,
-                                                            GL_BUFFER)
+    explicit Buffer(const GLchar* label = nullptr) : Object(Pool.Get(), label, GL_BUFFER)
     {}
 
     Buffer(Buffer&&) = default;

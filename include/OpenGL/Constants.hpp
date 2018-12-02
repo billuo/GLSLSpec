@@ -22,7 +22,9 @@ nameOfShaderType(GLenum type);
 GLenum
 shaderTypeOfSuffix(std::string suffix);
 
+const char*
+nameOfProgramInterface(GLenum interface);
 
-}
+} // namespace OpenGL
 
 #endif //OPENGL_LAB_CONSTANTS_HPP
