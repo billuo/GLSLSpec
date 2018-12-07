@@ -1,13 +1,12 @@
-#ifndef MATH_HPP_AUWT35Z6
-#define MATH_HPP_AUWT35Z6
+#pragma once
 
 #define GLM_ENABLE_EXPERIMENTAL 1
 
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
 #include "glm/gtx/string_cast.hpp"
+#include <algorithm>
 #include <type_traits>
-#include <sstream>
 #include <ostream>
 
 
@@ -208,5 +207,3 @@ sign(T x)
 
 #include "Math/Trigonometric.hpp"
 
-
-#endif /* end of include guard: MATH_HPP_AUWT35Z6 */

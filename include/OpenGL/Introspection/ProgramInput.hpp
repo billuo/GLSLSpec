@@ -1,5 +1,3 @@
-#ifndef PROGRAMINPUT_HPP_JCITG7HD
-#define PROGRAMINPUT_HPP_JCITG7HD
 #pragma once
 
 #include <ostream>
@@ -22,16 +20,16 @@ struct ProgramInput : public Resource {
     using GLintfield = GLint(ProgramInput::*);
     static constexpr GLintfield fields[] =
             {&ProgramInput::type, &ProgramInput::asize, &ProgramInput::location,
-             &ProgramInput::per_patch, &ProgramInput::component,};
+             &ProgramInput::per_patch,};
     static constexpr size_t n_fields = countof(fields);
 
     static constexpr GLenum properties[] =
-            {GL_TYPE, GL_ARRAY_SIZE, GL_LOCATION, GL_IS_PER_PATCH, GL_LOCATION_COMPONENT,
+            {GL_TYPE, GL_ARRAY_SIZE, GL_LOCATION, GL_IS_PER_PATCH,
              GL_REFERENCED_BY_VERTEX_SHADER, GL_REFERENCED_BY_TESS_CONTROL_SHADER,
              GL_REFERENCED_BY_TESS_EVALUATION_SHADER, GL_REFERENCED_BY_GEOMETRY_SHADER,
              GL_REFERENCED_BY_FRAGMENT_SHADER, GL_REFERENCED_BY_COMPUTE_SHADER,};
     static constexpr size_t n_properties = countof(properties);
-    static_assert(n_fields + MaxShaderStage == n_properties, "");
+    static_assert(n_fields + MaxShaderStage == n_properties);
 
     ProgramInput(GLuint program, GLint index, GLchar* name, const GLint* values);
 
@@ -41,4 +39,3 @@ struct ProgramInput : public Resource {
 
 } // namespace OpenGL
 
-#endif /* end of include guard: PROGRAMINPUT_HPP_JCITG7HD */

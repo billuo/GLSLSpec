@@ -3,8 +3,6 @@
  * @brief Encapsulates OpenGL shader program objects.
  * @author Zhen Luo 461652354@qq.com
  */
-#ifndef PROGRAM_HPP_FX85CLNB
-#define PROGRAM_HPP_FX85CLNB
 #pragma once
 
 #include "Shader.hpp"
@@ -60,4 +58,3 @@ class Program : public Object {
 
 } // namespace OpenGL
 
-#endif /* end of include guard: PROGRAM_HPP_FX85CLNB */

@@ -1,5 +1,3 @@
-#ifndef PROGRAMPIPELINE_HPP_FOIB1IJ8
-#define PROGRAMPIPELINE_HPP_FOIB1IJ8
 #pragma once
 
 #include "Program.hpp"
@@ -13,4 +11,3 @@ class ProgramPipeline : Object {
 };
 } // namespace OpenGL
 
-#endif /* end of include guard: PROGRAMPIPELINE_HPP_FOIB1IJ8 */

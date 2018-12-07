@@ -14,7 +14,7 @@ namespace OpenGL {
 
 class Buffer : public Object {
 
-    static decltype(makeNamePool(glCreateBuffers, glDeleteBuffers)) Pool;
+    static decltype(makeNamePool(glGenBuffers, glDeleteBuffers)) Pool;
 
   public:
     static void bind(GLenum target, Buffer& buffer)

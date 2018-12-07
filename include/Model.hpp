@@ -1,5 +1,3 @@
-#ifndef MODEL_HPP_DW4MRMVP
-#define MODEL_HPP_DW4MRMVP
 #pragma once
 
 #include "Math/Transform.hpp"
@@ -17,4 +15,3 @@ class Model {
     Mesh mesh;
 };
 
-#endif /* end of include guard: MODEL_HPP_DW4MRMVP */

@@ -1,5 +1,3 @@
-#ifndef UNIFORMBLOCK_HPP_NJWVEP58
-#define UNIFORMBLOCK_HPP_NJWVEP58
 #pragma once
 
 #include "Uniform.hpp"
@@ -33,4 +31,3 @@ struct UniformBlock : public Resource {
 
 } // namespace OpenGL
 
-#endif /* end of include guard: UNIFORMBLOCK_HPP_NJWVEP58 */

@@ -3,6 +3,6 @@
 
 namespace OpenGL {
 
-decltype(Object::makeNamePool(glCreateBuffers, glDeleteBuffers))
-        Buffer::Pool = Object::makeNamePool(glCreateBuffers, glDeleteBuffers);
+decltype(Object::makeNamePool(glGenBuffers, glDeleteBuffers))
+        Buffer::Pool = Object::makeNamePool(glGenBuffers, glDeleteBuffers);
 } // namespace OpenGL

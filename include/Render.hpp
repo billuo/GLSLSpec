@@ -1,5 +1,3 @@
-#ifndef RENDER_HPP_1PYP75HW
-#define RENDER_HPP_1PYP75HW
 #pragma once
 
 #include "glm/fwd.hpp"
@@ -32,4 +30,3 @@ switchRasterizationMode(Side side);
 extern float Shininess;
 } // namespace Render
 
-#endif /* end of include guard: RENDER_HPP_1PYP75HW */

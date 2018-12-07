@@ -1,5 +1,3 @@
-#ifndef SUBROUTINEUNIFORM_HPP_HFZJLTZH
-#define SUBROUTINEUNIFORM_HPP_HFZJLTZH
 #pragma once
 
 #include "Resource.hpp"
@@ -82,4 +80,3 @@ struct ComputeSubroutineUniform : public SubroutineUniform {
 };
 } // namespace OpenGL
 
-#endif /* end of include guard: SUBROUTINEUNIFORM_HPP_HFZJLTZH */

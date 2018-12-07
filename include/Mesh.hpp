@@ -1,5 +1,3 @@
-#ifndef MESH_HPP_OXR27HFE
-#define MESH_HPP_OXR27HFE
 #pragma once
 
 #include "Math.hpp"
@@ -42,19 +40,15 @@ class Mesh {
     {
         assert(m_n_vertices);
         //
-        glCreateBuffers(1, &m_buffer_vertex);
+        glGenBuffers(1, &m_buffer_vertex);
         assert(m_buffer_vertex);
-        glNamedBufferStorage(m_buffer_vertex,
-                             m_n_vertices * sizeof(Vertex),
-                             nullptr,
-                             GL_MAP_WRITE_BIT);
+        glBindBuffer(GL_ARRAY_BUFFER, m_buffer_vertex);
+        glBufferData(GL_ARRAY_BUFFER, m_n_vertices * sizeof(Vertex), nullptr, GL_STATIC_DRAW);
         //
-        glCreateBuffers(1, &m_buffer_normal);
+        glGenBuffers(1, &m_buffer_normal);
         assert(m_buffer_vertex);
-        glNamedBufferStorage(m_buffer_normal,
-                             m_n_vertices * sizeof(Normal),
-                             nullptr,
-                             GL_MAP_WRITE_BIT);
+        glBindBuffer(GL_ARRAY_BUFFER, m_buffer_normal);
+        glBufferData(GL_ARRAY_BUFFER, m_n_vertices * sizeof(Normal), nullptr, GL_MAP_WRITE_BIT);
     }
 
     GLsizei m_n_vertices;
@@ -62,4 +56,3 @@ class Mesh {
     GLuint m_buffer_normal;
 };
 
-#endif /* end of include guard: MESH_HPP_OXR27HFE */

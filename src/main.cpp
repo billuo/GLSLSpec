@@ -3,51 +3,48 @@
  * @brief Program entry point.
  * @author Zhen Luo 461652354@qq.com
  */
-#include "Log.hpp"
+#include "Console.hpp"
+#include "Options.hpp"
+#include "Window.hpp"
 #include "OpenGL/Common.hpp"
-#include "Render.hpp"
-#include "glutCallback.hpp"
-
 
 // TODO load meshes from .obj
 // TODO support simple texture
 // TODO load texture from .obj
 // TODO finish introspection
-// TODO better control over logging (multiple logger)
+
+namespace {
+
+void
+on_exit()
+{
+    OpenGL::Exit();
+}
+
+} // namespace
 
 int
 main(int argc, char** argv)
 {
-    glutInit(&argc, argv);
-    // glut window setup
-    glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGB);
-    glutInitContextVersion(4, 5);
-    glutInitContextFlags(GLUT_FORWARD_COMPATIBLE);
-    glutInitContextFlags(GLUT_CORE_PROFILE | GLUT_DEBUG);
-    glutInitWindowSize(800, 600);
-    glutInitWindowPosition(0, 0);
-    glutCreateWindow("Sphere");
-    // glut setup window specific callbacks
-    glutDisplayFunc(Render::render);
-    glutReshapeFunc(onReshape);
-    glutKeyboardFunc(onKeyboard);
-    glutKeyboardUpFunc(onKeyboardUp);
-    glutSpecialFunc(onSpecial);
-    glutMotionFunc(onMotion);
-    glutMouseFunc(onMouse);
-    glutCloseFunc(onClose);
-    // init glew for OpenGL 4+
-    GLenum err = glewInit();
-    if (err != GLEW_OK) {
-        Log::e("Failed to init glew:%s", glewGetErrorString(err));
-    } else if (GLEW_VERSION_4_5) {
-        Log::i("Found OpenGL 4.5 support");
+    std::atexit(on_exit);
+    try {
+        parse_options(argc - 1, argv + 1);
+    } catch (invalid_option& e) {
+        Log::e("{}", e.what());
+        std::exit(EXIT_FAILURE);
     }
-    // init for draw
-    Render::init();
-    // glut setup global callbacks
-    glutIdleFunc(Render::render);
-    glutTimerFunc(15, onTimer, 0);
-    // main loop
-    glutMainLoop();
+    if (options.flags.display_help) {
+        print_usage(argv[0]);
+        std::exit(EXIT_SUCCESS);
+    }
+    Watcher watcher(options.input_files);
+    // declare_commands();
+    OpenGL::Initialize();
+    glClearColor(0.1f, 0.3f, 0.5f, 1.0f);
+    console = std::make_unique<Console>(options.initial_commands);
+    while (options.flags.running && !main_window->closed()) {
+        console->execute_all();
+        main_window->next_frame();
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    }
 }

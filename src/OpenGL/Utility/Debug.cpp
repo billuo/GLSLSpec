@@ -57,10 +57,6 @@ TypeString(GLenum type)
 
 namespace OpenGL {
 
-const char*
-GLErrorString(uint32_t error)
-{ return (const char*) (gluErrorString(error)); }
-
 void
 OpenGLOnDebug(GLenum source, GLenum type, GLuint id, GLenum severity,
               GLsizei length, const GLchar* message, const void* user)

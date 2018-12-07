@@ -3,8 +3,6 @@
  * @brief Encapsulates OpenGL shader objects.
  * @author Zhen Luo 461652354@qq.com
  */
-#ifndef SHADER_HPP_HWFB70NR
-#define SHADER_HPP_HWFB70NR
 #pragma once
 
 #include "Object.hpp"
@@ -66,4 +64,3 @@ class Shader : public Object {
 
 } // namespace OpenGL
 
-#endif /* end of include guard: SHADER_HPP_HWFB70NR */

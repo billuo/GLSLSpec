@@ -1,5 +1,3 @@
-#ifndef PROGRAMOUTPUT_HPP_DN7NRFC6
-#define PROGRAMOUTPUT_HPP_DN7NRFC6
 #pragma once
 
 #include <ostream>
@@ -23,12 +21,12 @@ struct ProgramOutput : public Resource {
     using GLintfield = GLint(ProgramOutput::*);
     static constexpr GLintfield fields[] =
             {&ProgramOutput::type, &ProgramOutput::asize, &ProgramOutput::location,
-             &ProgramOutput::location_index, &ProgramOutput::per_patch, &ProgramOutput::component,};
+             &ProgramOutput::location_index, &ProgramOutput::per_patch,};
     static constexpr size_t n_fields = countof(fields);
 
     static constexpr GLenum properties[] =
             {GL_TYPE, GL_ARRAY_SIZE, GL_LOCATION, GL_LOCATION_INDEX, // dual source blending
-             GL_IS_PER_PATCH, GL_LOCATION_COMPONENT, GL_REFERENCED_BY_VERTEX_SHADER,
+             GL_IS_PER_PATCH, GL_REFERENCED_BY_VERTEX_SHADER,
              GL_REFERENCED_BY_TESS_CONTROL_SHADER, GL_REFERENCED_BY_TESS_EVALUATION_SHADER,
              GL_REFERENCED_BY_GEOMETRY_SHADER, GL_REFERENCED_BY_FRAGMENT_SHADER,
              GL_REFERENCED_BY_COMPUTE_SHADER,};
@@ -43,4 +41,3 @@ struct ProgramOutput : public Resource {
 
 } // namespace OpenGL
 
-#endif /* end of include guard: PROGRAMOUTPUT_HPP_DN7NRFC6 */

@@ -1,13 +1,21 @@
-#ifndef OPENGL_LAB_COMMON_HPP
-#define OPENGL_LAB_COMMON_HPP
+#pragma once
 
-#include <GL/glew.h>
-// <GL/freeglut.h> must be included after <GL/glew.h>
-#include <GL/freeglut.h>
+// TODO this is platform dependent
+#include "glad/glad.h"
+// <GLFW/glfw3.h> must be included after "glad/glad.h"
+#include <GLFW/glfw3.h>
+
+
+struct Window;
 
 /// OpenGL C++ wrapper
 namespace OpenGL {
 
+void
+Initialize();
+
+void
+Exit();
+
 } // namespace OpenGL
 
-#endif /* end of include guard: OPENGL_LAB_COMMON_HPP */

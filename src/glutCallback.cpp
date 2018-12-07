@@ -1,7 +1,9 @@
 #include "Math.hpp"
 #include "OpenGL/Common.hpp"
-#include "Render.hpp"
-#include "Log.hpp"
+#include "Options.hpp"
+#include "Window.hpp"
+
+#include <bitset>
 
 
 namespace {
@@ -50,7 +52,7 @@ onKeyboard(unsigned char key, int x, int y)
             KeyPressed[std::tolower(key)] = true;
             break;
         case 27:
-            glutLeaveMainLoop();
+            main_window->close();
             break;
         default:
             break;
@@ -104,8 +106,8 @@ onMotion(int x, int y)
     // XXX in glut, window coordinate origin is located at top left corner.
     // But we want to calculate as if it's at bottom left corner.
     y = -y;
-    int w = glutGet(GLUT_WINDOW_WIDTH);
-    int h = glutGet(GLUT_WINDOW_HEIGHT);
+    int w = main_window->dimension().x;
+    int h = main_window->dimension().y;
     Orientation.horizontal += 180_deg / w * x;
     Orientation.vertical += 180_deg / h * y;
     Orientation.horizontal.round_half();
@@ -116,52 +118,9 @@ onMotion(int x, int y)
 }
 
 void
-onMouse(int button, int state, int x, int y)
-{
-    if (button == GLUT_LEFT_BUTTON) {
-        if (state == GLUT_DOWN) {
-            LastGrabbing.x = x;
-            LastGrabbing.y = y;
-        } else if (state == GLUT_UP) {
-            LastGrabbing.x = -1;
-            LastGrabbing.y = -1;
-        }
-    }
-}
-
-void
-onTimer(int current_ms)
-{
-    // callback loop
-    static int last_ms = current_ms;
-    int delta_ms = current_ms - last_ms;
-    glutTimerFunc(15, onTimer, current_ms + 15);
-    last_ms = current_ms;
-    // update based on inputs
-    static float velocity = 1.5f;
-    float step = velocity * 15 / 1000;
-    if (KeyPressed[static_cast<unsigned char>('w')]) {
-        EyePos += LookDir * step;
-    }
-    if (KeyPressed[static_cast<unsigned char>('s')]) {
-        EyePos -= LookDir * step;
-    }
-    if (KeyPressed[static_cast<unsigned char>('a')]) {
-        EyePos += glm::normalize(glm::cross(Up, LookDir)) * step;
-    }
-    if (KeyPressed[static_cast<unsigned char>('d')]) {
-        EyePos -= glm::normalize(glm::cross(Up, LookDir)) * step;
-    }
-    Render::setViewMatrix(glm::lookAt(EyePos, EyePos + LookDir, Up));
-}
-
-void
 onReshape(GLint w, GLint h)
 {
     Render::setProjectionMatrix(glm::perspective(::Math::Pi / 2, static_cast<float>(w) / h, 0.01f, 100.0f));
     glViewport(0, 0, w, h);
 }
 
-void
-onClose()
-{ glutIdleFunc(nullptr); }

@@ -3,8 +3,6 @@
  * @brief Debug facilities including assertion and logging.
  * @author Zhen Luo 461652354@qq.com
  */
-#ifndef DEBUG_HPP_W8W5TH9A
-#define DEBUG_HPP_W8W5TH9A
 #pragma once
 
 #include <cassert>
@@ -32,4 +30,3 @@
 
 #define UNUSED(x) (void(x))
 
-#endif /* end of include guard: DEBUG_HPP_W8W5TH9A */

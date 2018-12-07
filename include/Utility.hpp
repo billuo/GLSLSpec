@@ -3,9 +3,9 @@
  * @brief Commonly used functions and macros
  * @author Zhen Luo 461652354@qq.com
  */
-#ifndef UTILITY_HPP_ZUDUHVTJ
-#define UTILITY_HPP_ZUDUHVTJ
 #pragma once
+
+#include "Log.hpp"
 
 #include <cmath>
 #include <cstdlib>
@@ -18,18 +18,9 @@
 /// Return size of static array at compile time
 #define countof(Array) (sizeof(Array) / sizeof((Array)[0]))
 
-template <class T, class O>
-static inline T*
-pointer_offset(T* ptr, O offset)
-{
-    return (T*) ((char*) (ptr) + offset);
-}
-
 #if !CXX_MSVC
-
 char*
 SafeDemangle(const char* mangled_name, char* output_buffer, size_t* length);
-
 #endif
 
 /// Convert types to name strings.
@@ -69,4 +60,76 @@ type_name()
     return r.c_str();
 }
 
-#endif /* end of include guard: UTILITY_HPP_ZUDUHVTJ */
+template <typename T>
+inline T
+string_to(const std::string& str);
+
+template <>
+inline int
+string_to<int>(const std::string& str)
+{
+    try {
+        return std::stoi(str);
+    } catch (std::invalid_argument& e) {
+        Log::e("{} can not be converted to int", str);
+    } catch (std::out_of_range& e) {
+        Log::e("{} out of range of int", str);
+    }
+    return 0;
+}
+
+template <>
+inline long
+string_to<long>(const std::string& str)
+{
+    try {
+        return std::stol(str);
+    } catch (std::invalid_argument& e) {
+        Log::e("{} can not be converted to long", str);
+    } catch (std::out_of_range& e) {
+        Log::e("{} out of range of long, str");
+    }
+    return 0;
+}
+
+template <>
+inline long long
+string_to<long long>(const std::string& str)
+{
+    try {
+        return std::stoll(str);
+    } catch (std::invalid_argument& e) {
+        Log::e("{} can not be converted to long long", str);
+    } catch (std::out_of_range& e) {
+        Log::e("{} out of range of long long", str);
+    }
+    return 0;
+}
+
+template <>
+inline float
+string_to<float>(const std::string& str)
+{
+    char* end;
+    float ret = std::strtof(str.c_str(), &end);
+    if (end == str.c_str()) {
+        Log::e("{} can not be converted to float", str);
+    } else if (errno == ERANGE) {
+        Log::e("{} out of range of float", str.substr(0, end - str.c_str()));
+    }
+    return ret;
+}
+
+template <>
+inline double
+string_to<double>(const std::string& str)
+{
+    char* end;
+    double ret = std::strtod(str.c_str(), &end);
+    if (end == str.c_str()) {
+        Log::e("{} can not be converted to float", str);
+    } else if (errno == ERANGE) {
+        Log::e("{} out of range of float", str.substr(0, end - str.c_str()));
+    }
+    return ret;
+}

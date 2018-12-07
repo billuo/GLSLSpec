@@ -3,8 +3,6 @@
  * @brief Base class representing generic OpenGL objects, each contains a name of type GLuint of OpenGL object.
  * @author Zhen Luo 461652354@qq.com
  */
-#ifndef OBJECT_HPP_NPLQXK1F
-#define OBJECT_HPP_NPLQXK1F
 #pragma once
 
 #include "OpenGL/Common.hpp"
@@ -172,4 +170,3 @@ class Object::NamePool {
 
 } // namespace OpenGL
 
-#endif /* end of include guard: OBJECT_HPP_NPLQXK1F */

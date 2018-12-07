@@ -1,5 +1,3 @@
-#ifndef UNIFORM_HPP_VDQHP3QT
-#define UNIFORM_HPP_VDQHP3QT
 #pragma once
 
 #include "Resource.hpp"
@@ -153,4 +151,3 @@ struct Uniform : public Resource {
 
 } // namespace OpenGL
 
-#endif /* end of include guard: UNIFORM_HPP_VDQHP3QT */

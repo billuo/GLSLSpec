@@ -1,5 +1,3 @@
-#ifndef GLUTCALLBACK_HPP_ZXY1E9DC
-#define GLUTCALLBACK_HPP_ZXY1E9DC
 #pragma once
 
 void
@@ -26,4 +24,3 @@ onClose();
 void
 onTimer(int current_ms);
 
-#endif /* end of include guard: GLUTCALLBACK_HPP_ZXY1E9DC */

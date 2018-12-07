@@ -1,5 +1,3 @@
-#ifndef RESOURCE_HPP_A4D60H9V
-#define RESOURCE_HPP_A4D60H9V
 #pragma once
 
 #include "../Common.hpp"
@@ -36,4 +34,3 @@ struct Resource {
 
 } // namespace OpenGL
 
-#endif /* end of include guard: RESOURCE_HPP_A4D60H9V */

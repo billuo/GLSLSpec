@@ -4,8 +4,6 @@
  * @sa https://www.khronos.org/opengl/wiki/Program_Introspection#Interface_qeury
  * @author Zhen Luo 461652354@qq.com
  */
-#ifndef INTROSPECTION_HPP_JKHGRKZY
-#define INTROSPECTION_HPP_JKHGRKZY
 
 #include "../Constants.hpp"
 #include "../Object/Program.hpp"
@@ -130,4 +128,3 @@ using ComputeSubroutineUniformInterface = ProgramInterface<ComputeSubroutineUnif
 
 } // namespace OpenGL
 
-#endif /* end of include guard: INTROSPECTION_HPP_JKHGRKZY */
