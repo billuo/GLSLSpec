@@ -132,5 +132,9 @@
 // Uncomment and set to compile time level with zero cost (default is INFO).
 // Macros like SPDLOG_DEBUG(..), SPDLOG_INFO(..)  will expand to empty statements if not enabled
 //
-// #define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_INFO
+#if DEBUG_BUILD
+#define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_DEBUG
+#else
+#define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_INFO
+#endif
 ///////////////////////////////////////////////////////////////////////////////

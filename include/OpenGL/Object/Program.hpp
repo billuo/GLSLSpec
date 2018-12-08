@@ -13,47 +13,50 @@ namespace OpenGL {
 
 /// OpenGL shader program object
 class Program : public Object {
+    static auto& pool()
+    {
+        static struct {
+            Name get()
+            {
+                GLuint name = glCreateProgram();
+                return Name(name);
+            }
+
+            void put(Name&& name)
+            { glDeleteProgram(name.get()); }
+        } singleton;
+        return singleton;
+    }
+
   public:
     static void Use(const Program& prog)
-    { glUseProgram(static_cast<GLuint>(prog.m_name)); }
+    { glUseProgram(prog.name()); }
 
-    explicit Program(const GLchar* label = nullptr) : Object(pool.Get(), label, GL_PROGRAM)
-    {}
+    explicit Program(const GLchar* label = nullptr) : Object(pool().get())
+    {
+        if (label) {
+            Object::label(label, GL_PROGRAM);
+        }
+    }
 
     Program(Program&&) = default;
     Program& operator=(Program&&) = default;
 
     ~Program()
-    { pool.Put(std::move(m_name)); }
+    { pool().put(std::move(m_name)); }
 
-    /// Attach a shader to this program.
-    Program& attach(shared_shader shader);
-    /// Attach shaders to this program.
-    Program& attach(std::initializer_list<shared_shader> shaders);
+    Program& attach(const Shader& shader);
     /// Link all attached shaders together, forming a valid program.
     Program& link();
 
-  private:
-    // specialized object name pool
-    static struct {
-        Name Get()
-        {
-            GLuint name = glCreateProgram();
-            return Name(name);
-        }
-
-        void Put(Name&& name)
-        { glDeleteProgram(name.get()); }
-    } pool;
-
-    /// Query about a property of this program.
-    GLint aux_get(GLenum param) const;
-    /// Query about a property an interface of this program.
-    GLint aux_getStage(GLenum stage, GLenum pname) const;
+    /// Query about a parameter
+    GLint get(GLenum param) const;
+    /// Query about a property an interface
+    GLint get_stage(GLenum stage, GLenum pname) const;
     /// Retrive information log safely.
-    std::unique_ptr<GLchar[]> aux_getInfoLog() const;
-
-    std::set<shared_shader> m_attached_shaders;
+    std::unique_ptr<GLchar[]> get_info_log() const;
+    /// Set a parameter.
+    void set(GLenum param, GLint value);
 };
 
 } // namespace OpenGL

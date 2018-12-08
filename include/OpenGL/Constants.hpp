@@ -1,14 +1,13 @@
 #ifndef OPENGL_LAB_CONSTANTS_HPP
 #define OPENGL_LAB_CONSTANTS_HPP
 
+#include "Expected.hpp"
 #include "OpenGL/Common.hpp"
 
 #include <string>
 
 
 namespace OpenGL {
-
-static constexpr GLenum GL_UNKNOWN_SHADER = -1;
 
 GLsizei
 sizeOfDataType(GLenum type);
@@ -19,7 +18,7 @@ numelOfDataType(GLenum type);
 const char*
 nameOfDataType(GLenum type);
 
-GLenum
+expected<GLenum, std::string>
 shaderTypeOfSuffix(std::string suffix);
 
 const char*

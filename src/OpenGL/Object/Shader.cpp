@@ -22,26 +22,26 @@ void
 Shader::compile()
 {
     glCompileShader(name());
-    if (aux_GetParameter(GL_COMPILE_STATUS) == GL_FALSE) {
-        Log::e("%s compilation failed:%s",
-               nameOfShaderType(aux_GetParameter(GL_SHADER_TYPE)),
-               aux_GetInfoLog().get());
+    if (get(GL_COMPILE_STATUS) == GL_FALSE) {
+        Log::e("{} compilation failed:{}",
+               nameOfShaderType(get(GL_SHADER_TYPE)),
+               aux_get_info_log().get());
     }
 }
 
 GLint
-Shader::aux_GetParameter(GLenum pname) const
+Shader::get(GLenum param) const
 {
     GLint result = -1;
-    glGetShaderiv(name(), pname, &result);
+    glGetShaderiv(name(), param, &result);
     return result;
 }
 
 std::unique_ptr<char[]>
-Shader::aux_GetInfoLog() const
+Shader::aux_get_info_log() const
 {
     std::unique_ptr<char[]> ret;
-    GLint length = aux_GetParameter(GL_INFO_LOG_LENGTH);
+    GLint length = get(GL_INFO_LOG_LENGTH);
     // XXX one more byte, just in case
     ret = std::make_unique<char[]>(length + 1);
     glGetShaderInfoLog(name(), length, nullptr, ret.get());

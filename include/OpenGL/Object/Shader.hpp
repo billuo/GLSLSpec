@@ -17,16 +17,18 @@ using shared_shader = std::shared_ptr<Shader>;
 
 class Shader : public Object {
   public:
-    explicit Shader(GLenum type, const GLchar* label = nullptr) : Object(Get(type),
-                                                                         label,
-                                                                         GL_SHADER)
-    {}
+    explicit Shader(GLenum type, const GLchar* label = nullptr) : Object(pool.get(type))
+    {
+        if (label) {
+            Object::label(label, GL_SHADER);
+        }
+    }
 
     Shader(Shader&&) = default;
     Shader& operator=(Shader&&) = default;
 
     ~Shader()
-    { Put(std::move(m_name)); }
+    { pool.put(std::move(m_name)); }
 
     /// Add array of strings as sources of this shader
     void source(const GLchar** sources, size_t count);
@@ -38,28 +40,24 @@ class Shader : public Object {
     /// Compile this shader object.
     void compile();
 
+    /// Query a parameter
+    GLint get(GLenum param) const;
+
   private:
-    static Name Get(GLenum type)
-    {
-        GLuint name = glCreateShader(type);
-        if (name == 0) {
-            glDebugMessageInsert(GL_DEBUG_SOURCE_APPLICATION,
-                                 GL_DEBUG_TYPE_ERROR,
-                                 0,
-                                 GL_DEBUG_SEVERITY_MEDIUM,
-                                 -1,
-                                 "Failed to create shader");
+    static struct {
+        static Name get(GLenum type)
+        {
+            GLuint name = glCreateShader(type);
+            return Name(name);
         }
-        return Name(name);
-    }
 
-    static void Put(Name&& name)
-    { glDeleteShader(name.get()); }
+        static void put(Name&& name)
+        { glDeleteShader(name.get()); }
 
-    /// Query a parameter of this shader object
-    GLint aux_GetParameter(GLenum param) const;
+    } pool;
+
     /// Retrieve information log in a smart pointer
-    std::unique_ptr<char[]> aux_GetInfoLog() const;
+    std::unique_ptr<char[]> aux_get_info_log() const;
 };
 
 } // namespace OpenGL

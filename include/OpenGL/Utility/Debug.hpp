@@ -4,6 +4,8 @@
 #include "OpenGL/Common.hpp"
 
 
+#define OPENGL_TRACE if(auto err = glGetError()) {Log::d("error[{}], line#{}\nfile:{}", err, __LINE__, __FILE__);}
+
 namespace OpenGL {
 
 void

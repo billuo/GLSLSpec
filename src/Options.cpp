@@ -151,6 +151,7 @@ const std::vector<NamedOption> NamedOptions = {
                 {1, 1}, {"command"},
                 [](const std::string&, unsigned, const std::string* arg) -> unsigned
                 {
+                    Log::e("Execute commands through command line will be removed");
                     options.initial_commands.emplace(*arg);
                     return 1u;
                 }},
@@ -159,6 +160,7 @@ const std::vector<NamedOption> NamedOptions = {
                 {1, 1}, {"command"},
                 [](const std::string&, unsigned, const std::string* arg) -> unsigned
                 {
+                    Log::e("Execute commands through command line will be removed");
                     options.flags.exit_after_execution = true;
                     options.initial_commands.emplace(*arg);
                     return 1u;
@@ -237,7 +239,8 @@ const std::vector<NamedOption> NamedOptions = {
                 {0, 0}, {"shader"},
                 [](const std::string& match, unsigned, const std::string* arg) -> unsigned
                 {
-                    options.input_files.emplace_back(*arg, FileType::Shader).tag = match;
+                    options.input_files.emplace_back(*arg, FileType::Shader);
+                    options.input_files.back().tag = match;
                     return 0u;
                 }},
         {".", {"vert", "vs"},
@@ -245,7 +248,8 @@ const std::vector<NamedOption> NamedOptions = {
                 {0, 0}, {"shader"},
                 [](const std::string& match, unsigned, const std::string* arg) -> unsigned
                 {
-                    options.input_files.emplace_back(*arg, FileType::Shader).tag = match;
+                    options.input_files.emplace_back(*arg, FileType::Shader);
+                    options.input_files.back().tag = match;
                     return 0u;
                 }},
         {".", {"ply",  "obj", "OBJ", "PLY"},
@@ -253,7 +257,8 @@ const std::vector<NamedOption> NamedOptions = {
                 {0, 0}, {"model"},
                 [](const std::string& match, unsigned, const std::string* arg) -> unsigned
                 {
-                    options.input_files.emplace_back(*arg, FileType::Geometry).tag = match;
+                    options.input_files.emplace_back(*arg, FileType::Image);
+                    options.input_files.back().tag = match;
                     return 0u;
                 }},
         {".", {"hdr",  "png", "jpg", "jpeg", "HDR", "PNG", "JPG", "JPEG"},
@@ -261,7 +266,8 @@ const std::vector<NamedOption> NamedOptions = {
                 {0, 0}, {"image"},
                 [](const std::string& match, unsigned, const std::string* arg) -> unsigned
                 {
-                    options.input_files.emplace_back(*arg, FileType::Image).tag = "texture";
+                    options.input_files.emplace_back(*arg, FileType::Image);
+                    options.input_files.back().tag = "texture";
                     return 0u;
                 }}
 };

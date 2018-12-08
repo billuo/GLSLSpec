@@ -1,3 +1,4 @@
+#include <Expected.hpp>
 #include "OpenGL/Constants.hpp"
 #include "Math.hpp"
 #include "Debug.hpp"
@@ -272,24 +273,33 @@ nameOfDataType(GLenum type)
     }
 }
 
-GLenum // suffix is expected to be small; no reference needed
+expected<GLenum, std::string> // suffix is expected to be small; no reference needed
 shaderTypeOfSuffix(std::string suffix)
 {
     static constexpr struct {
         const char* const s;
         GLenum t;
-    } pairs[] = {{"vert", GL_VERTEX_SHADER},
-                 {"tesc", GL_TESS_CONTROL_SHADER},
-                 {"tese", GL_TESS_EVALUATION_SHADER},
-                 {"geom", GL_GEOMETRY_SHADER},
-                 {"frag", GL_FRAGMENT_SHADER},
-                 {"comp", GL_COMPUTE_SHADER}};
-    for (auto&& p : pairs) {
-        if (p.s == suffix) {
-            return p.t;
+    } pairs[] =
+            {
+                    {"vert", GL_VERTEX_SHADER},
+                    {"vs",   GL_VERTEX_SHADER},
+                    {"tesc", GL_TESS_CONTROL_SHADER},
+                    {"tcs",  GL_TESS_CONTROL_SHADER},
+                    {"tese", GL_TESS_EVALUATION_SHADER},
+                    {"tes",  GL_TESS_EVALUATION_SHADER},
+                    {"geom", GL_GEOMETRY_SHADER},
+                    {"gs",   GL_GEOMETRY_SHADER},
+                    {"frag", GL_FRAGMENT_SHADER},
+                    {"fs",   GL_FRAGMENT_SHADER},
+                    {"comp", GL_COMPUTE_SHADER},
+                    {"cs",   GL_COMPUTE_SHADER},
+            };
+    for (auto&&[s, type] : pairs) {
+        if (s == suffix) {
+            return type;
         }
     }
-    return GL_UNKNOWN_SHADER;
+    return make_unexpected("Unknown suffix ." + suffix);
 }
 
 const char*

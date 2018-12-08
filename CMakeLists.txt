@@ -3,6 +3,7 @@ project(GLSLSpec)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(OpenGL_GL_PREFERENCE LEGACY)
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/3rdparty)
 include(cotire/cotire)
@@ -50,7 +51,6 @@ link_libraries(third_party assimp)
 add_dependencies(third_party generated-glad)
 
 add_library(MainLib
-        src/OpenGL/Object/Buffer.cpp
         src/OpenGL/Common.cpp
         src/OpenGL/Constants.cpp
         src/OpenGL/Introspection/Interface.cpp
@@ -61,24 +61,20 @@ add_library(MainLib
         src/OpenGL/Introspection/SubroutineUniform.cpp
         src/OpenGL/Introspection/Uniform.cpp
         src/OpenGL/Introspection/UniformBlock.cpp
-        src/OpenGL/Object/Object.cpp
+		src/OpenGL/Object/Object.cpp
         src/OpenGL/Object/Program.cpp
         src/OpenGL/Object/Shader.cpp
         src/OpenGL/Utility/Debug.cpp
-        src/OpenGL/Utility/ShaderCompiler.cpp
-		#src/glutCallback.cpp
 		src/Console.cpp
-        src/Debug.cpp
 		src/FileSystem.cpp
         src/Log.cpp
         src/Mesh.cpp
 		src/Options.cpp
-		#src/Render.cpp
         src/Transform.cpp
         src/Utility.cpp
 		src/Watcher.cpp
 		src/Window.cpp
-		)
+		src/Sandbox.cpp)
 
 message(STATUS "Build target:${CMAKE_HOST_SYSTEM_NAME}")
 set(HOST ${CMAKE_HOST_SYSTEM_NAME})
@@ -101,7 +97,6 @@ find_package(Threads REQUIRED)
 message(STATUS "Threads library:${CMAKE_THREAD_LIBS_INIT}")
 target_link_libraries(MainLib ${CMAKE_THREAD_LIBS_INIT})
 
-set(OpenGL_GL_PREFERENCE LEGACY)
 find_package(OpenGL REQUIRED)
 message(STATUS "OpenGL found at:\n${OPENGL_INCLUDE_DIR};\n${OPENGL_LIBRARIES};")
 include_directories(${OPENGL_INCLUDE_DIR})

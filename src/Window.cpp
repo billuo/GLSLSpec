@@ -15,28 +15,28 @@ Window::Window()
 {
     auto& dim = options.window.dimension;
     auto& title = options.application.name;
-    handle = glfwCreateWindow(dim.x, dim.y, title.c_str(), nullptr, nullptr);
-    if (handle == nullptr) {
+    m_handle = glfwCreateWindow(dim.x, dim.y, title.c_str(), nullptr, nullptr);
+    if (m_handle == nullptr) {
         Log::c("GLFW failed to create window");
         std::exit(EXIT_FAILURE);
     }
-    Instances[handle] = this;
-    glfwMakeContextCurrent(handle);
+    Instances[m_handle] = this;
+    glfwMakeContextCurrent(m_handle);
     gladLoadGLLoader((GLADloadproc) glfwGetProcAddress); // XXX it needs a current context
-    callbacks.register_all(handle);
+    m_callbacks.register_all(m_handle);
 }
 
 Window::~Window()
 {
-    if (handle) {
-        size_t n = Instances.erase(handle);
+    if (m_handle) {
+        size_t n = Instances.erase(m_handle);
         if (n == 0) {
             Log::e("Window double deleted");
         } else if (n > 1) {
             Log::e("Window double inserted");
         }
-        glfwDestroyWindow(handle);
-        handle = nullptr;
+        glfwDestroyWindow(m_handle);
+        m_handle = nullptr;
     }
 }
 
@@ -48,9 +48,14 @@ Window::Callbacks::default_on_window_size(GLFWwindow* handle, int w, int h)
 }
 
 void
-Window::Callbacks::default_on_key(GLFWwindow*, int, int, int, int)
+Window::Callbacks::default_on_key(GLFWwindow* handle, int key, int scancode, int action, int mods)
 {
-
+    Log::d("Default on key: pressed '{}'", static_cast<char>(key));
+    if (key == GLFW_KEY_Q && action == GLFW_PRESS) {
+        if (auto window = find_by_handle(handle)) {
+            window->close();
+        }
+    }
 }
 
 void
@@ -95,38 +100,43 @@ Window::find_by_handle(GLFWwindow* handle)
 void
 Window::resize(int w, int h)
 {
-    properties.viewport = glm::ivec4(0, 0, w, h);
-    auto& dim = properties.dimension;
-    glfwGetWindowSize(handle, &dim.x, &dim.y);
-    auto& dim_frame = properties.dimension_frame;
-    glfwGetFramebufferSize(handle, &dim_frame.x, &dim_frame.y);
-    glfwMakeContextCurrent(handle);
-    glViewport(0, 0, dim_frame.x, dim_frame.y);
+    auto& dim = m_properties.dimension;
+    auto& dim_frame = m_properties.dimension_frame;
+    glfwGetWindowSize(m_handle, &dim.x, &dim.y);
+    glfwGetFramebufferSize(m_handle, &dim_frame.x, &dim_frame.y);
+    set_viewport(dim_frame);
+}
+
+void
+Window::set_viewport(glm::ivec2 size)
+{
+    glfwMakeContextCurrent(m_handle);
+    glViewport(0, 0, size.x, size.y);
+    m_properties.viewport = glm::ivec4(0, 0, size.x, size.y);
 }
 
 void
 Window::next_frame()
 {
-    glfwSwapBuffers(handle);
-    properties.frame_count++;
-    properties.frame_delay = glfwGetTime() - properties.start_last_frame;
-    properties.start_last_frame += properties.frame_delay; // set to this frame
+    glfwSwapBuffers(m_handle);
+    m_properties.frame_count++;
+    m_properties.frame_delay = glfwGetTime() - m_properties.start_last_frame;
+    m_properties.start_last_frame += m_properties.frame_delay; // set to this frame
     // Fix FPS if necessary
     if (!options.window.full_fps) {
         double leisure = options.window.frame_delay - frame_delay();
         if (leisure > 0) {
-            Log::d("Sleeping for {} ms.", leisure * 1000);
             sleep_for_sec(static_cast<float>(leisure));
         }
     }
     // Measure performance by FPS
-    properties.since_FPS += frame_delay();
-    properties.FPS++;
-    if (properties.since_FPS >= 1.0) {
+    m_properties.since_FPS += frame_delay();
+    m_properties.FPS++;
+    if (m_properties.since_FPS >= 1.0) {
         std::string&& title = default_title();
-        glfwSetWindowTitle(handle, title.c_str());
-        properties.FPS = 0;
-        properties.since_FPS = 0.0;
+        glfwSetWindowTitle(m_handle, title.c_str());
+        m_properties.FPS = 0;
+        m_properties.since_FPS = 0.0;
     }
     glfwPollEvents();
 }
@@ -136,32 +146,32 @@ Window::default_title() const
 {
     return options.application.name +
            "(FPS=" +
-           std::to_string(properties.FPS) +
+           std::to_string(m_properties.FPS) +
            ")(Frame delay=" +
-           std::to_string(1000 * properties.since_FPS / properties.FPS) +
+           std::to_string(1000 * m_properties.since_FPS / m_properties.FPS) +
            ')';
 }
 
 void
 Window::close()
-{ glfwSetWindowShouldClose(handle, GLFW_TRUE); }
+{ glfwSetWindowShouldClose(m_handle, GLFW_TRUE); }
 
 bool
 Window::closed() const
-{ return glfwWindowShouldClose(handle) == GLFW_TRUE; }
+{ return glfwWindowShouldClose(m_handle) == GLFW_TRUE; }
 
 const glm::ivec4&
 Window::viewport() const
-{ return properties.viewport; }
+{ return m_properties.viewport; }
 
 const glm::ivec2&
 Window::dimension() const
-{ return properties.dimension; }
+{ return m_properties.dimension; }
 
 const glm::ivec2&
 Window::dimension_frame() const
-{ return properties.dimension_frame; }
+{ return m_properties.dimension_frame; }
 
 uint32_t
 Window::FPS() const
-{ return properties.FPS; }
+{ return m_properties.FPS; }

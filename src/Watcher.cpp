@@ -4,6 +4,7 @@
 
 #include <fstream>
 #include <iterator>
+#include <Watcher.hpp>
 
 
 DEFINE_ENUMERATION_DATABASE(FileType) {
@@ -18,17 +19,19 @@ Watcher::Watcher(const std::vector<DynamicFile>& to_watch)
     std::thread([&]()
                 {
                     while (this->m_watching) {
-                        std::lock_guard guard(mutex_WatchingFiles);
+                        std::lock_guard guard(mutex_watching_files);
                         for (auto&&[path, file] : m_watching_files) {
-                            file.check_update();
+                            if (file.check_update()) {
+                                m_callback(file);
+                            }
                         }
                     }
-                    sleep_for_ms(500.0f);
+                    sleep_for_ms(500);
                 }).detach();
-    std::lock_guard guard(mutex_WatchingFiles);
-    for (auto& file : to_watch) {
+    std::lock_guard guard(mutex_watching_files);
+    for (auto file : to_watch) {
         Log::d("{} added to watch", file.path());
-        m_watching_files.emplace(file.path(), DynamicFile(file.path(), file.type()));
+        m_watching_files.emplace(file.path(), std::move(file));
     }
 }
 
@@ -38,7 +41,7 @@ Watcher::~Watcher()
 void
 Watcher::watch(const FS::path& path, FileType type)
 {
-    std::lock_guard guard(mutex_WatchingFiles);
+    std::lock_guard guard(mutex_watching_files);
     auto&&[it, result] = m_watching_files.emplace(path, DynamicFile(path, type));
     if (!result) {
         Log::w("Already watching {}", path);
@@ -50,7 +53,7 @@ Watcher::watch(const FS::path& path, FileType type)
 void
 Watcher::unwatch(const FS::path& path, FileType type)
 {
-    std::lock_guard guard(mutex_WatchingFiles);
+    std::lock_guard guard(mutex_watching_files);
     auto n = m_watching_files.erase(path);
     if (n == 0) {
         Log::w("File to stop watching({}) was unwatched.", path);
@@ -59,34 +62,47 @@ Watcher::unwatch(const FS::path& path, FileType type)
     }
 }
 
-std::string
-Watcher::DynamicFile::fetch(bool latest) const
+expected<DynamicFile, std::string>
+Watcher::find(const FS::path& path)
 {
-    if (latest) {
-        check_update();
+    std::lock_guard guard(mutex_watching_files);
+    auto it = m_watching_files.find(path);
+    if (it == m_watching_files.end()) {
+        return make_unexpected(std::string("Not yet watching"));
+    } else {
+        return it->second;
     }
-    if (!m_modified) {
-        return m_cached;
-    }
-    m_modified = false;
-    std::ifstream ifs;
-    ifs.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-    try {
-        ifs.open(m_path);
-        m_cached = std::move(std::string(std::istreambuf_iterator{ifs}, {}));
-    } catch (std::ifstream::failure& e) {
-        Log::e("Failed to open file {}: {}", m_path, e.what());
-    }
-    return m_cached;
 }
 
-void
-Watcher::DynamicFile::check_update() const
+DynamicFile::DynamicFile(const std::string& path, FileType type) noexcept
+        : m_path(std::move(FS::canonical(path))), m_type(type), m_last_modified(FS::last_write_time(m_path))
+{}
+
+expected<std::string, std::string>
+DynamicFile::fetch() const
+{
+    std::ifstream ifs;
+    std::string content;
+    ifs.exceptions(std::ifstream::badbit);
+    try {
+        ifs.open(m_path);
+        content.assign(std::istreambuf_iterator{ifs}, {});
+        Log::d("Fetched newest content of {}", m_path);
+    } catch (std::ifstream::failure& e) {
+        return make_unexpected(std::string(e.what()));
+    }
+    return content;
+}
+
+bool
+DynamicFile::check_update() const
 {
     auto last_modified = FS::last_write_time(m_path);
     if (last_modified > m_last_modified) {
+        Log::d("Found {} modified", m_path);
         m_last_modified = last_modified;
-        m_modified = true;
+        return true;
     }
+    return false;
 }
 

@@ -12,15 +12,9 @@
 
 
 class Log {
-
-    static Log Instance;
-
-    Log();
-    void initialize();
-
-    std::shared_ptr<spdlog::logger> logger;
-
   public:
+
+    static void add_sink(spdlog::sink_ptr ptr);
 
     /// verbose(trace) logging
     template <typename ...Args>
@@ -51,5 +45,12 @@ class Log {
     template <typename ...Args>
     static void c(const char* fmt, Args&& ...args)
     { Log::Instance.logger->critical(fmt, std::forward<Args>(args)...); }
+
+  private:
+    Log();
+
+    static Log Instance;
+
+    std::shared_ptr<spdlog::logger> logger;
 
 };

@@ -8,13 +8,14 @@
 
 namespace FS {
 using path = std::experimental::filesystem::path;
-namespace detail = std::experimental::filesystem;
+namespace details = std::experimental::filesystem;
 
-inline auto
-last_write_time(const FS::path& path)
-{ return detail::last_write_time(path); }
 
-using ModifiedTimePoint = decltype(FS::last_write_time(FS::path()));
+using ModifiedTimePoint = decltype(details::last_write_time(details::path()));
+
+/// noexcept wrapper for fs::last_write_time();
+ModifiedTimePoint
+last_write_time(const FS::path& path) noexcept;
 
 inline auto
 extension(const FS::path& file)

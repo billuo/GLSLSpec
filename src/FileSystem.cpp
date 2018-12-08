@@ -13,21 +13,17 @@ namespace FS {
 namespace {
 
 inline void
-print_fs_error(FS::detail::filesystem_error& e)
-{
-    using namespace std;
-    Log::e("File system error: {}", e.what());
-}
+print_fs_error(FS::details::filesystem_error& e)
+{ Log::e("{}", e.what()); }
 
 inline void
 print_bad_alloc(std::bad_alloc& e)
-{ Log::e("Memory allocation failed: {}", e.what()); }
+{ Log::e("{}", e.what()); }
 
 /// Resolve the canonical path of a relative path.
 /// @param relative_path The path relative to the @p base_path.
 /// @param base_path The base directory.
-/// @param include_folders The additional directory to take into account.
-/// @details When determinging the actual base path, @p base_path is considered first of all.
+/// @details When determining the actual base path, @p base_path is considered first of all.
 /// Only if not found under @p base_path will folders in @p include_folders be tried one by one.
 /// @returns The canonical path if resolved successfully. Otherwise empty path.
 std::string
@@ -35,13 +31,13 @@ resolve_url(const FS::path& base_path, const FS::path& relative_path)
 {
     FS::path url;
     url = base_path / relative_path;
-    if (detail::exists(url)) {
-        return detail::canonical(url);
+    if (details::exists(url)) {
+        return details::canonical(url);
     }
     for (const auto& folder : options.includes) {
         url = folder / relative_path;
-        if (detail::exists(url)) {
-            return detail::canonical(url);
+        if (details::exists(url)) {
+            return details::canonical(url);
         }
     }
     return {};
@@ -67,18 +63,28 @@ extract_include(const std::string& line)
 
 } // namespace
 
+ModifiedTimePoint
+last_write_time(const FS::path& path) noexcept
+{
+    try {
+        return details::last_write_time(path);
+    } catch (details::filesystem_error& e) {
+        print_fs_error(e);
+    } catch (std::bad_alloc& e) {
+        print_bad_alloc(e);
+    }
+    return {};
+}
+
 bool
 exists(const std::string& name) noexcept
 {
     try {
-        return detail::exists(name);
-    } catch (detail::filesystem_error& e) {
+        return details::exists(name);
+    } catch (details::filesystem_error& e) {
         print_fs_error(e);
     } catch (std::bad_alloc& e) {
         print_bad_alloc(e);
-    } catch (...) {
-        Log::c("Unknown error");
-        std::exit(EXIT_FAILURE);
     }
     return false;
 }
@@ -87,14 +93,11 @@ FS::path
 canonical(const std::string& path) noexcept
 {
     try {
-        return detail::canonical(path);
-    } catch (detail::filesystem_error& e) {
+        return details::canonical(path);
+    } catch (details::filesystem_error& e) {
         print_fs_error(e);
     } catch (std::bad_alloc& e) {
         print_bad_alloc(e);
-    } catch (...) {
-        Log::c("Unknown error");
-        std::exit(EXIT_FAILURE);
     }
     return {};
 }

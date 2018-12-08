@@ -70,7 +70,7 @@ struct GlobalOptions {
     std::queue<std::string> initial_commands;
 
     /// Files given directly.
-    std::vector<Watcher::DynamicFile> input_files;
+    std::vector<DynamicFile> input_files;
 
     /// Files given through '-o'.
     std::vector<FS::path> output_files;

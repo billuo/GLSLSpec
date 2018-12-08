@@ -1,5 +1,6 @@
 #include "Console.hpp"
 #include "Window.hpp"
+#include "Math.hpp"
 
 #include <thread>
 #include <iostream>
@@ -11,28 +12,46 @@
 
 std::unique_ptr<Console> console;
 
-Command::Command(std::initializer_list<std::string> names, std::pair<unsigned, unsigned> n_args,
+Command::Command(std::string name, std::pair<unsigned, unsigned> n_args,
                  std::initializer_list<std::string> arg_names, std::string description, Command::Action action)
-        : names(names),
+        : name(std::move(name)),
           arg_names(arg_names),
           description(std::move(description)),
-          n_args(n_args),
+          n_args(std::move(n_args)),
           action(action)
-{}
+{
+    assert(!this->name.empty());
+}
 
-std::vector<Command> Console::CommandTable;
+std::string
+Command::usage() const
+{
+    std::string ret = name;
+    unsigned nth_arg = 1;
+    for (auto&& arg_name : arg_names) {
+        ret += ' ';
+        if (nth_arg <= n_args.first) {
+            ret += '<';
+            ret += arg_name;
+            ret += '>';
+        } else {
+            ret += '[';
+            ret += arg_name;
+            ret += ']';
+        }
+        ++nth_arg;
+    }
+    ret += "\n\t" + description;
+}
 
-Console::AsyncGetline::AsyncGetline(CommandQueue&& initial_commands) : m_commands(std::move(initial_commands))
+std::map<std::string, Command> Console::CommandTable;
+
+Console::AsyncGetline::AsyncGetline()
 {
     std::thread([&]()
                 {
-                    // TODO
-                    // wait until everything is ready
-                    // while (!sandbox || !sandbox->is_ready()) {
-                    //     std::this_thread::yield();
-                    // }
                     do {
-                        std::string args;
+                        std::string line;
                         while (true) {
                             while (options.flags.running && std::cin.peek() == EOF) {
                                 std::this_thread::yield();
@@ -44,10 +63,10 @@ Console::AsyncGetline::AsyncGetline(CommandQueue&& initial_commands) : m_command
                             if (c == '\n') {
                                 break;
                             }
-                            args += static_cast<char>(c);
+                            line += static_cast<char>(c);
                         }
                         std::lock_guard guard(this->mutex);
-                        m_commands.push(args);
+                        m_lines.push(line);
                     } while (options.flags.running);
                 }).detach();
 }
@@ -699,45 +718,134 @@ declare_commands()
                              return false;
                          });
 }
+#else
+
+void
+declare_commands()
+{
+    Console::add_command("help", {0, 1}, {"command"},
+                         "Print help for command(s)",
+                         [](const std::string& cmd, const std::list<std::string>& args)
+                         {
+                             static const std::string header = options.application.name +
+                                                               options.application.version +
+                                                               options.application.acknowledgement;
+                             switch (args.size()) {
+                                 case 0:
+                                     *console << header << "\n\n";
+                                     for (auto& command : Console::Commands()) {
+                                         *console << command.second.usage() << '\n';
+                                     }
+                                     break;
+                                 case 1: {
+                                     auto it = Console::Commands().find(cmd);
+                                     if (it != Console::Commands().end()) {
+                                         *console << it->second.usage() << '\n';
+                                     }
+                                 }
+                                     break;
+                                 default:
+                                     return false;
+                             }
+                             return true;
+                         });
+
+    Console::add_command("debug", {0, 1}, {"on/off"},
+                         "Display debug drawing status or enable/disable it.",
+                         [](const std::string& cmd, const std::list<std::string>& args)
+                         {
+                             switch (args.size()) {
+                                 case 0:
+                                     *console << (options.flags.debug ? "on" : "off") << '\n';
+                                     return true;
+                                 case 1: {
+                                     const std::string& arg = args.front();
+                                     if (arg == "on") {
+                                         options.flags.debug = true;
+                                     } else if (arg == "off") {
+                                         options.flags.debug = false;
+                                     } else {
+                                         Log::i("Unknown argument: {}", arg);
+                                     }
+                                 }
+                                     return true;
+                                 default:
+                                     Log::i("Excessive argument: {}", *++args.begin());
+                                     return false;
+                             }
+                         });
+
+    Console::add_command("viewport", {0, 0}, {},
+                         "Display position and dimension of viewport.",
+                         [](const std::string& cmd, const std::list<std::string>& args)
+                         {
+                             switch (args.size()) {
+                                 case 0:
+                                     *console << main_window->viewport() << '\n';
+                                     return true;
+                                 default:
+                                     Log::i("Excessive arguments: {}", args.front());
+                                     return false;
+                             }
+                         });
+    // Console::add_command("command", {0, 0}, {},
+    //                      "description",
+    //                      [](const std::string& cmd, const std::list<std::string>& args)
+    //                      {
+    //                          switch(args.size()){
+    //                              case 0:
+    //                                  break;
+    //                              default:
+    //                                  return false;
+    //                          }
+    //                          return true;
+    //                      });
+}
 
 #endif
 
 void
-Console::put(const std::string& str)
-{ std::cout << str; }
-
-void
-Console::putline(const std::string& str)
-{
-    std::cout << str << std::endl << options.application.prompt;
-    std::cout << std::flush;
-}
-
-void
-Console::add_command(std::initializer_list<std::string> names, std::pair<unsigned, unsigned> n_args,
+Console::add_command(std::string name, std::pair<unsigned, unsigned> n_args,
                      std::initializer_list<std::string> arg_names, std::string description, Command::Action action)
 {
-    CommandTable.emplace_back(names, n_args, arg_names, std::move(description), action);
+    CommandTable.emplace(std::make_pair(name,
+                                        Command(name, std::move(n_args), arg_names, std::move(description), action)));
 }
 
 bool
-Console::execute(const std::string& line)
+Console::execute(std::string line)
 {
-    // TODO
-    std::regex words("[^\\s]+");
-    auto begin_word = std::sregex_iterator(line.begin(), line.end(), words);
-    auto end_word = std::sregex_iterator();
-    auto&& cmd = begin_word++->str();
-    for (auto& command : CommandTable) {
-        for (auto& name : command.names) {
-            if (cmd == name) {
-                return command.action(cmd, line.substr(0, begin_word->position()));
-            }
+    if (line.front() == line.back()) {
+        if (line.front() == '\'' || line.front() == '"') {
+            line = line.substr(1, line.size() - 1);
         }
     }
-    return false;
-    // auto it = CommandTable.find(cmd);
-    // return it != CommandTable.end() && it->second.action(cmd, line);
+    std::regex words("[\\w]+");
+    auto begin_word = std::sregex_iterator(line.begin(), line.end(), words);
+    auto end_word = std::sregex_iterator();
+    auto&& cmd = begin_word->str();
+    std::list<std::string> args;
+    while (++begin_word != end_word) {
+        args.emplace_back(std::move(begin_word->str()));
+    }
+    auto it = CommandTable.find(cmd);
+    if (it == CommandTable.end() || args.size() < it->second.n_args.first || args.size() > it->second.n_args.second) {
+        return false;
+    }
+    return it->second.action(cmd, args);
+}
+
+void
+Console::execute_all(CommandQueue& commands)
+{
+    while (!commands.empty()) {
+        std::string&& command = std::move(commands.front());
+        commands.pop();
+        if (!execute(command)) {
+            Log::i("Can not find command: {}", command);
+        }
+    }
+    execute_all();
 }
 
 void
@@ -749,8 +857,28 @@ Console::execute_all()
             break;
         }
         if (!execute(line)) {
-            Log::i("Can not parse command: {}", line);
+            Log::i("Can not find command: {}", line);
         }
     }
+
+}
+
+void
+Console::ConsoleSink::flush_()
+{
+    std::string&& output = oss.str();
+    oss.clear();
+    oss.str(std::string());
+    if (!output.empty()) {
+        std::cout << output << options.application.prompt << std::flush;
+    }
+}
+
+void
+Console::ConsoleSink::sink_it_(const spdlog::details::log_msg& msg)
+{
+    fmt::memory_buffer formatted;
+    sink::formatter_->format(msg, formatted);
+    oss << fmt::to_string(formatted);
 }
 

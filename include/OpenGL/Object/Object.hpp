@@ -5,7 +5,10 @@
  */
 #pragma once
 
+#include "Log.hpp"
 #include "OpenGL/Common.hpp"
+#include "OpenGL/Utility/Debug.hpp"
+
 #include <memory>
 #include <ostream>
 #include <vector>
@@ -74,13 +77,15 @@ class Object {
 
   public:
     Object() = default;
-    Object(Name&& name, const GLchar* label, GLenum identifier);
+    Object(Name&& name);
 
     GLuint name() const
     { return m_name.get(); }
 
     std::string label() const
     { return m_label ? *m_label : std::string(); }
+
+    void label(std::string str, GLenum identifier);
 
     friend std::ostream& operator<<(std::ostream& os, const Object& object)
     { return os << object.label() << '#' << object.name(); }
@@ -100,7 +105,7 @@ class Object::NamePool {
     {}
 
     /// Get a single name.
-    Name Get()
+    Name get()
     {
         if (m_pool.empty()) {
             Refill();
@@ -111,33 +116,11 @@ class Object::NamePool {
     }
 
     /// Put a single name.
-    void Put(Name&& name)
+    void put(Name&& name)
     {
         Name moved = std::move(name);
         m_delete.push_back(moved.get());
     }
-
-    // template <typename OutputIterator>
-    // static void Get(GLsizei n, OutputIterator out) {
-    //     while (m_pool.size() < n) {
-    //         Refill();
-    //     }
-    //     size_t new_size = m_pool.size() - n;
-    //     auto it = m_pool.begin() + new_size;
-    //     while (it != m_pool.end()) {
-    //         *out++ = Name(*it++);
-    //     }
-    //     m_pool.resize(new_size);
-    // }
-
-    // template <typename InputIterator>
-    // static void Put(GLsizei n, InputIterator in) {
-    //     static_assert(std::is_same<Name, std::decay_t<decltype(*in)>>::value,
-    //                   "InputIterator dereferenced and decayed must return Name");
-    //     while (n--) {
-    //         Put(std::move(*in++));
-    //     }
-    // }
 
   private:
     void Refill()

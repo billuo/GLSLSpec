@@ -15,10 +15,10 @@ struct Window {
     Window();
     Window(const Window&) = delete;
 
-    Window(Window&& obj) noexcept : handle(obj.handle), callbacks(obj.callbacks)
+    Window(Window&& obj) noexcept : m_handle(obj.m_handle), m_callbacks(obj.m_callbacks)
     {
-        obj.handle = nullptr;
-        callbacks.register_all(handle);
+        obj.m_handle = nullptr;
+        m_callbacks.register_all(m_handle);
     }
 
     Window& operator=(Window&& obj) noexcept
@@ -29,8 +29,8 @@ struct Window {
 
     void swap(Window& other) noexcept
     {
-        std::swap(handle, other.handle);
-        std::swap(callbacks, other.callbacks);
+        std::swap(m_handle, other.m_handle);
+        std::swap(m_callbacks, other.m_callbacks);
     }
 
     ~Window();
@@ -51,13 +51,13 @@ struct Window {
     uint32_t FPS() const;
 
     double frame_delay()
-    { return properties.frame_delay; }
+    { return m_properties.frame_delay; }
 
     static Window* find_by_handle(Handle handle);
   private:
     static std::unordered_map<Handle, Window*> Instances;
 
-    Handle handle = nullptr;
+    Handle m_handle = nullptr;
 
     struct Callbacks {
         static void default_on_window_size(Handle, int, int);
@@ -73,7 +73,7 @@ struct Window {
         void (* on_cursor_pos)(Handle, double, double) = default_on_cursor_pos;
 
         void register_all(Handle);
-    } callbacks;
+    } m_callbacks;
 
     struct Properties {
         /// Position and dimension of viewport
@@ -92,7 +92,9 @@ struct Window {
         double since_FPS = 0.0;
         /// Number of frames rendered since FPS was last updated
         uint32_t FPS = 0;
-    } properties;
+    } m_properties;
+
+    void set_viewport(glm::ivec2 size);
 };
 
 extern std::unique_ptr<Window> main_window;

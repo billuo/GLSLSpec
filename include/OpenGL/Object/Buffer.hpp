@@ -14,7 +14,11 @@ namespace OpenGL {
 
 class Buffer : public Object {
 
-    static decltype(makeNamePool(glGenBuffers, glDeleteBuffers)) Pool;
+    static auto& pool()
+    {
+        static auto singleton = makeNamePool(glGenBuffers, glDeleteBuffers);
+        return singleton;
+    }
 
   public:
     static void bind(GLenum target, Buffer& buffer)
@@ -24,15 +28,20 @@ class Buffer : public Object {
     { glBindBuffer(target, 0); }
 
   public:
-    explicit Buffer(const GLchar* label = nullptr) : Object(Pool.Get(), label, GL_BUFFER)
-    {}
+    explicit Buffer(const GLchar* label = nullptr) : Object(pool().get())
+    {
+        bind(GL_ARRAY_BUFFER, *this);
+        if (label) {
+            Object::label(label, GL_BUFFER);
+        }
+    }
 
     Buffer(Buffer&&) = default;
 
     Buffer& operator=(Buffer&&) = default;
 
     ~Buffer()
-    { Pool.Put(std::move(m_name)); }
+    { pool().put(std::move(m_name)); }
 
     // void Data(GLsizeiptr size, const GLvoid* data, GLenum usage);
     // void Storage(GLsizei size, const GLvoid* data, GLbitfield flags);
@@ -70,7 +79,7 @@ class Buffer : public Object {
     //     BufferUsage = GL_BUFFER_USAGE,
     // };
 
-    // GLint aux_GetParameter(Parameter param) const;
+    // GLint get(Parameter param) const;
 
     // bool aux_CheckMapped(bool expected) const {
     //     if (Mapped() != expected) {
