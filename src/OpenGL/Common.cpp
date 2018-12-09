@@ -1,7 +1,7 @@
 #include "OpenGL/Common.hpp"
-#include "OpenGL/Utility/Debug.hpp"
-#include "Math.hpp"
-#include "Log.hpp"
+#include "OpenGL/Debug.hpp"
+#include "Math/Math.hpp"
+#include "Utility/Log.hpp"
 #include "Options.hpp"
 #include "Window.hpp"
 
@@ -25,7 +25,7 @@ Initialize()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, options.opengl.version.minor);
     main_window = std::make_unique<Window>();
     glDebugMessageCallback(OpenGLOnDebug, nullptr);
-    glClearColor(0.1f, 0.3f, 0.5f, 1.0f);
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     glEnable(GL_DEPTH_TEST);
 }
 

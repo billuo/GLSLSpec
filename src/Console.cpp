@@ -1,6 +1,6 @@
 #include "Console.hpp"
 #include "Window.hpp"
-#include "Math.hpp"
+#include "Math/Math.hpp"
 
 #include <thread>
 #include <iostream>

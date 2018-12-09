@@ -6,7 +6,12 @@
 #pragma once
 
 #include <cassert>
+#include "Log.hpp"
 
+
+#define DEBUG(fmt, ...) Log::d("{}:{} in {}\n\t" fmt, __FILE__, __LINE__, __func__, ##__VA_ARGS__)
+
+#define VALUE(expr) DEBUG(#expr "={}", expr)
 
 #if defined(DEBUG_BUILD)
 #define UNREACHABLE assert(false)

@@ -2,16 +2,16 @@
 
 #include "Resource.hpp"
 #include "OpenGL/Constants.hpp"
-#include "Debug.hpp"
-#include "Log.hpp"
+#include "Utility/Debug.hpp"
+#include "Utility/Log.hpp"
 
 
 namespace OpenGL {
 
 namespace details {
 
-/// TODO with extension https://www.khronos.org/registry/OpenGL/extensions/ARB/ARB_gpu_shader_fp64.txt
-/// TODO double may as well be supported. Detect it?
+// TODO with extension https://www.khronos.org/registry/OpenGL/extensions/ARB/ARB_gpu_shader_fp64.txt
+// TODO double may as well be supported. Detect it?
 
 template <typename To, typename ...Args> static constexpr auto all_convertible_v = (std::is_convertible_v<Args, To> &&
 ...);
@@ -22,7 +22,7 @@ template <typename T> static constexpr auto is_GL_type_v =
 template <typename ...Args> static constexpr auto all_GL_type_v =
         all_convertible_v<GLfloat, Args...> || all_convertible_v<GLint, Args...> || all_convertible_v<GLuint, Args...>;
 
-/// TODO the order of conditional may have unexpected effect on result...
+// TODO the order of conditional may have unexpected effect on result...
 template <typename ...Args> using GL_cast =
 std::conditional_t<all_convertible_v<GLfloat, Args...>,
         GLfloat,
@@ -138,7 +138,7 @@ struct Uniform : public Resource {
     }
 
     /// assign this uniform with a pointer
-    /// TODO consider matrix
+    // TODO consider matrix
     template <typename T>
     void assign(GLsizei count, const T* x) const noexcept
     {

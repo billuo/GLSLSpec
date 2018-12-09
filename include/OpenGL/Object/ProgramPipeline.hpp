@@ -6,6 +6,7 @@
 #pragma once
 
 #include "Program.hpp"
+#include "../Constants.hpp"
 
 
 namespace OpenGL {
@@ -17,6 +18,8 @@ class ProgramPipeline : Object {
         static auto singleton = makeNamePool(glGenProgramPipelines, glDeleteProgramPipelines);
         return singleton;
     }
+
+    GLuint m_stages[MaxShaderStage] = {};
 
   public:
     static void Bind(const ProgramPipeline& obj)
@@ -36,26 +39,15 @@ class ProgramPipeline : Object {
     ~ProgramPipeline()
     { pool().put(std::move(m_name)); }
 
-    void use_stage(const Program& program, GLbitfield stages)
-    { glUseProgramStages(name(), stages, program.name()); }
+    GLuint stage(GLenum order);
 
-    bool validate() const
-    { glValidateProgramPipeline(name()); }
+    void use_stage(const Program& program, GLbitfield stages);
 
-    GLint get(GLenum param) const
-    {
-        GLint ret = -1;
-        glGetProgramPipelineiv(name(), param, &ret);
-        return ret;
-    }
+    bool valid() const;
 
-    std::unique_ptr<GLchar[]> get_info_log() const
-    {
-        auto size = get(GL_INFO_LOG_LENGTH);
-        std::unique_ptr<GLchar[]> ret = std::make_unique<GLchar[]>(size + 1);
-        glGetProgramPipelineInfoLog(name(), size, nullptr, ret.get());
-        return ret;
-    }
+    GLint get(GLenum param) const;
+
+    std::unique_ptr<GLchar[]> get_info_log() const;
 
 };
 

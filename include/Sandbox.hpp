@@ -1,9 +1,11 @@
 #pragma once
 
+#include "Math/Camera.hpp"
 #include "Watcher.hpp"
-#include "OpenGL/Object/VertexArray.hpp"
+#include "OpenGL/Introspection/Introspector.hpp"
 #include "OpenGL/Object/Buffer.hpp"
 #include "OpenGL/Object/ProgramPipeline.hpp"
+#include "OpenGL/Object/VertexArray.hpp"
 
 
 class Sandbox {
@@ -14,13 +16,15 @@ class Sandbox {
 
     void render();
 
+    Math::Camera camera = Math::Camera(glm::vec3(3.0f, 0.0f, 3.0f));
+
   private:
 
     std::set<DynamicFile> m_updated;
     std::mutex mutex_updated;
 
-    bool valid = true;
     OpenGL::ProgramPipeline m_pipeline{"sbpp"};
+    std::unique_ptr<OpenGL::Introspector> m_introspectors[OpenGL::MaxShaderStage] = {};
     OpenGL::VertexArray m_vao{"sbvao"};
 
     void import(const DynamicFile& file);

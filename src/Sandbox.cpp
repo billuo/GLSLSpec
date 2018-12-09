@@ -1,7 +1,4 @@
-
-#include <Sandbox.hpp>
-
-#include "Log.hpp"
+#include "Utility/Log.hpp"
 #include "Sandbox.hpp"
 #include "OpenGL/Constants.hpp"
 
@@ -36,35 +33,13 @@ Sandbox::aux_import_shader(const DynamicFile& file, const std::string& tag)
         Log::e("Can't determine shader type: {}", type.error());
         return;
     }
-    GLbitfield stage = 0;
-    switch (*type) {
-        case GL_VERTEX_SHADER:
-            stage = GL_VERTEX_SHADER_BIT;
-            break;
-        case GL_TESS_CONTROL_SHADER:
-            stage = GL_TESS_CONTROL_SHADER_BIT;
-            break;
-        case GL_TESS_EVALUATION_SHADER:
-            stage = GL_TESS_EVALUATION_SHADER_BIT;
-            break;
-        case GL_GEOMETRY_SHADER:
-            stage = GL_GEOMETRY_SHADER_BIT;
-            break;
-        case GL_FRAGMENT_SHADER:
-            stage = GL_FRAGMENT_SHADER_BIT;
-            break;
-        case GL_COMPUTE_SHADER:
-            stage = GL_COMPUTE_SHADER_BIT;
-            break;
-        default:
-            break;
-    }
+    GLbitfield stage = OpenGL::shaderBitOfShaderType(*type);
     auto&& source = file.fetch();
     if (!source) {
         Log::e("Failed to fetch shader source: {}", source.error());
         return;
     }
-    Log::d("Importing shader {}", file.path());
+    DEBUG("Importing shader {}", file.path());
     OpenGL::Shader shader(*type, "import");
     OpenGL::Program program("import");
     shader.source(source->c_str());
@@ -73,6 +48,8 @@ Sandbox::aux_import_shader(const DynamicFile& file, const std::string& tag)
     program.attach(shader);
     program.link();
     m_pipeline.use_stage(program, stage);
+    auto n = OpenGL::orderOfShaderBit(stage);
+    m_introspectors[n] = std::make_unique<OpenGL::Introspector>(program);
 }
 
 void
@@ -96,9 +73,18 @@ Sandbox::aux_import_dependency(const DynamicFile& path, const std::string& tag)
 void
 Sandbox::render()
 {
-    OpenGL::VertexArray::Bind(m_vao);
-    valid = m_pipeline.validate();
-    if (valid) {
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    if (m_pipeline.valid()) {
+        auto&& mvp = camera.projection_world();
+        auto&& v = glm::vec3(1.0f, 1.0f, 1.0f);
+        v.x = 0.0f;
+        v.z = 0.0f;
+        auto order = OpenGL::VertexShader;
+        auto u_mvp = m_introspectors[order]->IUniform->find("MVP");
+        if (u_mvp) {
+            glProgramUniformMatrix4fv(m_pipeline.stage(order), u_mvp->location, 1, GL_FALSE, glm::value_ptr(mvp));
+        }
+        OpenGL::VertexArray::Bind(m_vao);
         glDrawArrays(GL_LINES, 0, 6);
     } else {
         Log::e("Program pipeline invalid: {}", m_pipeline.get_info_log().get());

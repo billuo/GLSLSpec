@@ -1,5 +1,5 @@
-#include "Utility.hpp"
-#include "Log.hpp"
+#include "Utility/Misc.hpp"
+#include "Utility/Log.hpp"
 
 
 namespace {

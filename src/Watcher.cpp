@@ -1,6 +1,7 @@
 #include "Watcher.hpp"
-#include "Enumeration.hpp"
-#include "Log.hpp"
+#include "Utility/Enumeration.hpp"
+#include "Sandbox.hpp"
+#include "Utility/Debug.hpp"
 
 #include <fstream>
 #include <iterator>
@@ -22,7 +23,10 @@ Watcher::Watcher(const std::vector<DynamicFile>& to_watch)
                         std::lock_guard guard(mutex_watching_files);
                         for (auto&&[path, file] : m_watching_files) {
                             if (file.check_update()) {
-                                m_callback(file);
+                                if (sandbox) {
+                                    sandbox->on_update(file);
+                                }
+                                // m_callback(file);
                             }
                         }
                     }
@@ -30,7 +34,7 @@ Watcher::Watcher(const std::vector<DynamicFile>& to_watch)
                 }).detach();
     std::lock_guard guard(mutex_watching_files);
     for (auto file : to_watch) {
-        Log::d("{} added to watch", file.path());
+        DEBUG("{} added to watch", file.path());
         m_watching_files.emplace(file.path(), std::move(file));
     }
 }
@@ -46,7 +50,7 @@ Watcher::watch(const FS::path& path, FileType type)
     if (!result) {
         Log::w("Already watching {}", path);
     } else {
-        Log::d("{} added to watch", path);
+        DEBUG("{} added to watch", path);
     }
 }
 
@@ -58,7 +62,7 @@ Watcher::unwatch(const FS::path& path, FileType type)
     if (n == 0) {
         Log::w("File to stop watching({}) was unwatched.", path);
     } else {
-        Log::d("{} no longer watching", path);
+        DEBUG("{} no longer watching", path);
     }
 }
 
@@ -87,7 +91,6 @@ DynamicFile::fetch() const
     try {
         ifs.open(m_path);
         content.assign(std::istreambuf_iterator{ifs}, {});
-        Log::d("Fetched newest content of {}", m_path);
     } catch (std::ifstream::failure& e) {
         return make_unexpected(std::string(e.what()));
     }
@@ -99,7 +102,7 @@ DynamicFile::check_update() const
 {
     auto last_modified = FS::last_write_time(m_path);
     if (last_modified > m_last_modified) {
-        Log::d("Found {} modified", m_path);
+        DEBUG("Found {} modified", m_path);
         m_last_modified = last_modified;
         return true;
     }

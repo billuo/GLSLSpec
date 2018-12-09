@@ -1,6 +1,6 @@
 #include "OpenGL/Object/Shader.hpp"
 #include "OpenGL/Constants.hpp"
-#include "Log.hpp"
+#include "Utility/Log.hpp"
 
 #include <cstring>
 #include <fstream>

@@ -1,7 +1,9 @@
-#include <Expected.hpp>
+#include <Utility/Expected.hpp>
+#include <OpenGL/Constants.hpp>
+
 #include "OpenGL/Constants.hpp"
-#include "Math.hpp"
-#include "Debug.hpp"
+#include "Math/Math.hpp"
+#include "Utility/Debug.hpp"
 
 
 using namespace glm;
@@ -62,7 +64,7 @@ sizeOfDataType(GLenum type)
             return sizeof(mat4x2);
         case GL_FLOAT_MAT4x3:
             return sizeof(mat4x3);
-            /// TODO double floating point not yet fully supported
+            // TODO double floating point not yet fully supported
         case GL_DOUBLE:
 //            return sizeof(double);
         case GL_DOUBLE_VEC2:
@@ -249,7 +251,7 @@ nameOfDataType(GLenum type)
             return "usamplerBuffer";
         case GL_UNSIGNED_INT_SAMPLER_2D_RECT:
             return "usampler2DRect";
-            /// TODO double floating point not yet fully supported
+            // TODO double floating point not yet fully supported
         case GL_DOUBLE_MAT2:
 //            return "dmat2";
         case GL_DOUBLE_MAT3:
@@ -369,6 +371,48 @@ nameOfProgramInterface(GLenum interface)
             return "tessellation evaluation shader subroutine uniform";
         case GL_COMPUTE_SUBROUTINE_UNIFORM:
             return "compute shader subroutine uniform";
+        default:
+            UNREACHABLE;
+    }
+}
+
+GLenum
+shaderBitOfShaderType(GLenum type)
+{
+    switch (type) {
+        case GL_VERTEX_SHADER:
+            return GL_VERTEX_SHADER_BIT;
+        case GL_TESS_CONTROL_SHADER:
+            return GL_TESS_CONTROL_SHADER_BIT;
+        case GL_TESS_EVALUATION_SHADER:
+            return GL_TESS_EVALUATION_SHADER_BIT;
+        case GL_GEOMETRY_SHADER:
+            return GL_GEOMETRY_SHADER_BIT;
+        case GL_FRAGMENT_SHADER:
+            return GL_FRAGMENT_SHADER_BIT;
+        case GL_COMPUTE_SHADER:
+            return GL_COMPUTE_SHADER_BIT;
+        default:
+            UNREACHABLE;
+    }
+}
+
+size_t
+orderOfShaderBit(GLenum bit)
+{
+    switch (bit) {
+        case GL_VERTEX_SHADER_BIT:
+            return VertexShader;
+        case GL_TESS_CONTROL_SHADER_BIT:
+            return TessellationControlShader;
+        case GL_TESS_EVALUATION_SHADER_BIT:
+            return TessellationEvaluationShader;
+        case GL_GEOMETRY_SHADER_BIT:
+            return GeometryShader;
+        case GL_FRAGMENT_SHADER_BIT:
+            return FragmentShader;
+        case GL_COMPUTE_SHADER_BIT:
+            return ComputeShader;
         default:
             UNREACHABLE;
     }

@@ -1,6 +1,6 @@
-#include "Enumeration.hpp"
+#include "Utility/Enumeration.hpp"
 #include "FileSystem.hpp"
-#include "Log.hpp"
+#include "Utility/Log.hpp"
 #include "Options.hpp"
 
 #include <fstream>

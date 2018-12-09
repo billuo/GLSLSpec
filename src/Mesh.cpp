@@ -1,6 +1,6 @@
 #include "Mesh.hpp"
-#include "Log.hpp"
-#include "Debug.hpp"
+#include "Utility/Log.hpp"
+#include "Utility/Debug.hpp"
 
 
 void

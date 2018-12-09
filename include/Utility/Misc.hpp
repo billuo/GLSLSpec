@@ -18,6 +18,11 @@
 /// Return size of static array at compile time
 #define countof(Array) (sizeof(Array) / sizeof((Array)[0]))
 
+template <typename E, typename = std::enable_if_t<std::is_enum_v<E>>>
+constexpr auto
+underlying_cast(E e)
+{ return static_cast<std::underlying_type_t<std::decay_t<E>>>(e); }
+
 #if !CXX_MSVC
 char*
 SafeDemangle(const char* mangled_name, char* output_buffer, size_t* length);

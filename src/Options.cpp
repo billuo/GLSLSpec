@@ -1,6 +1,6 @@
 #include "Options.hpp"
 #include "Watcher.hpp"
-#include "Utility.hpp"
+#include "Utility/Misc.hpp"
 
 #include <iostream>
 #include <algorithm>

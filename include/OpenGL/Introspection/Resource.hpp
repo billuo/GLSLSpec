@@ -1,20 +1,11 @@
 #pragma once
 
 #include "../Common.hpp"
-#include "Utility.hpp"
+#include "../Constants.hpp"
+#include "Utility/Misc.hpp"
 
 
 namespace OpenGL {
-
-enum ShaderStage {
-    VertexShader,
-    TessellationControlShader,
-    TessellationEvaluationShader,
-    GeometryShader,
-    FragmentShader,
-    ComputeShader,
-    MaxShaderStage,
-};
 
 struct Resource {
     GLint index = 0;

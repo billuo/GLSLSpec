@@ -12,7 +12,7 @@ Introspector::Introspector(const Program& program)
           IOutput(std::make_unique<ProgramOutputInterface>(name)),
           IVertexSubroutineUniform(std::make_unique<VertexSubroutineUniformInterface>(name)),
           ITessControlSubroutineUniform(std::make_unique<TessControlSubroutineUniformInterface>(name)),
-          ITessEvalutationSubroutineUniform(std::make_unique<TessEvaluationSubroutineUniformInterface>(name)),
+          ITessEvaluationSubroutineUniform(std::make_unique<TessEvaluationSubroutineUniformInterface>(name)),
           IGeometrySubroutineUniform(std::make_unique<GeometrySubroutineUniformInterface>(name)),
           IFragmentSubroutineUniform(std::make_unique<FragmentSubroutineUniformInterface>(name)),
           IComputeSubroutineUniform(std::make_unique<ComputeSubroutineUniformInterface>(name))
@@ -36,7 +36,7 @@ operator<<(std::ostream& os, const Introspector& introspector)
     os << separator;
     os << "Tessellation Control Shader Subroutine Uniform " << *introspector.ITessControlSubroutineUniform;
     os << separator;
-    os << "Tessellation Evaluation Shader Subroutine Uniform " << *introspector.ITessEvalutationSubroutineUniform;
+    os << "Tessellation Evaluation Shader Subroutine Uniform " << *introspector.ITessEvaluationSubroutineUniform;
     os << separator;
     os << "Geometry Shader Subroutine Uniform " << *introspector.IGeometrySubroutineUniform;
     os << separator;

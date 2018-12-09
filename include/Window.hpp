@@ -2,6 +2,8 @@
 
 #include "glm/ivec2.hpp"
 #include "glm/ivec4.hpp"
+#include "glm/bvec2.hpp"
+#include "glm/dvec2.hpp"
 
 #include <unordered_map>
 #include <memory>
@@ -15,10 +17,10 @@ struct Window {
     Window();
     Window(const Window&) = delete;
 
-    Window(Window&& obj) noexcept : m_handle(obj.m_handle), m_callbacks(obj.m_callbacks)
+    Window(Window&& obj) noexcept : m_handle(obj.m_handle), callbacks(obj.callbacks)
     {
         obj.m_handle = nullptr;
-        m_callbacks.register_all(m_handle);
+        callbacks.register_all(m_handle);
     }
 
     Window& operator=(Window&& obj) noexcept
@@ -30,7 +32,7 @@ struct Window {
     void swap(Window& other) noexcept
     {
         std::swap(m_handle, other.m_handle);
-        std::swap(m_callbacks, other.m_callbacks);
+        std::swap(callbacks, other.callbacks);
     }
 
     ~Window();
@@ -54,10 +56,6 @@ struct Window {
     { return m_properties.frame_delay; }
 
     static Window* find_by_handle(Handle handle);
-  private:
-    static std::unordered_map<Handle, Window*> Instances;
-
-    Handle m_handle = nullptr;
 
     struct Callbacks {
         static void default_on_window_size(Handle, int, int);
@@ -65,15 +63,27 @@ struct Window {
         static void default_on_mouse_button(Handle, int, int, int);
         static void default_on_scroll(Handle, double, double);
         static void default_on_cursor_pos(Handle, double, double);
+        static void default_on_mouse_drag(Window*, int, double, double);
 
         void (* on_window_size)(Handle, int, int) = default_on_window_size;
         void (* on_key)(Handle, int, int, int, int) = default_on_key;
         void (* on_mouse_button)(Handle, int, int, int) = default_on_mouse_button;
         void (* on_scroll)(Handle, double, double) = default_on_scroll;
         void (* on_cursor_pos)(Handle, double, double) = default_on_cursor_pos;
+        void (* on_mouse_drag)(Window*, int, double, double) = default_on_mouse_drag; // custom
 
         void register_all(Handle);
-    } m_callbacks;
+
+        /// left/right button is down?
+        glm::bvec2 button_down = glm::bvec2(false, false);
+        glm::dvec2 last_cursor_pos = glm::dvec2(0.0, 0.0);
+        glm::bvec2 last_button_down = glm::bvec2(false, false);
+    } callbacks;
+
+  private:
+    static std::unordered_map<Handle, Window*> Instances;
+
+    Handle m_handle = nullptr;
 
     struct Properties {
         /// Position and dimension of viewport

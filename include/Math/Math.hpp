@@ -3,8 +3,8 @@
 #define GLM_ENABLE_EXPERIMENTAL 1
 
 #include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/matrix_access.hpp"
 #include "glm/gtc/type_ptr.hpp"
-#include "glm/gtx/string_cast.hpp"
 #include <algorithm>
 #include <type_traits>
 #include <ostream>
@@ -136,10 +136,9 @@ template <length_t C, length_t R, typename T, qualifier Q>
 GLM_FUNC_DECL std::ostream&
 operator<<(std::ostream& os, mat<C, R, T, Q> const& x)
 {
-    auto x_t = glm::transpose(x);
     os << "{\n";
-    for (length_t i = 0; i < x_t.length(); ++i) {
-        os << std::string("  ") << x_t[i] << '\n';
+    for (length_t i = 0; i < x.length(); ++i) {
+        os << std::string("  ") << glm::row(x, i) << '\n';
     }
     os << "}";
     return os;
@@ -147,37 +146,41 @@ operator<<(std::ostream& os, mat<C, R, T, Q> const& x)
 
 } // namespace glm
 
-/// @TODO Re-encapsulate into own Vector and Metrix classes.
+// TODO Re-encapsulate into own Vector and Metrix classes.
 namespace Math {
 
 static constexpr float Pi = 3.1415926f;
 
 struct Real {
-    float v;
+    using value_type = float;
+    value_type v;
 
-    constexpr Real(float value = 0.0f) : v(value)
+    constexpr Real(value_type value = 0.0f) : v(value)
     {}
 
-    Real& operator=(float value)
+    Real& operator=(value_type value)
     { return assign(value); }
 
-    Real& assign(float value)
+    explicit constexpr operator value_type() const
+    { return v; }
+
+    Real& assign(value_type value)
     {
         v = value;
         return *this;
     }
 
-    /// @TODO many operators
+    // TODO many operators
 
 
-    /// @TODO test normalize()
+    // TODO test normalize()
 
     /// normalize to (-mag, mag)
-    Real& normalize(float mag)
+    Real& normalize(value_type mag)
     { return assign(std::fmod(v, mag)); }
 
     /// normalize to (min, max)
-    Real& normalize(float min, float max)
+    Real& normalize(value_type min, value_type max)
     {
         if (min >= max) {
             return assign(0);
@@ -186,10 +189,10 @@ struct Real {
         return assign(std::fmod(v - mid, max - mid) + mid);
     }
 
-    Real& clamp(float mag)
+    Real& clamp(value_type mag)
     { return assign(std::clamp(v, -mag, mag)); }
 
-    Real& clamp(float min, float max)
+    Real& clamp(value_type min, float max)
     { return assign(std::clamp(v, min, max)); }
 
 };

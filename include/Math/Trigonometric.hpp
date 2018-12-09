@@ -12,11 +12,15 @@ class Degree;
 class Radian : public Real {
   public:
     using Real::v;
+    using value_type = Real::value_type;
 
     class Tag {};
 
     constexpr Radian(Tag, float value) : Real(value)
     {}
+
+    static Radian Of(float v)
+    { return Radian{Tag(), v}; }
 
     Degree degrees() const;
 
@@ -111,15 +115,6 @@ class Radian : public Real {
     float tan() const
     { return glm::tan(v); }
 
-    float asin() const
-    { return glm::asin(v); }
-
-    float acos() const
-    { return glm::acos(v); }
-
-    float atan() const
-    { return glm::atan(v); }
-
     float sinh() const
     { return glm::sinh(v); }
 
@@ -129,14 +124,23 @@ class Radian : public Real {
     float tanh() const
     { return glm::tanh(v); }
 
-    float asinh() const
-    { return glm::asinh(v); }
+    static Radian asin(float v)
+    { return Radian{Tag(), glm::asin(v)}; }
 
-    float acosh() const
-    { return glm::acosh(v); }
+    static Radian acos(float v)
+    { return Radian{Tag(), glm::acos(v)}; }
 
-    float atanh() const
-    { return glm::atanh(v); }
+    static Radian atan(float v)
+    { return Radian{Tag(), glm::atan(v)}; }
+
+    static Radian asinh(float v)
+    { return Radian{Tag(), glm::asinh(v)}; }
+
+    static Radian acosh(float v)
+    { return Radian{Tag(), glm::acosh(v)}; }
+
+    static Radian atanh(float v)
+    { return Radian{Tag(), glm::atanh(v)}; }
 
     /// round to [0, 2Pi)
     void round()
@@ -159,11 +163,15 @@ class Radian : public Real {
 class Degree : public Real {
   public:
     using Real::v;
+    using value_type = Real::value_type;
 
     class Tag {};
 
-    constexpr Degree(Tag, float value) : Real(value)
+    constexpr Degree(Tag, value_type value) : Real(value)
     {}
+
+    static Degree Of(value_type v)
+    { return Degree{Tag(), v}; }
 
     Radian radians() const;
 
@@ -258,15 +266,6 @@ class Degree : public Real {
     float tan() const
     { return radians().tan(); }
 
-    float asin() const
-    { return radians().asin(); }
-
-    float acos() const
-    { return radians().acos(); }
-
-    float atan() const
-    { return radians().atan(); }
-
     float sinh() const
     { return radians().sinh(); }
 
@@ -276,14 +275,23 @@ class Degree : public Real {
     float tanh() const
     { return radians().tanh(); }
 
-    float asinh() const
-    { return radians().asinh(); }
+    static Degree asin(float v)
+    { return Radian::asin(v).degrees(); }
 
-    float acosh() const
-    { return radians().acosh(); }
+    static Degree acos(float v)
+    { return Radian::acos(v).degrees(); }
 
-    float atanh() const
-    { return radians().atanh(); }
+    static Degree atan(float v)
+    { return Radian::atan(v).degrees(); }
+
+    static Degree asinh(float v)
+    { return Radian::asinh(v).degrees(); }
+
+    static Degree acosh(float v)
+    { return Radian::acosh(v).degrees(); }
+
+    static Degree atanh(float v)
+    { return Radian::atanh(v).degrees(); }
 
     /// round to [0, 360)
     void round()
@@ -336,30 +344,6 @@ tan(Degree deg)
 { return deg.tan(); }
 
 inline float
-asin(Radian rad)
-{ return rad.asin(); }
-
-inline float
-asin(Degree deg)
-{ return deg.asin(); }
-
-inline float
-acos(Radian rad)
-{ return rad.acos(); }
-
-inline float
-acos(Degree deg)
-{ return deg.acos(); }
-
-inline float
-atan(Radian rad)
-{ return rad.atan(); }
-
-inline float
-atan(Degree deg)
-{ return deg.atan(); }
-
-inline float
 sinh(Radian rad)
 { return rad.sinh(); }
 
@@ -383,46 +367,22 @@ inline float
 tanh(Degree deg)
 { return deg.tanh(); }
 
-inline float
-asinh(Radian rad)
-{ return rad.asinh(); }
-
-inline float
-asinh(Degree deg)
-{ return deg.asinh(); }
-
-inline float
-acosh(Radian rad)
-{ return rad.acosh(); }
-
-inline float
-acosh(Degree deg)
-{ return deg.acosh(); }
-
-inline float
-atanh(Radian rad)
-{ return rad.atanh(); }
-
-inline float
-atanh(Degree deg)
-{ return deg.atanh(); }
-
 } // namespace Math
 
 inline constexpr Math::Radian
 operator "" _rad(long double n)
-{ return {Math::Radian::Tag(), static_cast<float>(n)}; }
+{ return {Math::Radian::Tag(), static_cast<Math::Radian::value_type>(n)}; }
 
 inline constexpr Math::Radian
 operator "" _rad(unsigned long long int n)
-{ return {Math::Radian::Tag(), static_cast<float>(n)}; }
+{ return {Math::Radian::Tag(), static_cast<Math::Radian::value_type>(n)}; }
 
 inline constexpr Math::Degree
 operator "" _deg(long double n)
-{ return {Math::Degree::Tag(), static_cast<float>(n)}; }
+{ return {Math::Degree::Tag(), static_cast<Math::Degree::value_type>(n)}; }
 
 inline constexpr Math::Degree
 operator "" _deg(unsigned long long int n)
-{ return {Math::Degree::Tag(), static_cast<float>(n)}; }
+{ return {Math::Degree::Tag(), static_cast<Math::Degree::value_type>(n)}; }
 
 #endif //OPENGL_LAB_TRIGONOMETRIC_HPP

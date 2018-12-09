@@ -64,17 +64,17 @@ add_library(MainLib
 		src/OpenGL/Object/Object.cpp
         src/OpenGL/Object/Program.cpp
         src/OpenGL/Object/Shader.cpp
-        src/OpenGL/Utility/Debug.cpp
+		src/OpenGL/Debug.cpp
 		src/Console.cpp
 		src/FileSystem.cpp
-        src/Log.cpp
+		src/Utility/Log.cpp
         src/Mesh.cpp
 		src/Options.cpp
-        src/Transform.cpp
-        src/Utility.cpp
+		src/Math/Transform.cpp
+		src/Utility/Misc.cpp
 		src/Watcher.cpp
 		src/Window.cpp
-		src/Sandbox.cpp)
+		src/Sandbox.cpp src/Math/Camera.cpp include/Math/Camera.hpp src/Math/Node.cpp include/Math/Node.hpp src/OpenGL/ProgramPipeline.cpp)
 
 message(STATUS "Build target:${CMAKE_HOST_SYSTEM_NAME}")
 set(HOST ${CMAKE_HOST_SYSTEM_NAME})
@@ -119,12 +119,6 @@ add_executable(test EXCLUDE_FROM_ALL
         test/test001.cpp)
 add_dependencies(test MainLib)
 target_link_libraries(test MainLib)
-
-# TODO due to timestamp of directories not changed frequently,
-# TODO updates to resource files might not be reflected in new build.
-# TODO think of a new way... may be copy recursively
-file(REMOVE_RECURSE ${CMAKE_BINARY_DIR}/shaders)
-file(COPY shaders DESTINATION ./)
 
 option(UNITY_BUILD "Use cotire to enable unity build, speeding up compilation.")
 if (UNITY_BUILD)

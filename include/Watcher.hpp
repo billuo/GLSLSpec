@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Expected.hpp"
-#include "Thread.hpp"
+#include "Utility/Expected.hpp"
+#include "Utility/Thread.hpp"
 #include "FileSystem.hpp"
 
 #include <unordered_map>
@@ -60,20 +60,20 @@ class Watcher {
 
     void unwatch(const FS::path& path, FileType type);
 
-    using Callback = std::function<void(const DynamicFile&)>;
+    // using Callback = std::function<void(const DynamicFile&)>;
 
-    Callback set_callback(Callback callback)
-    {
-        std::swap(callback, m_callback);
-        return callback;
-    }
+    // Callback set_callback(Callback callback)
+    // {
+    //     std::swap(callback, m_callback);
+    //     return callback;
+    // }
 
     expected<DynamicFile, std::string> find(const FS::path& path);
 
   private:
     bool m_watching = true;
-    Callback m_callback = [](const DynamicFile& path)
-    {};
+    // Callback m_callback = [](const DynamicFile& path)
+    // {};
 
     std::unordered_map<FS::path, DynamicFile> m_watching_files;
     std::mutex mutex_watching_files;

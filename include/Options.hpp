@@ -2,7 +2,7 @@
 
 #include "glm/fwd.hpp"
 #include "glm/ivec2.hpp"
-#include "Log.hpp"
+#include "Utility/Log.hpp"
 #include "FileSystem.hpp"
 #include "Watcher.hpp"
 

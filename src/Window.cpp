@@ -1,7 +1,9 @@
 #include "Window.hpp"
 #include "Options.hpp"
+#include "Sandbox.hpp"
 #include "OpenGL/Common.hpp"
-#include "Thread.hpp"
+#include "Utility/Debug.hpp"
+#include "Utility/Thread.hpp"
 
 #include <ctime>
 #include <Window.hpp>
@@ -23,7 +25,7 @@ Window::Window()
     Instances[m_handle] = this;
     glfwMakeContextCurrent(m_handle);
     gladLoadGLLoader((GLADloadproc) glfwGetProcAddress); // XXX it needs a current context
-    m_callbacks.register_all(m_handle);
+    callbacks.register_all(m_handle);
 }
 
 Window::~Window()
@@ -44,36 +46,108 @@ void
 Window::Callbacks::default_on_window_size(GLFWwindow* handle, int w, int h)
 {
     auto* window = find_by_handle(handle);
-    window->resize(w, h);
+    if (window) {
+        window->resize(w, h);
+    }
 }
 
 void
 Window::Callbacks::default_on_key(GLFWwindow* handle, int key, int scancode, int action, int mods)
 {
-    Log::d("Default on key: pressed '{}'", static_cast<char>(key));
-    if (key == GLFW_KEY_Q && action == GLFW_PRESS) {
-        if (auto window = find_by_handle(handle)) {
-            window->close();
+    switch (key) {
+        case GLFW_KEY_Q:
+            if (action == GLFW_PRESS) {
+                if (auto window = find_by_handle(handle)) {
+                    window->close();
+                }
+            }
+            break;
+        case GLFW_KEY_W:
+            if (action != GLFW_RELEASE) {
+                sandbox->camera.dolly(0.2f);
+            }
+            break;
+        case GLFW_KEY_A:
+            if (action != GLFW_RELEASE) {
+                sandbox->camera.track(-0.2f);
+            }
+            break;
+        case GLFW_KEY_S:
+            if (action != GLFW_RELEASE) {
+                sandbox->camera.dolly(-0.2f);
+            }
+            break;
+        case GLFW_KEY_D:
+            if (action != GLFW_RELEASE) {
+                sandbox->camera.track(0.2f);
+            }
+            break;
+        case GLFW_KEY_P:
+            if (action == GLFW_PRESS) {
+                VALUE(sandbox->camera.axes());
+                VALUE(sandbox->camera.look_at());
+            }
+            break;
+        default:
+            break;
+    }
+}
+
+void
+Window::Callbacks::default_on_mouse_button(GLFWwindow* handle, int button, int action, int mods)
+{
+    auto window = find_by_handle(handle);
+    if (window) {
+        if (button == GLFW_MOUSE_BUTTON_LEFT) {
+            window->callbacks.button_down.x = action == GLFW_PRESS;
+        } else if (button == GLFW_MOUSE_BUTTON_RIGHT) {
+            window->callbacks.button_down.y = action == GLFW_PRESS;
         }
     }
 }
 
 void
-Window::Callbacks::default_on_mouse_button(GLFWwindow*, int, int, int)
+Window::Callbacks::default_on_scroll(GLFWwindow* handle, double dx, double dy)
 {
-
+    constexpr float factor = 1.1892; // = 2^0.25
+    if (dy != 0.0) {
+        float n = std::pow(factor, static_cast<float>(dy));
+        sandbox->camera.orbit(0_deg, 0_deg, sandbox->camera.distance_to() * (1 / n - 1));
+        // so the distance becomes 1/n of the old distance, i.e. everything looks scaled by n.
+    }
 }
 
 void
-Window::Callbacks::default_on_scroll(GLFWwindow*, double, double)
+Window::Callbacks::default_on_cursor_pos(GLFWwindow* handle, double xpos, double ypos)
 {
-
+    auto window = find_by_handle(handle);
+    if (window) {
+        auto& cb = window->callbacks;
+        auto&& delta = glm::dvec2(xpos, ypos) - cb.last_cursor_pos;
+        if (cb.last_button_down.x && cb.button_down.x) {
+            cb.on_mouse_drag(window, GLFW_MOUSE_BUTTON_LEFT, delta.x, delta.y);
+        }
+        if (cb.last_button_down.y && cb.button_down.y) {
+            cb.on_mouse_drag(window, GLFW_MOUSE_BUTTON_RIGHT, delta.x, delta.y);
+        }
+        cb.last_cursor_pos = glm::dvec2(xpos, ypos);
+        cb.last_button_down = cb.button_down;
+    }
 }
 
 void
-Window::Callbacks::default_on_cursor_pos(GLFWwindow*, double, double)
+Window::Callbacks::default_on_mouse_drag(Window* _this, int button, double dx, double dy)
 {
-
+    assert(_this);
+    switch (button) {
+        case GLFW_MOUSE_BUTTON_LEFT:
+            sandbox->camera.orbit(Math::Degree::Of(dy), Math::Degree::Of(-dx));
+            break;
+        case GLFW_MOUSE_BUTTON_RIGHT:
+            break;
+        default:
+            break;
+    }
 }
 
 void
@@ -112,6 +186,7 @@ Window::set_viewport(glm::ivec2 size)
 {
     glfwMakeContextCurrent(m_handle);
     glViewport(0, 0, size.x, size.y);
+    sandbox->camera.set_aspect(static_cast<float>(size.x) / size.y);
     m_properties.viewport = glm::ivec4(0, 0, size.x, size.y);
 }
 

@@ -1,5 +1,5 @@
 #include "OpenGL/Object/Object.hpp"
-#include "Debug.hpp"
+#include "Utility/Debug.hpp"
 
 
 namespace {

@@ -90,7 +90,7 @@ struct ProgramInterface : public details::InterfaceBase {
                 return &r;
             }
         }
-        Log::w("In {}, {} not found\n", type_name<decltype(*this)>(), name);
+        // Log::d("In {}, {} not found\n", type_name<decltype(*this)>(), name);
         return nullptr;
     }
 

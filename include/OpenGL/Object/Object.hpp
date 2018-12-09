@@ -5,9 +5,9 @@
  */
 #pragma once
 
-#include "Log.hpp"
+#include "Utility/Log.hpp"
 #include "OpenGL/Common.hpp"
-#include "OpenGL/Utility/Debug.hpp"
+#include "OpenGL/Debug.hpp"
 
 #include <memory>
 #include <ostream>
