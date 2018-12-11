@@ -74,7 +74,7 @@ add_library(MainLib
 		src/Utility/Misc.cpp
 		src/Watcher.cpp
 		src/Window.cpp
-		src/Sandbox.cpp src/Math/Camera.cpp include/Math/Camera.hpp src/Math/Node.cpp include/Math/Node.hpp src/OpenGL/ProgramPipeline.cpp)
+		src/Sandbox.cpp src/Scene/Camera.cpp include/Scene/Camera.hpp src/Scene/Node.cpp include/Scene/Node.hpp src/OpenGL/ProgramPipeline.cpp src/OpenGL/VertexLayout.cpp include/OpenGL/VertexLayout.hpp)
 
 message(STATUS "Build target:${CMAKE_HOST_SYSTEM_NAME}")
 set(HOST ${CMAKE_HOST_SYSTEM_NAME})

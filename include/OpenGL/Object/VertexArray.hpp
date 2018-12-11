@@ -19,23 +19,24 @@ class VertexArray : public Object {
 
   public:
     static void Bind(const VertexArray& vao)
-    {
-        glBindVertexArray(vao.name());
-    }
+    { glBindVertexArray(vao.name()); }
 
-    explicit VertexArray(const GLchar* label = nullptr) : Object(pool().get())
-    {
-        Bind(*this);
-        if (label) {
-            Object::label(label, GL_VERTEX_ARRAY);
-        }
-    }
+    explicit VertexArray() : Object(pool().get())
+    {}
 
     VertexArray(VertexArray&& obj) = default;
     VertexArray& operator=(VertexArray&& rhs) = default;
 
     ~VertexArray()
     { pool().put(std::move(m_name)); }
+
+    using Object::label;
+
+    void label(const GLchar* label)
+    { Object::label(label, GL_VERTEX_ARRAY); }
+
+    void bind()
+    { Bind(*this); }
 
 };
 

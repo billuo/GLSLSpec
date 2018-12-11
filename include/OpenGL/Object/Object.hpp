@@ -85,7 +85,11 @@ class Object {
     std::string label() const
     { return m_label ? *m_label : std::string(); }
 
+    #if DEBUG_BUILD
     void label(std::string str, GLenum identifier);
+    #else
+    void label(std::string str, GLenum identifier){}
+    #endif
 
     friend std::ostream& operator<<(std::ostream& os, const Object& object)
     { return os << object.label() << '#' << object.name(); }

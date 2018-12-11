@@ -4,6 +4,7 @@
 #include "spdlog/sinks/base_sink.h"
 
 #include <sstream>
+#include <iomanip>
 #include <list>
 #include <string>
 #include <queue>
@@ -48,6 +49,7 @@ class Console {
     {
         Log::add_sink(m_sink);
         m_sink->set_pattern("==>[%^%l%$] %v");
+        m_sink->oss << std::fixed;
     }
 
     static void add_command(std::string names, std::pair<unsigned, unsigned> n_args,

@@ -16,19 +16,35 @@ class Shader;
 using shared_shader = std::shared_ptr<Shader>;
 
 class Shader : public Object {
-  public:
-    explicit Shader(GLenum type, const GLchar* label = nullptr) : Object(pool.get(type))
+    static auto& pool()
     {
-        if (label) {
-            Object::label(label, GL_SHADER);
-        }
+        static struct {
+            Name get(GLenum type)
+            {
+                GLuint name = glCreateShader(type);
+                return Name(name);
+            }
+
+            void put(Name&& name)
+            { glDeleteShader(name.get()); }
+        } singleton;
+        return singleton;
     }
+
+  public:
+    explicit Shader(GLenum type) : Object(pool().get(type))
+    {}
 
     Shader(Shader&&) = default;
     Shader& operator=(Shader&&) = default;
 
     ~Shader()
-    { pool.put(std::move(m_name)); }
+    { pool().put(std::move(m_name)); }
+
+    using Object::label;
+
+    void label(const GLchar* label)
+    { Object::label(label, GL_SHADER); }
 
     /// Add array of strings as sources of this shader
     void source(const GLchar** sources, size_t count);
@@ -43,21 +59,9 @@ class Shader : public Object {
     /// Query a parameter
     GLint get(GLenum param) const;
 
-  private:
-    static struct {
-        static Name get(GLenum type)
-        {
-            GLuint name = glCreateShader(type);
-            return Name(name);
-        }
-
-        static void put(Name&& name)
-        { glDeleteShader(name.get()); }
-
-    } pool;
-
     /// Retrieve information log in a smart pointer
-    std::unique_ptr<char[]> aux_get_info_log() const;
+    std::unique_ptr<char[]> get_info_log() const;
+
 };
 
 } // namespace OpenGL

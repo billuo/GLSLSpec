@@ -1,8 +1,8 @@
-#include "Math/Node.hpp"
+#include "Scene/Node.hpp"
 #include "Utility/Debug.hpp"
 
 
-namespace Math {
+namespace Scene {
 
 std::pair<Math::Degree, Math::Degree>
 Node::get_orbit(const glm::vec3& center) const
@@ -18,4 +18,4 @@ Node::get_orbit(const glm::vec3& center) const
     return {Degree::atan(offset.y / l_xz), Degree::asin(offset.x / l_xz)};
 }
 
-} // namespace Math
+} // namespace Scene

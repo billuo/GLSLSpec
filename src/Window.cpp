@@ -7,6 +7,7 @@
 
 #include <ctime>
 #include <Window.hpp>
+#include <Scene/Camera.hpp>
 
 
 std::unique_ptr<Window> main_window;
@@ -15,7 +16,8 @@ std::unordered_map<Handle, Window*> Window::Instances;
 
 Window::Window()
 {
-    auto& dim = options.window.dimension;
+    m_properties.dimension = options.window.dimension;
+    auto& dim = m_properties.dimension;
     auto& title = options.application.name;
     m_handle = glfwCreateWindow(dim.x, dim.y, title.c_str(), nullptr, nullptr);
     if (m_handle == nullptr) {
@@ -85,7 +87,6 @@ Window::Callbacks::default_on_key(GLFWwindow* handle, int key, int scancode, int
         case GLFW_KEY_P:
             if (action == GLFW_PRESS) {
                 VALUE(sandbox->camera.axes());
-                VALUE(sandbox->camera.look_at());
             }
             break;
         default:
@@ -112,8 +113,7 @@ Window::Callbacks::default_on_scroll(GLFWwindow* handle, double dx, double dy)
     constexpr float factor = 1.1892; // = 2^0.25
     if (dy != 0.0) {
         float n = std::pow(factor, static_cast<float>(dy));
-        sandbox->camera.orbit(0_deg, 0_deg, sandbox->camera.distance_to() * (1 / n - 1));
-        // so the distance becomes 1/n of the old distance, i.e. everything looks scaled by n.
+        sandbox->camera.distance(glm::vec3(0.0f), sandbox->camera.distance_to(glm::vec3(0.0f)) / n);
     }
 }
 
@@ -141,9 +141,17 @@ Window::Callbacks::default_on_mouse_drag(Window* _this, int button, double dx, d
     assert(_this);
     switch (button) {
         case GLFW_MOUSE_BUTTON_LEFT:
-            sandbox->camera.orbit(Math::Degree::Of(dy), Math::Degree::Of(-dx));
+            sandbox->camera.orbit(Math::Degree::Of(static_cast<Math::Degree::value_type>(dy)),
+                                  Math::Degree::Of(static_cast<Math::Degree::value_type>(-dx)),
+                                  glm::vec3(0.0f));
             break;
         case GLFW_MOUSE_BUTTON_RIGHT:
+            if (dx != 0.0) {
+                sandbox->camera.pan(180_deg / _this->size().x * dx);
+            }
+            if (dy != 0.0) {
+                sandbox->camera.tilt(180_deg / _this->size().y * -dy);
+            }
             break;
         default:
             break;
@@ -174,9 +182,8 @@ Window::find_by_handle(GLFWwindow* handle)
 void
 Window::resize(int w, int h)
 {
-    auto& dim = m_properties.dimension;
+    m_properties.dimension = glm::ivec2(w, h);
     auto& dim_frame = m_properties.dimension_frame;
-    glfwGetWindowSize(m_handle, &dim.x, &dim.y);
     glfwGetFramebufferSize(m_handle, &dim_frame.x, &dim_frame.y);
     set_viewport(dim_frame);
 }
@@ -239,12 +246,12 @@ const glm::ivec4&
 Window::viewport() const
 { return m_properties.viewport; }
 
-const glm::ivec2&
-Window::dimension() const
+glm::ivec2
+Window::size() const
 { return m_properties.dimension; }
 
-const glm::ivec2&
-Window::dimension_frame() const
+glm::ivec2
+Window::frame_buffer_size() const
 { return m_properties.dimension_frame; }
 
 uint32_t

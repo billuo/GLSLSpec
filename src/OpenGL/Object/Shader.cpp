@@ -25,7 +25,7 @@ Shader::compile()
     if (get(GL_COMPILE_STATUS) == GL_FALSE) {
         Log::e("{} compilation failed:{}",
                nameOfShaderType(get(GL_SHADER_TYPE)),
-               aux_get_info_log().get());
+               get_info_log().get());
     }
 }
 
@@ -38,7 +38,7 @@ Shader::get(GLenum param) const
 }
 
 std::unique_ptr<char[]>
-Shader::aux_get_info_log() const
+Shader::get_info_log() const
 {
     std::unique_ptr<char[]> ret;
     GLint length = get(GL_INFO_LOG_LENGTH);

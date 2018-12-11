@@ -1,12 +1,17 @@
 #pragma once
 
-#include "Transform.hpp"
+#include "Math/Transform.hpp"
 #include "Utility/Misc.hpp"
+#include "Utility/Debug.hpp"
 
 
-namespace Math {
+namespace Scene {
 
 class Node {
+    using Transform = Math::Transform;
+    using Degree = Math::Degree;
+    using Radian = Math::Radian;
+
   public:
     Node() = default;
     virtual ~Node() = default;
@@ -25,8 +30,16 @@ class Node {
     glm::mat3 axes() const
     { return glm::mat3_cast(m_transform.rotation); }
 
-    glm::vec3 axis(Axis axis)
+    glm::vec3 axis(Axis axis) const
     { return glm::row(glm::mat3_cast(m_transform.rotation), underlying_cast(axis)); }
+
+    void look_at(const glm::vec3& target, const glm::vec3& up)
+    {
+        auto&& forward = glm::normalize(target - m_transform.position);
+        auto&& right = glm::normalize(glm::cross(forward, up));
+        auto&& new_up = glm::normalize(glm::cross(right, forward));
+        set_rotation(glm::transpose(glm::mat3(right, new_up, -forward)));
+    }
 
     void reset()
     { on_reset(); }
@@ -41,16 +54,22 @@ class Node {
     { on_scale(scale); }
 
     void translate_by(const glm::vec3& offset)
-    { on_position(m_transform.position + offset); }
+    { set_position(offset + m_transform.position); }
 
     void rotate_by(const glm::quat& quat)
-    { on_rotation(m_transform.rotation * quat); }
+    { set_rotation(quat * m_transform.rotation); }
 
     void scale_by(const glm::vec3& scale)
-    { on_scale(m_transform.scale * scale); }
+    { set_scale(scale * m_transform.scale); }
 
     float distance_to(const glm::vec3& position) const
     { return glm::length(position - m_transform.position); }
+
+    void distance(const glm::vec3& position, float distance)
+    {
+        auto&& dir = glm::normalize(m_transform.position - position);
+        set_position(position + distance * dir);
+    }
 
     void track(float distance)
     { translate_by(distance * axis(Axis::X)); }
@@ -61,14 +80,14 @@ class Node {
     void dolly(float distance)
     { translate_by(distance * axis(Axis::Z)); }
 
-    void tilt(Degree degree)
-    { rotate_by(glm::angleAxis(static_cast<float>(degree.radians()), axis(Axis::X))); }
+    // void tilt(Degree degree)
+    // { rotate_by(glm::angleAxis(static_cast<float>(degree.radians()), glm::vec3(1.0f, 0.0f, 0.0f))); }
 
-    void pan(Degree degree)
-    { rotate_by(glm::angleAxis(static_cast<float>(degree.radians()), axis(Axis::Y))); }
+    // void pan(Degree degree)
+    // { rotate_by(glm::angleAxis(static_cast<float>(degree.radians()), glm::vec3(0.0f, 1.0f, 0.0f))); }
 
-    void roll(Degree degree)
-    { rotate_by(glm::angleAxis(static_cast<float>(degree.radians()), axis(Axis::Z))); }
+    // void roll(Degree degree)
+    // { rotate_by(glm::angleAxis(static_cast<float>(degree.radians()), glm::vec3(0.0f, 0.0f, 1.0f))); }
 
     /// @brief Get the latitude & longitude of the orbit to a center
     /// @param center Center of the orbit
@@ -100,6 +119,6 @@ class Node {
     { m_transform.scale = result; }
 };
 
-} // namespace Math
+} // namespace Scene
 
 

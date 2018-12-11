@@ -32,12 +32,8 @@ class Program : public Object {
     static void Use(const Program& prog)
     { glUseProgram(prog.name()); }
 
-    explicit Program(const GLchar* label = nullptr) : Object(pool().get())
-    {
-        if (label) {
-            Object::label(label, GL_PROGRAM);
-        }
-    }
+    explicit Program() : Object(pool().get())
+    {}
 
     Program(Program&&) = default;
     Program& operator=(Program&&) = default;
@@ -45,9 +41,17 @@ class Program : public Object {
     ~Program()
     { pool().put(std::move(m_name)); }
 
+    using Object::label;
+
+    void label(const GLchar* label)
+    { Object::label(label, GL_PROGRAM); }
+
     Program& attach(const Shader& shader);
     /// Link all attached shaders together, forming a valid program.
     Program& link();
+
+    Program& use() const
+    { Use(*this); }
 
     /// Query about a parameter
     GLint get(GLenum param) const;

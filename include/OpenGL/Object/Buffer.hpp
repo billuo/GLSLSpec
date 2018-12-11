@@ -21,20 +21,15 @@ class Buffer : public Object {
     }
 
   public:
-    static void bind(GLenum target, Buffer& buffer)
+    static void Bind(GLenum target, const Buffer& buffer)
     { glBindBuffer(target, buffer.m_name.get()); }
 
-    static void unbind(GLenum target)
+    static void Unbind(GLenum target)
     { glBindBuffer(target, 0); }
 
   public:
-    explicit Buffer(const GLchar* label = nullptr) : Object(pool().get())
-    {
-        bind(GL_ARRAY_BUFFER, *this);
-        if (label) {
-            Object::label(label, GL_BUFFER);
-        }
-    }
+    explicit Buffer() : Object(pool().get())
+    {}
 
     Buffer(Buffer&&) = default;
 
@@ -42,6 +37,14 @@ class Buffer : public Object {
 
     ~Buffer()
     { pool().put(std::move(m_name)); }
+
+    using Object::label;
+
+    void label(const GLchar* label)
+    { Object::label(label, GL_BUFFER); }
+
+    void bind(GLenum target) const
+    { Bind(target, *this); }
 
     // void Data(GLsizeiptr size, const GLvoid* data, GLenum usage);
     // void Storage(GLsizei size, const GLvoid* data, GLbitfield flags);

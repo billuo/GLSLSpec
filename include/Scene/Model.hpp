@@ -1,10 +1,12 @@
 #pragma once
 
-#include "Math/Transform.hpp"
+#include "Scene/Node.hpp"
 #include "Mesh.hpp"
 
 
-class Model {
+namespace Scene {
+
+class Model : public Node {
   public:
     Model() = default;
     ~Model() = default;
@@ -15,3 +17,4 @@ class Model {
     Mesh mesh;
 };
 
+} //namespace Scene

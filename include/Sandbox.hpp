@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Math/Camera.hpp"
+#include "Scene/Camera.hpp"
 #include "Watcher.hpp"
 #include "OpenGL/Introspection/Introspector.hpp"
 #include "OpenGL/Object/Buffer.hpp"
@@ -10,22 +10,24 @@
 
 class Sandbox {
   public:
+    Sandbox();
+
     void on_update(const DynamicFile& file);
 
     void update();
 
     void render();
 
-    Math::Camera camera = Math::Camera(glm::vec3(3.0f, 0.0f, 3.0f));
+    Scene::Camera camera{glm::vec3(3.0f, 0.0f, 3.0f), glm::vec3()};
 
   private:
 
     std::set<DynamicFile> m_updated;
     std::mutex mutex_updated;
 
-    OpenGL::ProgramPipeline m_pipeline{"sbpp"};
-    std::unique_ptr<OpenGL::Introspector> m_introspectors[OpenGL::MaxShaderStage] = {};
-    OpenGL::VertexArray m_vao{"sbvao"};
+    OpenGL::ProgramPipeline m_pipeline;
+    std::unique_ptr<OpenGL::Introspector> m_introspectors[OpenGL::MaxShaderStage]{};
+    OpenGL::VertexArray m_vao;
 
     void import(const DynamicFile& file);
     void aux_import_shader(const DynamicFile& file, const std::string& tag);

@@ -36,7 +36,7 @@ ProgramPipeline::valid() const
 }
 
 GLuint
-ProgramPipeline::stage(GLenum order)
+ProgramPipeline::stage(ShaderStage order)
 { return m_stages[order]; }
 
 } // namespace OpenGL

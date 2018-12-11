@@ -1,9 +1,20 @@
+
+#include <Sandbox.hpp>
+
 #include "Utility/Log.hpp"
 #include "Sandbox.hpp"
 #include "OpenGL/Constants.hpp"
 
 
 std::unique_ptr<Sandbox> sandbox;
+
+Sandbox::Sandbox()
+{
+    OpenGL::ProgramPipeline::Bind(m_pipeline);
+    m_pipeline.label("sandbox-pipeline");
+    OpenGL::VertexArray::Bind(m_vao);
+    m_vao.label("sandbox-VAO");
+}
 
 void
 Sandbox::import(const DynamicFile& file)
@@ -40,10 +51,12 @@ Sandbox::aux_import_shader(const DynamicFile& file, const std::string& tag)
         return;
     }
     DEBUG("Importing shader {}", file.path());
-    OpenGL::Shader shader(*type, "import");
-    OpenGL::Program program("import");
+    OpenGL::Shader shader(*type);
+    OpenGL::Program program;
+    shader.label("import");
     shader.source(source->c_str());
     shader.compile();
+    program.label("import");
     program.set(GL_PROGRAM_SEPARABLE, GL_TRUE);
     program.attach(shader);
     program.link();
@@ -75,12 +88,9 @@ Sandbox::render()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     if (m_pipeline.valid()) {
-        auto&& mvp = camera.projection_world();
-        auto&& v = glm::vec3(1.0f, 1.0f, 1.0f);
-        v.x = 0.0f;
-        v.z = 0.0f;
         auto order = OpenGL::VertexShader;
-        auto u_mvp = m_introspectors[order]->IUniform->find("MVP");
+        auto&& mvp = camera.projection_world();
+        auto u_mvp = m_introspectors[order]->uniform().find("MVP");
         if (u_mvp) {
             glProgramUniformMatrix4fv(m_pipeline.stage(order), u_mvp->location, 1, GL_FALSE, glm::value_ptr(mvp));
         }
@@ -107,3 +117,5 @@ Sandbox::on_update(const DynamicFile& file)
     std::lock_guard guard(mutex_updated);
     m_updated.insert(file);
 }
+
+

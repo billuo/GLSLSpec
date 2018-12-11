@@ -27,10 +27,6 @@ class ProgramPipeline : Object {
 
     explicit ProgramPipeline(const GLchar* label = nullptr) : Object(pool().get())
     {
-        Bind(*this);
-        if (label) {
-            Object::label(label, GL_PROGRAM_PIPELINE);
-        }
     }
 
     ProgramPipeline(ProgramPipeline&&) = default;
@@ -39,7 +35,12 @@ class ProgramPipeline : Object {
     ~ProgramPipeline()
     { pool().put(std::move(m_name)); }
 
-    GLuint stage(GLenum order);
+    using Object::label;
+
+    void label(const GLchar* label)
+    { Object::label(label, GL_PROGRAM_PIPELINE); }
+
+    GLuint stage(ShaderStage order);
 
     void use_stage(const Program& program, GLbitfield stages);
 

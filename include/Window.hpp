@@ -48,8 +48,8 @@ struct Window {
     std::string default_title() const;
 
     const glm::ivec4& viewport() const;
-    const glm::ivec2& dimension() const;
-    const glm::ivec2& dimension_frame() const;
+    glm::ivec2 size() const;
+    glm::ivec2 frame_buffer_size() const;
     uint32_t FPS() const;
 
     double frame_delay()
@@ -81,16 +81,17 @@ struct Window {
     } callbacks;
 
   private:
+    /// Map raw handle to instance of this class. May as well use glfwSet/GetWindowUserPointer?
     static std::unordered_map<Handle, Window*> Instances;
 
     Handle m_handle = nullptr;
 
     struct Properties {
-        /// Position and dimension of viewport
+        /// Position and dimension of viewport (in memory pixels)
         glm::ivec4 viewport = {0, 0, 0, 0};
-        /// Dimension of the window
+        /// Dimension of the window (in screen coordinates)
         glm::ivec2 dimension = {0, 0};
-        /// Dimension of the frame buffer related with viewport
+        /// Dimension of the frame buffer for the whole window.
         glm::ivec2 dimension_frame = {0, 0};
         /// Number of frames rendered
         uint64_t frame_count = 0;

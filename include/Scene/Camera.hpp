@@ -1,19 +1,21 @@
 #pragma once
 
 #include "Node.hpp"
-#include "Transform.hpp"
 
 
-namespace Math {
+namespace Scene {
 
 class Camera : public Node {
+    using Degree = Math::Degree;
+   
   public:
+
     enum Projection { Perspective, Orthographic };
 
-    explicit Camera(glm::vec3 pos, glm::vec3 target = glm::vec3(0.0f));
+    Camera(glm::vec3 pos, glm::vec3 target, const glm::vec3& up = glm::vec3(0.0f, 1.0f, 0.0f));
 
-    glm::mat4 projection_world() const;
-    glm::mat4 projection_view() const;
+    const glm::mat4& projection_world() const;
+    const glm::mat4& projection_view() const;
 
     glm::vec3 world_to_view(glm::vec3 vec) const;
     glm::vec3 world_to_projection(glm::vec3 vec) const;
@@ -22,62 +24,71 @@ class Camera : public Node {
 
     using Node::distance_to;
 
-    float distance_to() const
-    { return distance_to(m_look_at); }
-
     void set_aspect(float aspect)
     {
         m_aspect = aspect;
         m_matrices.cached = false;
     }
 
-    auto look_at() const
-    { return m_look_at; }
+    using Node::look_at;
 
     void look_at(const glm::vec3& target)
-    { look_at(target, m_up); }
-
-    void look_at(const glm::vec3& target, const glm::vec3& up)
     {
-        m_look_at = target;
-        m_up = up;
-        set_rotation(quat_cast(lookAt(-m_transform.position, target, up)));
+        look_at(target, m_up);
+        auto&&[lat, lon] = get_orbit(target);
+        m_angle.vertical = -lat;
+        m_angle.horizontal = -lon;
     }
 
     /// @brief Move the camera on the orbit around current look_at.
     /// @param dlat Offset of latitude
     /// @param dlon Offset of longitude
-    /// @param dr Offset of the distance to look_at, defaults to 0.0f.
-    void orbit(Degree dlat, Degree dlon, float dr = 0.0f)
-    {
-        orbit(dlat, dlon, dr, look_at(), m_up);
-        // XXX DON'T replace look_at() with m_look_at.
-        // In set_orbit(), m_look_at is set to the orbit center at last,
-        // which is passed by reference all the way.
-        // However just before that, the position is set and as a result,
-        // m_look_at is updated (falsely) as well. If m_look_at itself is passed in,
-        // The correction to m_look_at is invalid -- it's just self assignment.
-    }
+    /// @param center Center of the orbit
+    void orbit(Degree dlat, Degree dlon, const glm::vec3& center)
+    { orbit(dlat, dlon, center, m_up); }
 
     /// @brief Set the node onto the orbit around a center.
     /// @param lat Latitude of the orbit
     /// @param lon Longitude of the orbit
-    /// @param radius Distance to the orbit center
-    /// @param center Center of the orbit, defaults to world origin.
+    /// @param center Center of the orbit
     /// @param up Reference direction of up in world coord.
-    void set_orbit(Degree lat, Degree lon, float radius, const glm::vec3& center, const glm::vec3& up);
+    void set_orbit(Degree lat, Degree lon, const glm::vec3& center, const glm::vec3& up);
+
     /// @brief Change orbit relatively
     /// @param dlat Offset of latitude
     /// @param dlon Offset of longitude
-    /// @param dr Offset of the distance to the orbit center
     /// @param center Center of the orbit, defaults to world origin.
     /// @param up Reference direction of up in world coord.
-    void orbit(Degree dlat, Degree dlon, float dr, const glm::vec3& center, const glm::vec3& up);
+    void orbit(Degree dlat, Degree dlon, const glm::vec3& center, const glm::vec3& up);
+
+    void tilt(Degree degree)
+    {
+        m_angle.vertical += degree;
+        m_angle.vertical.clamp(89.9f);
+        m_matrices.cached = false;
+    }
+
+    void pan(Degree degree)
+    {
+        m_angle.horizontal += degree;
+        m_angle.horizontal.round_half();
+        m_matrices.cached = false;
+    }
+
+    void roll(Degree degree)
+    {}
+
+    auto look_dir() const
+    {
+        auto& h = m_angle.horizontal;
+        auto& v = m_angle.vertical;
+        return glm::vec3(v.cos() * h.sin(), v.sin(), v.cos() * -h.cos());
+    }
+
   protected:
 
     void on_position(const glm::vec3& result) override
     {
-        m_look_at += result - m_transform.position;
         Node::on_position(result);
         m_matrices.cached = false;
     }
@@ -85,6 +96,7 @@ class Camera : public Node {
     void on_rotation(const glm::quat& result) override
     {
         Node::on_rotation(result);
+        // adjust m_angle ...?
         m_matrices.cached = false;
     }
 
@@ -101,11 +113,16 @@ class Camera : public Node {
     };
     mutable Matrices m_matrices;
 
+    /// View angle to calculate direction looking at
+    struct {
+        Degree horizontal = 0_deg;
+        Degree vertical = 0_deg;
+    } m_angle;
+
     /// Update all cached matrices
     void compute_all() const;
 
-    glm::vec3 m_look_at = glm::vec3(0.0f);
-    glm::vec3 m_up = glm::vec3(0.0f, 1.0f, 0.0f);
+    glm::vec3 m_up;
     glm::vec2 m_clip = glm::vec2(1.0f / 128.0f, 128.0f);
     float m_FOV = 45.0f;
     float m_aspect = 4.0f / 3.0f;
