@@ -4,7 +4,3 @@
 tags
 *build*/
 include/glm
-
-\.idea/workspace\.xml
-
-\.idea/
