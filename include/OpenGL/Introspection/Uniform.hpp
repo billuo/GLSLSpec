@@ -1,9 +1,8 @@
 #pragma once
 
-#include "Resource.hpp"
-#include "OpenGL/Constants.hpp"
-#include "Utility/Debug.hpp"
-#include "Utility/Log.hpp"
+#include <OpenGL/Introspection/Resource.hpp>
+#include <OpenGL/Constants.hpp>
+#include <Utility/Debug.hpp>
 
 
 namespace OpenGL {

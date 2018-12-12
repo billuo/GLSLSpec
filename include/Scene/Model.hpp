@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Scene/Node.hpp"
-#include "Mesh.hpp"
+#include <Scene/Node.hpp>
+#include <Mesh.hpp>
 
 
 namespace Scene {

@@ -1,6 +1,6 @@
-#include "OpenGL/Debug.hpp"
-#include "Utility/Log.hpp"
-#include "Utility/Debug.hpp"
+#include <OpenGL/Debug.hpp>
+#include <Utility/Log.hpp>
+#include <Utility/Debug.hpp>
 
 
 namespace {

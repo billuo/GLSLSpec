@@ -1,5 +1,5 @@
-#include "Utility/Log.hpp"
-#include "OpenGL/Introspection/Interface.hpp"
+#include <Utility/Log.hpp>
+#include <OpenGL/Introspection/Interface.hpp>
 #include <algorithm>
 #include <OpenGL/Object/Program.hpp>
 

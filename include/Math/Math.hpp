@@ -2,9 +2,9 @@
 
 #define GLM_ENABLE_EXPERIMENTAL 1
 
-#include "glm/gtc/matrix_transform.hpp"
-#include "glm/gtc/matrix_access.hpp"
-#include "glm/gtc/type_ptr.hpp"
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/matrix_access.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <algorithm>
 #include <type_traits>
 #include <ostream>
@@ -208,5 +208,5 @@ sign(T x)
 
 } // namespace Math
 
-#include "Math/Trigonometric.hpp"
+#include <Math/Trigonometric.hpp>
 

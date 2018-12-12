@@ -1,6 +1,6 @@
-#include "Console.hpp"
-#include "Window.hpp"
-#include "Math/Math.hpp"
+#include <Console.hpp>
+#include <Window.hpp>
+#include <Math/Math.hpp>
 
 #include <thread>
 #include <iostream>
@@ -121,13 +121,13 @@ declare_commands()
                          [](const std::string& cmd, const std::string& args)
                          {
                              if (args == "debug") {
-                                 console->putline(options.flags.debug ? "on" : "off");
+                                 console->putline(options.flags.debug_draw ? "on" : "off");
                                  return true;
                              } else {
                                  std::vector<std::string> values = split(args, ',');
                                  if (values.size() == 2) {
                                      std::lock_guard guard(console->mutex);
-                                     options.flags.debug = (values[1] == "on");
+                                     options.flags.debug_draw = (values[1] == "on");
                                      return true;
                                  }
                              }
@@ -756,14 +756,14 @@ declare_commands()
                          {
                              switch (args.size()) {
                                  case 0:
-                                     *console << (options.flags.debug ? "on" : "off") << '\n';
+                                     *console << (options.flags.debug_draw ? "on" : "off") << '\n';
                                      return true;
                                  case 1: {
                                      const std::string& arg = args.front();
                                      if (arg == "on") {
-                                         options.flags.debug = true;
+                                         options.flags.debug_draw = true;
                                      } else if (arg == "off") {
-                                         options.flags.debug = false;
+                                         options.flags.debug_draw = false;
                                      } else {
                                          Log::i("Unknown argument: {}", arg);
                                      }

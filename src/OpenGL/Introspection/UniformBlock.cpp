@@ -1,4 +1,4 @@
-#include "OpenGL/Introspection/UniformBlock.hpp"
+#include <OpenGL/Introspection/UniformBlock.hpp>
 
 
 namespace OpenGL {

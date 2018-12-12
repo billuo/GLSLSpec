@@ -1,11 +1,11 @@
 #pragma once
 
-#include "Scene/Camera.hpp"
-#include "Watcher.hpp"
-#include "OpenGL/Introspection/Introspector.hpp"
-#include "OpenGL/Object/Buffer.hpp"
-#include "OpenGL/Object/ProgramPipeline.hpp"
-#include "OpenGL/Object/VertexArray.hpp"
+#include <Scene/Camera.hpp>
+#include <Watcher.hpp>
+#include <OpenGL/Introspection/Introspector.hpp>
+#include <OpenGL/Object/Buffer.hpp>
+#include <OpenGL/Object/ProgramPipeline.hpp>
+#include <OpenGL/Object/VertexArray.hpp>
 
 
 class Sandbox {

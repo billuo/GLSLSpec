@@ -1,8 +1,8 @@
 #ifndef OPENGL_LAB_CONSTANTS_HPP
 #define OPENGL_LAB_CONSTANTS_HPP
 
-#include "Utility/Expected.hpp"
-#include "OpenGL/Common.hpp"
+#include <Utility/Expected.hpp>
+#include <OpenGL/Common.hpp>
 
 #include <string>
 

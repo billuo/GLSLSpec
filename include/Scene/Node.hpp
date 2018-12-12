@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Math/Transform.hpp"
-#include "Utility/Misc.hpp"
-#include "Utility/Debug.hpp"
+#include <Math/Transform.hpp>
+#include <Utility/Misc.hpp>
+#include <Utility/Debug.hpp>
 
 
 namespace Scene {
@@ -19,7 +19,7 @@ class Node {
     explicit Node(const Transform& transform) : m_transform(transform)
     {}
 
-    explicit Node(const glm::mat4& transform) : m_transform(transform)
+    explicit Node(const glm::mat4& transform_matrix) : m_transform(transform_matrix)
     {}
 
     const Transform& transform() const

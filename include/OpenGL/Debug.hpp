@@ -1,7 +1,7 @@
 #ifndef OPENGL_LAB_DEBUG_HPP
 #define OPENGL_LAB_DEBUG_HPP
 
-#include "OpenGL/Common.hpp"
+#include <OpenGL/Common.hpp>
 
 
 #define OPENGL_TRACE if(auto err = glGetError()) {Log::d("error[{}], line#{}\nfile:{}", err, __LINE__, __FILE__);}

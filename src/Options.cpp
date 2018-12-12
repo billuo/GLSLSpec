@@ -1,6 +1,6 @@
-#include "Options.hpp"
-#include "Watcher.hpp"
-#include "Utility/Misc.hpp"
+#include <Options.hpp>
+#include <Watcher.hpp>
+#include <Utility/Misc.hpp>
 
 #include <iostream>
 #include <algorithm>
@@ -170,7 +170,7 @@ const std::vector<NamedOption> NamedOptions = {
                 {0, 0}, {},
                 [](const std::string&, unsigned, const std::string* arg) -> unsigned
                 {
-                    options.flags.debug = true;
+                    options.flags.debug_draw = true;
                     return 0u;
                 }},
         {"",  {"verbose"},

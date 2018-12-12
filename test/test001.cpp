@@ -1,8 +1,8 @@
 #include <iostream>
-#include "catch2/catch.hpp"
-#include "Math/Transform.hpp"
-#include "Math/Math.hpp"
-#include "Utility/Debug.hpp"
+#include <catch2/catch.hpp>
+#include <Math/Transform.hpp>
+#include <Math/Math.hpp>
+#include <Utility/Debug.hpp>
 
 
 TEST_CASE("Decompose transformation matrix M=SRT")

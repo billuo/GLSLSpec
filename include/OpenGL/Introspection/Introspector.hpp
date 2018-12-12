@@ -1,13 +1,12 @@
 #ifndef OPENGL_LAB_INTROSPECTOR_HPP
 #define OPENGL_LAB_INTROSPECTOR_HPP
 
-#include "Interface.hpp"
+#include <OpenGL/Introspection/Interface.hpp>
 
 
 namespace OpenGL {
 
 class Introspector {
-    template <typename T> using UP = std::unique_ptr<T>;
   public:
     explicit Introspector(const Program& program);
     ~Introspector() = default;
@@ -98,16 +97,16 @@ class Introspector {
     }
 
   private:
-    mutable UP<UniformInterface> IUniform;
-    mutable UP<UniformBlockInterface> IUniformBlock;
-    mutable UP<ProgramInputInterface> IInput;
-    mutable UP<ProgramOutputInterface> IOutput;
-    mutable UP<VertexSubroutineUniformInterface> IVertexSubroutineUniform;
-    mutable UP<TessControlSubroutineUniformInterface> ITessControlSubroutineUniform;
-    mutable UP<TessEvaluationSubroutineUniformInterface> ITessEvaluationSubroutineUniform;
-    mutable UP<GeometrySubroutineUniformInterface> IGeometrySubroutineUniform;
-    mutable UP<FragmentSubroutineUniformInterface> IFragmentSubroutineUniform;
-    mutable UP<ComputeSubroutineUniformInterface> IComputeSubroutineUniform;
+    mutable Owned<UniformInterface> IUniform;
+    mutable Owned<UniformBlockInterface> IUniformBlock;
+    mutable Owned<ProgramInputInterface> IInput;
+    mutable Owned<ProgramOutputInterface> IOutput;
+    mutable Owned<VertexSubroutineUniformInterface> IVertexSubroutineUniform;
+    mutable Owned<TessControlSubroutineUniformInterface> ITessControlSubroutineUniform;
+    mutable Owned<TessEvaluationSubroutineUniformInterface> ITessEvaluationSubroutineUniform;
+    mutable Owned<GeometrySubroutineUniformInterface> IGeometrySubroutineUniform;
+    mutable Owned<FragmentSubroutineUniformInterface> IFragmentSubroutineUniform;
+    mutable Owned<ComputeSubroutineUniformInterface> IComputeSubroutineUniform;
 
     friend std::ostream& operator<<(std::ostream& os, const Introspector& introspector);
 };

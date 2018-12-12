@@ -1,10 +1,10 @@
 #pragma once
 
-#include "glm/fwd.hpp"
-#include "glm/ivec2.hpp"
-#include "Utility/Log.hpp"
-#include "FileSystem.hpp"
-#include "Watcher.hpp"
+#include <glm/fwd.hpp>
+#include <glm/ivec2.hpp>
+#include <Utility/Log.hpp>
+#include <FileSystem.hpp>
+#include <Watcher.hpp>
 
 #include <string>
 #include <list>
@@ -17,6 +17,7 @@ struct GlobalOptions {
 
     /// Application information
     struct Application {
+        static constexpr bool debug = DEBUG_BUILD;
         const std::string name;
         const std::string version;
         const std::string build;
@@ -55,7 +56,7 @@ struct GlobalOptions {
     /// Various boolean flags
     struct Flags {
         /// Enable debug drawing?
-        bool debug = DEBUG_BUILD;
+        bool debug_draw = DEBUG_BUILD;
         /// Enable verbose output?
         bool verbose = false;
         /// Display help and immediately quit?

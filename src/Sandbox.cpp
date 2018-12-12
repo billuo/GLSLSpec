@@ -1,9 +1,9 @@
 
 #include <Sandbox.hpp>
 
-#include "Utility/Log.hpp"
-#include "Sandbox.hpp"
-#include "OpenGL/Constants.hpp"
+#include <Utility/Log.hpp>
+#include <Sandbox.hpp>
+#include <OpenGL/Constants.hpp>
 
 
 std::unique_ptr<Sandbox> sandbox;
@@ -58,7 +58,7 @@ Sandbox::aux_import_shader(const DynamicFile& file, const std::string& tag)
     shader.compile();
     program.label("import");
     program.set(GL_PROGRAM_SEPARABLE, GL_TRUE);
-    program.attach(shader);
+    program.attach(shader).link();
     program.link();
     m_pipeline.use_stage(program, stage);
     auto n = OpenGL::orderOfShaderBit(stage);

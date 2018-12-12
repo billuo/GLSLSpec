@@ -1,7 +1,7 @@
 #include <Scene/Camera.hpp>
-#include "Scene/Node.hpp"
-#include "Scene/Camera.hpp"
-#include "Utility/Debug.hpp"
+#include <Scene/Node.hpp>
+#include <Scene/Camera.hpp>
+#include <Utility/Debug.hpp>
 
 
 namespace Scene {

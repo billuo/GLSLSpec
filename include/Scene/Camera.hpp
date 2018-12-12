@@ -1,13 +1,13 @@
 #pragma once
 
-#include "Node.hpp"
+#include <Scene/Node.hpp>
 
 
 namespace Scene {
 
 class Camera : public Node {
     using Degree = Math::Degree;
-   
+
   public:
 
     enum Projection { Perspective, Orthographic };

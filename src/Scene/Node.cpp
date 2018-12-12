@@ -1,5 +1,5 @@
-#include "Scene/Node.hpp"
-#include "Utility/Debug.hpp"
+#include <Scene/Node.hpp>
+#include <Utility/Debug.hpp>
 
 
 namespace Scene {

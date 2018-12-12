@@ -1,7 +1,7 @@
 #ifndef OPENGL_LAB_TRIGONOMETRIC_HPP
 #define OPENGL_LAB_TRIGONOMETRIC_HPP
 
-#include "glm/trigonometric.hpp"
+#include <glm/trigonometric.hpp>
 #include <ostream>
 
 

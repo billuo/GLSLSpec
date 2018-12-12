@@ -1,9 +1,9 @@
-#include "OpenGL/Common.hpp"
-#include "OpenGL/Debug.hpp"
-#include "Math/Math.hpp"
-#include "Utility/Log.hpp"
-#include "Options.hpp"
-#include "Window.hpp"
+#include <OpenGL/Common.hpp>
+#include <OpenGL/Debug.hpp>
+#include <Math/Math.hpp>
+#include <Utility/Log.hpp>
+#include <Options.hpp>
+#include <Window.hpp>
 
 
 namespace OpenGL {

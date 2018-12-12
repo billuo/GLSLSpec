@@ -3,12 +3,12 @@
  * @brief Program entry point.
  * @author Zhen Luo 461652354@qq.com
  */
-#include "Console.hpp"
-#include "Sandbox.hpp"
-#include "Options.hpp"
-#include "Window.hpp"
-#include "OpenGL/Common.hpp"
-#include "OpenGL/Debug.hpp"
+#include <Console.hpp>
+#include <Sandbox.hpp>
+#include <Options.hpp>
+#include <Window.hpp>
+#include <OpenGL/Common.hpp>
+#include <OpenGL/Debug.hpp>
 
 // TODO load meshes from .obj
 // TODO support simple texture

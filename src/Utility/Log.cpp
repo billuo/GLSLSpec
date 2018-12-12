@@ -1,7 +1,7 @@
-#include "Utility/Log.hpp"
-#include "Options.hpp"
-#include "Console.hpp"
-#include "spdlog/sinks/null_sink.h"
+#include <Utility/Log.hpp>
+#include <Options.hpp>
+#include <Console.hpp>
+#include <spdlog/sinks/null_sink.h>
 
 #include <iostream>
 

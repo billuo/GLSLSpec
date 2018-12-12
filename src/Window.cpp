@@ -1,9 +1,9 @@
-#include "Window.hpp"
-#include "Options.hpp"
-#include "Sandbox.hpp"
-#include "OpenGL/Common.hpp"
-#include "Utility/Debug.hpp"
-#include "Utility/Thread.hpp"
+#include <Window.hpp>
+#include <Options.hpp>
+#include <Sandbox.hpp>
+#include <OpenGL/Common.hpp>
+#include <Utility/Debug.hpp>
+#include <Utility/Thread.hpp>
 
 #include <ctime>
 #include <Window.hpp>
@@ -64,14 +64,16 @@ Window::Callbacks::default_on_key(GLFWwindow* handle, int key, int scancode, int
                 }
             }
             break;
+            // TODO time based movements
+            //  - track key states
         case GLFW_KEY_W:
             if (action != GLFW_RELEASE) {
-                sandbox->camera.dolly(0.2f);
+                sandbox->camera.dolly(-0.2f);
             }
             break;
         case GLFW_KEY_A:
             if (action != GLFW_RELEASE) {
-                sandbox->camera.track(-0.2f);
+                sandbox->camera.track(0.2f);
             }
             break;
         case GLFW_KEY_S:

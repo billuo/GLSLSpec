@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Uniform.hpp"
+#include <OpenGL/Introspection/Uniform.hpp>
 #include <vector>
 
 

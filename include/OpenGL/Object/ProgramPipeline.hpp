@@ -5,8 +5,8 @@
  */
 #pragma once
 
-#include "Program.hpp"
-#include "../Constants.hpp"
+#include <OpenGL/Object/Program.hpp>
+#include <OpenGL/Constants.hpp>
 
 
 namespace OpenGL {

@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include "Log.hpp"
+#include <Utility/Log.hpp>
 
 #include <cmath>
 #include <cstdlib>
@@ -15,11 +15,18 @@
 #include <string> ///< serialization
 #include <ostream> ///< serialization
 
+
 /// Return size of static array at compile time
-#define countof(Array) (sizeof(Array) / sizeof((Array)[0]))
+template <typename T, std::size_t N>
+inline constexpr auto
+countof(T(& array)[N])
+{ return N; }
+
+template <typename T, typename D = std::default_delete<T>> using Owned = std::unique_ptr<T, D>;
+template <typename T> using Shared = std::shared_ptr<T>;
 
 template <typename E, typename = std::enable_if_t<std::is_enum_v<E>>>
-constexpr auto
+inline constexpr auto
 underlying_cast(E e)
 { return static_cast<std::underlying_type_t<std::decay_t<E>>>(e); }
 
@@ -32,7 +39,7 @@ SafeDemangle(const char* mangled_name, char* output_buffer, size_t* length);
 /// @author Howard Hinnant
 /// @see https://stackoverflow.com/questions/81870/is-it-possible-to-print-a-variables-type-in-standard-c
 template <typename T>
-const char*
+inline const char*
 type_name()
 {
     using TR = typename std::remove_reference<T>::type;

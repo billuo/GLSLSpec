@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Math/Math.hpp"
-#include "OpenGL/Object/Object.hpp"
+#include <Math/Math.hpp>
+#include <OpenGL/Object/Object.hpp>
 
 
 class Mesh {

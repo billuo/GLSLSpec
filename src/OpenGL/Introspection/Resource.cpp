@@ -1,4 +1,4 @@
-#include "OpenGL/Introspection/Resource.hpp"
+#include <OpenGL/Introspection/Resource.hpp>
 #include <sstream>
 
 

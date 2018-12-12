@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Options.hpp"
-#include "spdlog/sinks/base_sink.h"
+#include <Options.hpp>
+#include <spdlog/sinks/base_sink.h>
 
 #include <sstream>
 #include <iomanip>

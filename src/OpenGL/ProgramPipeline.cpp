@@ -1,5 +1,5 @@
-#include "OpenGL/Object/ProgramPipeline.hpp"
-#include "OpenGL/Constants.hpp"
+#include <OpenGL/Object/ProgramPipeline.hpp>
+#include <OpenGL/Constants.hpp>
 
 
 namespace OpenGL {

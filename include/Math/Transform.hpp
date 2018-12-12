@@ -2,7 +2,7 @@
 #define OPENGL_LAB_TRANSFORM_HPP
 #pragma once
 
-#include "Math.hpp"
+#include <Math/Math.hpp>
 
 
 namespace Math {

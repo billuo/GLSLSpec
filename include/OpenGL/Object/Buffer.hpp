@@ -7,7 +7,7 @@
 #define OPENGL_LAB_BUFFER_HPP
 #pragma once
 
-#include "Object.hpp"
+#include <OpenGL/Object/Object.hpp>
 
 
 namespace OpenGL {

@@ -1,4 +1,4 @@
-#include "OpenGL/Introspection/Introspector.hpp"
+#include <OpenGL/Introspection/Introspector.hpp>
 
 
 namespace OpenGL {

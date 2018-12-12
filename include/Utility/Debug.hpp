@@ -6,7 +6,7 @@
 #pragma once
 
 #include <cassert>
-#include "Log.hpp"
+#include <Utility/Log.hpp>
 
 
 #define DEBUG(fmt, ...) Log::d("{}:{} in {}\n\t" fmt, __FILE__, __LINE__, __func__, ##__VA_ARGS__)

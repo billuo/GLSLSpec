@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Resource.hpp"
+#include <OpenGL/Introspection/Resource.hpp>
 #include <vector>
 
 

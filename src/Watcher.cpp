@@ -1,7 +1,7 @@
-#include "Watcher.hpp"
-#include "Utility/Enumeration.hpp"
-#include "Sandbox.hpp"
-#include "Utility/Debug.hpp"
+#include <Watcher.hpp>
+#include <Utility/Enumeration.hpp>
+#include <Sandbox.hpp>
+#include <Utility/Debug.hpp>
 
 #include <fstream>
 #include <iterator>
