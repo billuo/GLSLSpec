@@ -22,13 +22,23 @@ check_attribute_index(const Container& c, GLuint index, const std::string& when)
 {
     #if DEBUG_BUILD
     using V = typename std::iterator_traits<typename Container::iterator>::value_type;
-    static_assert(std::is_same_v<V, Shared<VertexAttribute>>);
+    static_assert(std::is_convertible_v<V, Shared<const VertexAttribute>>);
     auto it = std::find_if(c.begin(), c.end(), [index](const V& v)
     { return v && v->index == index; });
     if (it == c.end()) {
         DEBUG("index={} doesn't exist when {}", when);
     }
     #endif
+}
+
+VertexAttribute::VertexAttribute(Usage usage, GLint size, GLenum data_type, const std::string& name)
+{
+    if (name.empty()) {
+        this->name = "v_" + E<Usage>(usage).to_string();
+    }
+    this->usage = usage;
+    this->size = size;
+    this->data_type = data_type;
 }
 
 void
@@ -78,6 +88,15 @@ VertexLayout::bind_buffer(const Buffer& buffer, const VertexAttribute& attribute
         disable(attribute.index);
     }
     attribute_binding(attribute.index, underlying_cast(attribute.usage));
+}
+
+void
+VertexLayout::clear()
+{
+    for (auto& p : m_attributes) {
+        p.reset();
+    }
+    m_vao.~VertexArray();
 }
 
 } // namespace OpenGL

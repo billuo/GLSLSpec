@@ -25,8 +25,7 @@ class ProgramPipeline : Object {
     { glBindProgramPipeline(obj.name()); }
 
     explicit ProgramPipeline(const GLchar* label = nullptr) : Object(pool().get())
-    {
-    }
+    {}
 
     ProgramPipeline(ProgramPipeline&&) = default;
     ProgramPipeline& operator=(ProgramPipeline&&) = default;
@@ -36,14 +35,29 @@ class ProgramPipeline : Object {
 
     using Object::label;
 
-    void label(const GLchar* label)
-    { Object::label(label, GL_PROGRAM_PIPELINE); }
+    ProgramPipeline& label(const GLchar* label)
+    {
+        Object::label(label, GL_PROGRAM_PIPELINE);
+        return *this;
+    }
 
-    GLuint stage(ShaderStage order);
+    GLuint stage(ShaderStage stage) const;
 
-    void use_stage(const Program& program, GLbitfield stages);
+    ProgramPipeline& use_stage(const Program& program, GLbitfield stages);
 
     bool valid() const;
+
+    ProgramPipeline& bind()
+    {
+        Bind(*this);
+        return *this;
+    }
+
+    const ProgramPipeline& bind() const
+    {
+        Bind(*this);
+        return *this;
+    }
 
     GLint get(GLenum param) const;
 

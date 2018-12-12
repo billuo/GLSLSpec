@@ -5,6 +5,7 @@
 #include <OpenGL/Object/Shader.hpp>
 #include <OpenGL/Constants.hpp>
 #include <Utility/Log.hpp>
+#include <Utility/Misc.hpp>
 
 #include <cstring>
 #include <fstream>
@@ -12,17 +13,27 @@
 
 namespace OpenGL {
 
-void
+Shader&
 Shader::source(const GLchar** sources, size_t count)
 {
-    std::vector<GLint> lens(count);
+    Owned<GLint[]> lens = std::make_unique<GLint[]>(count);
     for (size_t i = 0; i < count; ++i) {
-        lens[i] = static_cast<int>(strlen(sources[i]));
+        lens[i] = static_cast<GLint>(strlen(sources[i]));
     }
-    glShaderSource(name(), static_cast<GLsizei>(count), sources, lens.data());
+    glShaderSource(name(), static_cast<GLsizei>(count), sources, lens.get());
+    return *this;
 }
 
-void
+Shader&
+Shader::source(const std::string& source)
+{
+    auto str = source.c_str();
+    auto len = static_cast<GLint>(source.size());
+    glShaderSource(name(), 1, &str, &len);
+    return *this;
+}
+
+Shader&
 Shader::compile()
 {
     glCompileShader(name());
@@ -31,6 +42,7 @@ Shader::compile()
                nameOfShaderType(get(GL_SHADER_TYPE)),
                get_info_log().get());
     }
+    return *this;
 }
 
 GLint
@@ -46,8 +58,7 @@ Shader::get_info_log() const
 {
     std::unique_ptr<char[]> ret;
     GLint length = get(GL_INFO_LOG_LENGTH);
-    // XXX one more byte, just in case
-    ret = std::make_unique<char[]>(length + 1);
+    ret = std::make_unique<char[]>(length + 1); // XXX one more byte, just in case
     glGetShaderInfoLog(name(), length, nullptr, ret.get());
     return ret;
 }

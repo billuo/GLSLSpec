@@ -29,6 +29,13 @@ struct VertexAttribute {
         Other,
         Max,
     };
+
+    /// @note The parameter of this ctor are the only ones that must be specified by user.
+    /// In that case, the attribute name is figured out reasonably and
+    /// it's the shader writers' responsibility to obey the naming rules.
+    /// Other properties either has a reasonable default or can be obtained from shader program at runtime.
+    explicit VertexAttribute(Usage usage, GLint size, GLenum data_type, const std::string& name = "");
+
     /// Name in shader, used to retrieve the index etc.
     std::string name{};
     /// User defined type of usage.
@@ -36,14 +43,17 @@ struct VertexAttribute {
     /// Index in shader
     /// @note It's the first argument passed to glVertexArrayFormat().
     GLuint index{-1u};
-    /// Data type stored in the memory of client.
-    /// @note For instance, GL_UNSIGNED_BYTE or GL_FLOAT. NOT GL_FLOAT_VEC3 or such!
-    GLenum data_type{0};
-    /// If GL_TRUE, integer type should be normalized to floats in range [-1,1] or [0,1].
+    /// Number of components this attribute has.
+    GLint size{-1};
+    /// Data type of each component that are stored in client memory.
+    /// @note For instance, GL_UNSIGNED_BYTE or GL_FLOAT.
+    GLenum data_type{GL_FALSE};
+    /// If GL_TRUE, integer data_type will be normalized while being uploaded to range [-1,1] or [0,1].
     GLboolean normalized{GL_FALSE};
     /// Relative offset of the first element of such attribute to the beginning of buffer supplying the data.
     GLuint offset{0};
-    /// Distance between elements within the buffer
+    /// Distance between elements within the buffer.
+    /// It defaults to 0 which means OpenGL will calculate it based on size and data_type.
     GLuint stride{0};
 };
 
@@ -55,7 +65,11 @@ class VertexLayout {
     VertexLayout(std::initializer_list<VertexAttribute> attribute_list)
     { define_range(attribute_list.begin(), attribute_list.end()); }
 
-    ~VertexLayout() = default;
+    VertexLayout(VertexLayout&&) = default;
+    VertexLayout& operator=(VertexLayout&&) = default;
+
+    ~VertexLayout()
+    { clear(); }
 
     auto& attribute(Usage usage)
     { return m_attributes[underlying_cast(usage)]; }
@@ -84,6 +98,10 @@ class VertexLayout {
         }
     }
 
+    /// @brief Release all resources.
+    /// @note It only deletes, but not unbinds the VAO it owns.
+    void clear();
+
     /// @brief Enable a vertex attribute as an attribute array.
     /// @param index The index of the attribute.
     void enable(GLuint index);
@@ -91,6 +109,10 @@ class VertexLayout {
     /// @brief Disable a vertex attribute as an attribute array.
     /// @param index The index of the attribute.
     void disable(GLuint index);
+
+    /// @brief Bind the underlying VAO to current OpenGL context.
+    void bind() const
+    { m_vao.bind(); }
 
     /// @brief Bind a vertex buffer as data source of a vertex attribute.
     /// @param buffer The vertex buffer to bind.
@@ -118,7 +140,7 @@ class VertexLayout {
     /// Attributes each of a specific usage.
     /// @note Indices of attributes in the array is exactly the index of the binding point they will be bound to.
     /// @sa VertexAttribute::Usage
-    std::array<Shared<VertexAttribute>, underlying_cast(Usage::Max)> m_attributes{};
+    std::array<Shared<const VertexAttribute>, underlying_cast(Usage::Max)> m_attributes{};
 };
 
 } // namespace OpenGL

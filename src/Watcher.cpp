@@ -24,21 +24,26 @@ Watcher::Watcher(const std::vector<DynamicFile>& to_watch)
 {
     std::thread([&]()
                 {
+                    while (!sandbox) {
+                        sleep_for_ms(1);
+                    }
                     while (this->m_watching) {
-                        std::lock_guard guard(mutex_watching_files);
-                        for (auto&&[path, file] : m_watching_files) {
-                            if (file.check_update()) {
-                                if (sandbox) {
+                        {
+                            std::lock_guard guard(mutex_watching_files);
+                            for (auto&&[_, file] : m_watching_files) {
+                                if (file.check_update()) {
                                     sandbox->on_update(file);
                                 }
-                                // m_callback(file);
                             }
                         }
+                        sleep_for_ms(500);
                     }
-                    sleep_for_ms(500);
                 }).detach();
     std::lock_guard guard(mutex_watching_files);
     for (auto file : to_watch) {
+        if (file.path().empty()) {
+            continue;
+        }
         DEBUG("{} added to watch", file.path());
         m_watching_files.emplace(file.path(), std::move(file));
     }
@@ -84,7 +89,7 @@ Watcher::find(const FS::path& path)
 }
 
 DynamicFile::DynamicFile(const std::string& path, FileType type) noexcept
-        : m_path(std::move(FS::canonical(path))), m_type(type), m_last_modified(FS::last_write_time(m_path))
+        : m_path(FS::canonical(path)), m_type(type), m_last_modified(FS::last_write_time(m_path))
 {}
 
 expected<std::string, std::string>

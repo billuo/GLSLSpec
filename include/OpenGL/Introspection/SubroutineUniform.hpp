@@ -21,7 +21,7 @@ struct SubroutineUniform : public Resource {
     GLint location = -1;
     std::vector<Subroutine> subroutines;
     static constexpr GLenum properties[] = {GL_ARRAY_SIZE, GL_LOCATION,};
-    static constexpr size_t n_properties = countof(properties);
+    static constexpr size_t n_properties = numel(properties);
 
     SubroutineUniform(GLuint program, GLenum stage, GLint index, GLchar* name, const GLint* values);
 

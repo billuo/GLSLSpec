@@ -3,75 +3,25 @@
  * @author Zhen Luo 461652354@qq.com
  */
 #include <Mesh.hpp>
-#include <Utility/Log.hpp>
 #include <Utility/Debug.hpp>
 
 
+Mesh::Mesh(OpenGL::VertexLayout layout, std::vector<glm::vec3> positions, std::vector<glm::vec3> normals,
+           std::vector<glm::vec2> tex_coords, std::vector<glm::vec3> colors)
+        : m_layout(std::move(layout)),
+          m_positions(std::move(positions)),
+          m_normals(std::move(normals)),
+          m_tex_coords(std::move(tex_coords)),
+          m_colors(std::move(colors))
+{}
+
 void
-Mesh::draw(GLuint VAO, GLenum layout)
+Mesh::draw()
 {
-    glBindVertexArray(VAO);
-    // [0] in vec3 pos
-    glEnableVertexAttribArray(0);
-    glVertexAttribFormat(0, 3, GL_FLOAT, GL_FALSE, 0);
-    glVertexAttribBinding(0, 0);
-    glBindVertexBuffer(0, m_buffer_vertex, 0, sizeof(Vertex));
-    // [1] in vec3 normal
-    glEnableVertexAttribArray(1);
-    glVertexAttribFormat(1, 3, GL_FLOAT, GL_FALSE, 0);
-    glVertexAttribBinding(1, 1);
-    glBindVertexBuffer(1, m_buffer_normal, 0, sizeof(Normal));
-    // draw
-    glDrawArrays(layout, 0, m_n_vertices);
+    m_layout.bind();
 }
 
 void
-Mesh::initData(GLsizei n_vertices)
+Mesh::upload()
 {
-    if (m_n_vertices) {
-        Log::e("Mesh already allocated");
-    } else {
-        m_n_vertices = n_vertices;
-        aux_initBuffers();
-    }
-}
-
-/// map/unmap vertex buffer
-void*
-Mesh::mapBufferVertex()
-{
-    glBindBuffer(GL_ARRAY_BUFFER, m_buffer_vertex);
-    void* ret = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
-    return ret;
-}
-
-bool
-Mesh::unmapBufferVertex()
-{
-    glBindBuffer(GL_ARRAY_BUFFER, m_buffer_vertex);
-    GLboolean result = glUnmapBuffer(GL_ARRAY_BUFFER);
-    if (result == GL_FALSE) {
-        Log::w("Failed to unmap vertex buffer, data may need to mapped again.");
-    }
-    return result == GL_TRUE;
-}
-
-/// map/unmap normal buffer
-void*
-Mesh::mapBufferNormal()
-{
-    glBindBuffer(GL_ARRAY_BUFFER, m_buffer_normal);
-    void* ret = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
-    return ret;
-}
-
-bool
-Mesh::unmapBufferNormal()
-{
-    glBindBuffer(GL_ARRAY_BUFFER, m_buffer_normal);
-    GLboolean result = glUnmapBuffer(GL_ARRAY_BUFFER);
-    if (result == GL_FALSE) {
-        Log::w("Failed to unmap normal buffer, data may need to mapped again.");
-    }
-    return result == GL_TRUE;
 }

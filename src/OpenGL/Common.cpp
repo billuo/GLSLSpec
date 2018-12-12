@@ -25,14 +25,14 @@ Initialize()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, options.opengl.version.minor);
     main_window = std::make_unique<Window>();
     glDebugMessageCallback(OpenGLOnDebug, nullptr);
-    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
     glEnable(GL_DEPTH_TEST);
 }
 
 void
 Exit()
 {
-    main_window.reset();
+    glfwTerminate();
 }
 
 } // namespace OpenGL

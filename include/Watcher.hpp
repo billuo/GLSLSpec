@@ -21,7 +21,7 @@ enum class FileType : int {
 struct DynamicFile {
     DynamicFile(const std::string& path, FileType type) noexcept;
 
-    DynamicFile(const DynamicFile& obj) : m_path(obj.m_path), m_type(obj.m_type), tag(obj.tag)
+    DynamicFile(const DynamicFile& obj) : tag(obj.tag), m_path(obj.m_path), m_type(obj.m_type)
     {}
 
     const auto& path() const

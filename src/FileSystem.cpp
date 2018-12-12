@@ -4,7 +4,7 @@
  */
 #include <Utility/Enumeration.hpp>
 #include <FileSystem.hpp>
-#include <Utility/Log.hpp>
+#include <Utility/Debug.hpp>
 #include <Options.hpp>
 
 #include <fstream>
@@ -18,11 +18,11 @@ namespace {
 
 inline void
 print_fs_error(FS::details::filesystem_error& e)
-{ Log::e("{}", e.what()); }
+{ ERROR("{}", e.what()); }
 
 inline void
 print_bad_alloc(std::bad_alloc& e)
-{ Log::e("{}", e.what()); }
+{ ERROR("{}", e.what()); }
 
 /// Resolve the canonical path of a relative path.
 /// @param relative_path The path relative to the @p base_path.

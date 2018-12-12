@@ -10,7 +10,7 @@
 namespace OpenGL {
 
 class VertexArray : public Object {
-    static auto pool()
+    static auto& pool()
     {
         static auto singleton = make_pool(glGenVertexArrays, glDeleteVertexArrays);
         return singleton;
@@ -31,11 +31,23 @@ class VertexArray : public Object {
 
     using Object::label;
 
-    void label(const GLchar* label)
-    { Object::label(label, GL_VERTEX_ARRAY); }
+    VertexArray& label(const GLchar* label)
+    {
+        Object::label(label, GL_VERTEX_ARRAY);
+        return *this;
+    }
 
-    void bind()
-    { Bind(*this); }
+    const VertexArray& bind() const
+    {
+        Bind(*this);
+        return *this;
+    }
+
+    VertexArray& bind()
+    {
+        Bind(*this);
+        return *this;
+    }
 
 };
 

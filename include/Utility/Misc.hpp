@@ -18,7 +18,7 @@
 /// Return size of static array at compile time
 template <typename T, std::size_t N>
 inline constexpr auto
-countof(T(& array)[N])
+numel(T(& array)[N])
 { return N; }
 
 template <typename T, typename D = std::default_delete<T>> using Owned = std::unique_ptr<T, D>;
@@ -28,6 +28,24 @@ template <typename E, typename = std::enable_if_t<std::is_enum_v<E>>>
 inline constexpr auto
 underlying_cast(E e)
 { return static_cast<std::underlying_type_t<std::decay_t<E>>>(e); }
+
+class unimplemented : std::exception {
+  public:
+    unimplemented() : m_msg("Unimplemented.")
+    {}
+
+    explicit unimplemented(const char* msg) : m_msg(msg)
+    { m_msg = "Unimplemented: " + m_msg; }
+
+    explicit unimplemented(std::string msg) : m_msg(std::move(msg))
+    { m_msg = "Unimplemented: " + m_msg; }
+
+    const char* what() const noexcept override
+    { return m_msg.c_str(); }
+
+  private:
+    std::string m_msg;
+};
 
 #if !CXX_MSVC
 char*

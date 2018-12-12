@@ -42,18 +42,20 @@ class Shader : public Object {
 
     using Object::label;
 
-    void label(const GLchar* label)
-    { Object::label(label, GL_SHADER); }
+    Shader& label(const GLchar* label)
+    {
+        Object::label(label, GL_SHADER);
+        return *this;
+    }
 
     /// Add array of strings as sources of this shader
-    void source(const GLchar** sources, size_t count);
+    Shader& source(const GLchar** sources, size_t count);
 
     /// Add a single string as the source of this shader
-    void source(const GLchar* source)
-    { this->source(&source, 1); }
+    Shader& source(const std::string& source);
 
     /// Compile this shader object.
-    void compile();
+    Shader& compile();
 
     /// Query a parameter
     GLint get(GLenum param) const;

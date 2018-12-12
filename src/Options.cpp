@@ -2,6 +2,7 @@
  * @File Options.cpp
  * @author Zhen Luo 461652354@qq.com
  */
+#include <Console.hpp>
 #include <Options.hpp>
 #include <Watcher.hpp>
 #include <Utility/Misc.hpp>
@@ -64,7 +65,9 @@ const std::vector<NamedOption> NamedOptions = {
                 {0, 0}, {},
                 [](const std::string&, unsigned, const std::string*) -> unsigned
                 {
-                    Log::i("{} {} build v{}", PLATFORM_NAME, DEBUG_BUILD ? "debug" : "release", APP_VERSION);
+                    // Log::i("{} {} build v{}", PLATFORM_NAME, DEBUG_BUILD ? "debug" : "release", APP_VERSION);
+                    *console << PLATFORM_NAME << ' ' << (DEBUG_BUILD ? "debug" : "release") << " v" << APP_VERSION
+                             << '\n';
                     return 0u;
                 }},
         {"t", {"top"},
@@ -261,7 +264,7 @@ const std::vector<NamedOption> NamedOptions = {
                 {0, 0}, {"model"},
                 [](const std::string& match, unsigned, const std::string* arg) -> unsigned
                 {
-                    options.input_files.emplace_back(*arg, FileType::Image);
+                    options.input_files.emplace_back(*arg, FileType::Geometry);
                     options.input_files.back().tag = match;
                     return 0u;
                 }},

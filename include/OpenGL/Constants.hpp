@@ -35,10 +35,16 @@ expected<GLenum, std::string>
 shaderTypeOfSuffix(std::string suffix);
 
 GLenum
-shaderBitOfShaderType(GLenum type);
+typeOfShaderBit(GLbitfield bit);
+
+GLenum
+bitOfShaderType(GLenum type);
 
 size_t
-orderOfShaderBit(GLenum bit);
+stageOfShaderBit(GLbitfield bit);
+
+GLbitfield
+bitOfShaderStage(ShaderStage stage);
 
 const char*
 nameOfShaderType(GLenum type);

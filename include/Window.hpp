@@ -21,7 +21,7 @@ struct Window {
     Window();
     Window(const Window&) = delete;
 
-    Window(Window&& obj) noexcept : m_handle(obj.m_handle), callbacks(obj.callbacks)
+    Window(Window&& obj) noexcept : callbacks(obj.callbacks), m_handle(obj.m_handle)
     {
         obj.m_handle = nullptr;
         callbacks.register_all(m_handle);
@@ -31,6 +31,7 @@ struct Window {
     {
         Window other(std::move(obj));
         swap(other);
+        return *this;
     }
 
     void swap(Window& other) noexcept

@@ -3,6 +3,7 @@ project(GLSLViewer)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_FLAGS -Wall)
 set(OpenGL_GL_PREFERENCE LEGACY)
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/3rdparty)
@@ -44,11 +45,13 @@ add_custom_target(generated-glad DEPENDS
 		${CMAKE_SOURCE_DIR}/3rdparty/glad/glad.h
 		${CMAKE_SOURCE_DIR}/3rdparty/glad/khrplatform.h)
 
-add_subdirectory(3rdparty/assimp)
+#add_subdirectory(3rdparty/assimp)
 
-add_library(third_party 3rdparty/glad/glad.c)
-link_libraries(third_party assimp)
+add_library(third_party 3rdparty/glad/glad.c 3rdparty/tol/tol.cpp)
+#link_libraries(third_party assimp)
 add_dependencies(third_party generated-glad)
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-function -Wno-unused-variable -Wno-unused-parameter")
 
 add_library(MainLib
 		src/Console.cpp
@@ -84,13 +87,14 @@ add_library(MainLib
 message(STATUS "Build target:${CMAKE_HOST_SYSTEM_NAME}")
 set(HOST ${CMAKE_HOST_SYSTEM_NAME})
 target_compile_definitions(MainLib PUBLIC APP_NAME=\"GLSLViewer\")
-target_compile_definitions(MainLib PUBLIC APP_VERSION=\"${BUILD_VERSION}\")
+target_compile_definitions(MainLib PUBLIC APP_VERSION=\"0.1.5\")
 target_compile_definitions(MainLib PUBLIC PLATFORM_NAME=\"${HOST}\")
 target_compile_definitions(MainLib PUBLIC $<$<STREQUAL:${HOST},Linux>:PLATFORM_LINUX>)
 target_compile_definitions(MainLib PUBLIC $<$<STREQUAL:${HOST},Windows>:PLATFORM_WINDOWS>)
 target_compile_definitions(MainLib PUBLIC $<$<STREQUAL:${HOST},Darwin>:PLATFORM_OSX>)
 target_compile_definitions(MainLib PUBLIC DEBUG_BUILD=$<CONFIG:Debug>)
 target_compile_definitions(MainLib PUBLIC RELEASE_BUILD=$<CONFIG:Release>)
+target_compile_definitions(MainLib PUBLIC $<$<CONFIG:Release>:NDEBUG=1>)
 target_compile_definitions(MainLib PUBLIC OPENGL_MAJOR_VERSION=${OPENGL_MAJOR_VERSION})
 target_compile_definitions(MainLib PUBLIC OPENGL_MINOR_VERSION=${OPENGL_MINOR_VERSION})
 target_compile_options(MainLib PUBLIC $<$<CONFIG:Release>:-O3>)

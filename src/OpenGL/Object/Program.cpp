@@ -57,8 +57,11 @@ Program::get_stage(GLenum stage, GLenum pname) const
     return result;
 }
 
-void
+Program&
 Program::set(GLenum param, GLint value)
-{ glProgramParameteri(name(), param, value); }
+{
+    glProgramParameteri(name(), param, value);
+    return *this;
+}
 
 } // namespace OpenGL

@@ -5,12 +5,12 @@
 #include <Console.hpp>
 #include <Window.hpp>
 #include <Math/Math.hpp>
+#include <OpenGL/Common.hpp>
 
 #include <thread>
 #include <iostream>
 #include <fstream>
 #include <utility>
-#include <Console.hpp>
 #include <regex>
 
 
@@ -46,6 +46,7 @@ Command::usage() const
         ++nth_arg;
     }
     ret += "\n\t" + description;
+    return ret;
 }
 
 std::map<std::string, Command> Console::CommandTable;
@@ -71,6 +72,7 @@ Console::AsyncGetline::AsyncGetline()
                         }
                         std::lock_guard guard(this->mutex);
                         m_lines.push(line);
+                        console->flush(true);
                     } while (options.flags.running);
                 }).detach();
 }
@@ -727,13 +729,14 @@ declare_commands()
 void
 declare_commands()
 {
+    using Arguments = Command::Arguments;
     Console::add_command("help", {0, 1}, {"command"},
                          "Print help for command(s)",
-                         [](const std::string& cmd, const std::list<std::string>& args)
+                         [](const std::string& cmd, const Arguments& args)
                          {
-                             static const std::string header = options.application.name +
-                                     options.application.version +
-                                     options.application.acknowledgement;
+                             static const std::string header = options.application.name + ' ' +
+                                                               options.application.version +
+                                                               options.application.acknowledgement;
                              switch (args.size()) {
                                  case 0:
                                      *console << header << "\n\n";
@@ -754,9 +757,18 @@ declare_commands()
                              return true;
                          });
 
+    Console::add_command("version", {0, 0}, {},
+                         "Display version string of application",
+                         [](const std::string& cmd, const Arguments& args)
+                         {
+                             *console << options.application.name << ' ' << options.application.version << '\n';
+                             *console << glfwGetVersionString() << '\n';
+                             return true;
+                         });
+
     Console::add_command("debug", {0, 1}, {"on/off"},
                          "Display debug drawing status or enable/disable it.",
-                         [](const std::string& cmd, const std::list<std::string>& args)
+                         [](const std::string& cmd, const Arguments& args)
                          {
                              switch (args.size()) {
                                  case 0:
@@ -781,7 +793,7 @@ declare_commands()
 
     Console::add_command("viewport", {0, 0}, {},
                          "Display position and dimension of viewport.",
-                         [](const std::string& cmd, const std::list<std::string>& args)
+                         [](const std::string& cmd, const Arguments& args)
                          {
                              switch (args.size()) {
                                  case 0:
@@ -794,7 +806,7 @@ declare_commands()
                          });
     // Console::add_command("command", {0, 0}, {},
     //                      "description",
-    //                      [](const std::string& cmd, const std::list<std::string>& args)
+    //                      [](const std::string& cmd, const Arguments& args)
     //                      {
     //                          switch(args.size()){
     //                              case 0:

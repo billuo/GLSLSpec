@@ -92,7 +92,7 @@ Window::Callbacks::default_on_key(GLFWwindow* handle, int key, int scancode, int
             break;
         case GLFW_KEY_P:
             if (action == GLFW_PRESS) {
-                VALUE(sandbox->camera.axes());
+                PRINT_VALUE(sandbox->camera.axes());
             }
             break;
         default:

@@ -118,14 +118,14 @@ struct Uniform : public Resource {
     static constexpr GLintfield fields[] =
             {&Uniform::type, &Uniform::asize, &Uniform::offset, &Uniform::block_index, &Uniform::astride,
              &Uniform::mstride, &Uniform::row_major, &Uniform::atomic_index, &Uniform::location,};
-    static constexpr size_t n_fields = countof(fields);
+    static constexpr size_t n_fields = numel(fields);
 
     static constexpr GLenum properties[] =
             {GL_TYPE, GL_ARRAY_SIZE, GL_OFFSET, GL_BLOCK_INDEX, GL_ARRAY_STRIDE, GL_MATRIX_STRIDE, GL_IS_ROW_MAJOR,
              GL_ATOMIC_COUNTER_BUFFER_INDEX, GL_LOCATION, GL_REFERENCED_BY_VERTEX_SHADER,
              GL_REFERENCED_BY_TESS_CONTROL_SHADER, GL_REFERENCED_BY_TESS_EVALUATION_SHADER,
              GL_REFERENCED_BY_GEOMETRY_SHADER, GL_REFERENCED_BY_FRAGMENT_SHADER, GL_REFERENCED_BY_COMPUTE_SHADER,};
-    static constexpr size_t n_properties = countof(properties);
+    static constexpr size_t n_properties = numel(properties);
 
     Uniform(GLuint program, GLint index, GLchar* name, const GLint* values);
 

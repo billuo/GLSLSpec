@@ -25,14 +25,14 @@ struct ProgramInput : public Resource {
     static constexpr GLintfield fields[]
             {&ProgramInput::type, &ProgramInput::asize, &ProgramInput::location,
              &ProgramInput::per_patch,};
-    static constexpr size_t n_fields{countof(fields)};
+    static constexpr size_t n_fields{numel(fields)};
 
     static constexpr GLenum properties[]
             {GL_TYPE, GL_ARRAY_SIZE, GL_LOCATION, GL_IS_PER_PATCH,
              GL_REFERENCED_BY_VERTEX_SHADER, GL_REFERENCED_BY_TESS_CONTROL_SHADER,
              GL_REFERENCED_BY_TESS_EVALUATION_SHADER, GL_REFERENCED_BY_GEOMETRY_SHADER,
              GL_REFERENCED_BY_FRAGMENT_SHADER, GL_REFERENCED_BY_COMPUTE_SHADER,};
-    static constexpr size_t n_properties{countof(properties)};
+    static constexpr size_t n_properties{numel(properties)};
     static_assert(n_fields + MaxShaderStage == n_properties);
 
     ProgramInput(GLuint program, GLint index, GLchar* name, const GLint* values);

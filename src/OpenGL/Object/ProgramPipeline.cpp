@@ -8,11 +8,12 @@
 
 namespace OpenGL {
 
-void
+ProgramPipeline&
 ProgramPipeline::use_stage(const Program& program, GLbitfield stages)
 {
-    m_stages[orderOfShaderBit(stages)] = program.name();
+    m_stages[stageOfShaderBit(stages)] = program.name();
     glUseProgramStages(name(), stages, program.name());
+    return *this;
 }
 
 std::unique_ptr<GLchar[]>
@@ -40,7 +41,7 @@ ProgramPipeline::valid() const
 }
 
 GLuint
-ProgramPipeline::stage(ShaderStage order)
-{ return m_stages[order]; }
+ProgramPipeline::stage(ShaderStage stage) const
+{ return m_stages[stage]; }
 
 } // namespace OpenGL

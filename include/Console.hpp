@@ -21,6 +21,7 @@ void
 declare_commands();
 
 struct Command {
+    using Arguments = std::list<std::string>;
     using Action = bool (*)(const std::string&, const std::list<std::string>&);
 
     Command(std::string name, std::pair<unsigned, unsigned> n_args,
@@ -78,7 +79,12 @@ class Console {
     /// @brief Flush the console output stream to display any messages still in buffer.
     /// @param force If true, even when no output is available, print a newline together with the prompt.
     void flush(bool force = false)
-    { return m_sink->flush(); }
+    {
+        if (force) {
+            *this << '\n'; // XXX ugly but works
+        }
+        return m_sink->flush();
+    }
 
     template <typename T>
     Console& operator<<(T&& x)

@@ -379,7 +379,7 @@ nameOfProgramInterface(GLenum interface)
 }
 
 GLenum
-shaderBitOfShaderType(GLenum type)
+bitOfShaderType(GLenum type)
 {
     switch (type) {
         case GL_VERTEX_SHADER:
@@ -400,9 +400,10 @@ shaderBitOfShaderType(GLenum type)
 }
 
 size_t
-orderOfShaderBit(GLenum bit)
+stageOfShaderBit(GLbitfield bits)
+// TODO input is bit mask! it doesn't work generally.
 {
-    switch (bit) {
+    switch (bits) {
         case GL_VERTEX_SHADER_BIT:
             return VertexShader;
         case GL_TESS_CONTROL_SHADER_BIT:
@@ -415,6 +416,8 @@ orderOfShaderBit(GLenum bit)
             return FragmentShader;
         case GL_COMPUTE_SHADER_BIT:
             return ComputeShader;
+        case GL_ALL_SHADER_BITS:
+            return -1;
         default:
             UNREACHABLE;
     }

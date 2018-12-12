@@ -1,6 +1,6 @@
 /**
  * @file Debug.hpp
- * @brief Debug facilities including assertion and logging.
+ * @brief Macros only
  * @author Zhen Luo 461652354@qq.com
  */
 #pragma once
@@ -9,9 +9,15 @@
 #include <Utility/Log.hpp>
 
 
-#define DEBUG(fmt, ...) Log::d("{}:{} in {}\n\t" fmt, __FILE__, __LINE__, __func__, ##__VA_ARGS__)
+#define TRACE(fmt, ...)     Log::t("{}:{} in {}\n\t" fmt, __FILE__, __LINE__, __func__, ##__VA_ARGS__)
+#define INFO(fmt, ...)      Log::i("{}:{} in {}\n\t" fmt, __FILE__, __LINE__, __func__, ##__VA_ARGS__)
+#define DEBUG(fmt, ...)     Log::d("{}:{} in {}\n\t" fmt, __FILE__, __LINE__, __func__, ##__VA_ARGS__)
+#define WARNING(fmt, ...)   Log::w("{}:{} in {}\n\t" fmt, __FILE__, __LINE__, __func__, ##__VA_ARGS__)
+#define ERROR(fmt, ...)     Log::e("{}:{} in {}\n\t" fmt, __FILE__, __LINE__, __func__, ##__VA_ARGS__)
+#define CRITICAL(fmt, ...)  Log::c("{}:{} in {}\n\t" fmt, __FILE__, __LINE__, __func__, ##__VA_ARGS__)
 
-#define VALUE(expr) DEBUG(#expr "={}", expr)
+#define PRINT_VALUE(expr) DEBUG(#expr "={}", expr)
+#define PRINT_TYPE(expr) DEBUG("typeof" #expr "={}", type_name<decltype(expr)>())
 
 #if defined(DEBUG_BUILD)
 #define UNREACHABLE assert(false)

@@ -28,7 +28,7 @@ Object::Object(Object::Name&& name) : m_name(std::move(name))
 void
 Object::label(std::string str, GLenum identifier)
 {
-    static GLsizei max_label_length = get_max_label_length();
+    static std::size_t max_label_length = get_max_label_length();
     if (!str.empty()) {
         m_label = std::make_unique<std::string>(std::move(str));
         if (m_label->size() <= max_label_length) {

@@ -4,6 +4,7 @@
  */
 #pragma once
 
+#include <Mesh.hpp>
 #include <Scene/Camera.hpp>
 #include <Watcher.hpp>
 #include <OpenGL/Introspection/Introspector.hpp>
@@ -22,6 +23,8 @@ class Sandbox {
 
     void render();
 
+    void render_debug() const;
+
     Scene::Camera camera{glm::vec3(3.0f, 0.0f, 3.0f), glm::vec3()};
 
   private:
@@ -31,12 +34,15 @@ class Sandbox {
 
     OpenGL::ProgramPipeline m_pipeline;
     std::unique_ptr<OpenGL::Introspector> m_introspectors[OpenGL::MaxShaderStage]{};
-    OpenGL::VertexArray m_vao;
+    std::vector<Mesh> m_meshes;
+
+    OpenGL::VertexArray m_vao_debug;
+    OpenGL::ProgramPipeline m_pipeline_debug;
 
     void import(const DynamicFile& file);
     void aux_import_shader(const DynamicFile& file, const std::string& tag);
-    void aux_import_image(const DynamicFile& path, const std::string& tag);
-    void aux_import_geometry(const DynamicFile& path, const std::string& tag);
+    void aux_import_image(const DynamicFile& file, const std::string& tag);
+    void aux_import_geometry(const DynamicFile& file, const std::string& tag);
     void aux_import_dependency(const DynamicFile& path, const std::string& tag);
 };
 

@@ -8,21 +8,45 @@
 #include <Window.hpp>
 #include <OpenGL/Common.hpp>
 #include <OpenGL/Debug.hpp>
+#include <csignal>
 
 // TODO load meshes from .obj
 // TODO support simple texture
 // TODO load texture from .obj
 // TODO finish introspection
 
+void
+OnExit()
+{
+    options.flags.running = false;
+    static std::atomic_bool exited = false;
+    if (!exited) {
+        exited = true;
+        console->flush();
+        sandbox.reset();
+        main_window.reset();
+        OpenGL::Exit();
+    }
+};
+
+void
+OnExitSignal(int)
+{ OnExit(); }
+
 int
 main(int argc, char** argv)
 {
     console = std::make_unique<Console>(); // XXX enable logging first
-    std::atexit([]()
-                {
-                    sandbox.reset();
-                    OpenGL::Exit();
-                });
+    std::atexit(OnExit);
+    std::at_quick_exit(OnExit);
+    auto&& register_signal_handler = [](auto signal)
+    {
+        if (std::signal(signal, OnExitSignal) == SIG_ERR) {
+            Log::e("Failed to register signal {}", signal);
+        }
+    };
+    register_signal_handler(SIGHUP);
+    register_signal_handler(SIGILL);
     try {
         parse_options(argc - 1, argv + 1);
     } catch (invalid_option& e) {
@@ -45,6 +69,10 @@ main(int argc, char** argv)
         console->flush();
         sandbox->update();
         sandbox->render();
+        if (options.flags.debug_draw) {
+            sandbox->render_debug();
+        }
     }
+    OnExit();
     std::exit(EXIT_SUCCESS);
 }

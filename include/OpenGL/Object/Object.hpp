@@ -33,24 +33,21 @@ class Object {
         Name& operator=(const Name&) = delete;
 
         Name(Name&& obj) noexcept : m_name(obj.m_name)
-        { obj.clear(); }
+        { obj.release(); }
 
         Name& operator=(Name&& rhs) noexcept
         {
             GLuint name = rhs.m_name;
-            rhs.clear();
+            rhs.release();
             m_name = name;
             return *this;
         }
 
         ~Name()
-        { clear(); }
+        { release(); }
 
         GLuint get() const
         { return m_name; }
-
-        void clear()
-        { m_name = 0; }
 
         explicit operator GLuint() const
         { return m_name; }
@@ -60,6 +57,11 @@ class Object {
 
       private:
         GLuint m_name;
+
+        /// @warning It relases the object name without deleting it from OpenGL. Use carefully.
+        void release()
+        { m_name = 0; }
+
     };
 
     template <typename F1, typename F2>
@@ -76,7 +78,7 @@ class Object {
 
   public:
     Object() = default;
-    Object(Name&& name);
+    explicit Object(Name&& name);
 
     GLuint name() const
     { return m_name.get(); }
