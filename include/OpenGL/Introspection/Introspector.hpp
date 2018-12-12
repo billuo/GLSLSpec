@@ -1,5 +1,8 @@
-#ifndef OPENGL_LAB_INTROSPECTOR_HPP
-#define OPENGL_LAB_INTROSPECTOR_HPP
+/**
+ * @File Introspector.hpp
+ * @author Zhen Luo 461652354@qq.com
+ */
+#pragma once
 
 #include <OpenGL/Introspection/Interface.hpp>
 
@@ -111,5 +114,4 @@ class Introspector {
     friend std::ostream& operator<<(std::ostream& os, const Introspector& introspector);
 };
 
-}
-#endif //OPENGL_LAB_INTROSPECTOR_HPP
+} // namespace OpenGL

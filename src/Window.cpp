@@ -1,3 +1,7 @@
+/**
+ * @File Window.cpp
+ * @author Zhen Luo 461652354@qq.com
+ */
 #include <Window.hpp>
 #include <Options.hpp>
 #include <Sandbox.hpp>
@@ -229,11 +233,11 @@ std::string
 Window::default_title() const
 {
     return options.application.name +
-           "(FPS=" +
-           std::to_string(m_properties.FPS) +
-           ")(Frame delay=" +
-           std::to_string(1000 * m_properties.since_FPS / m_properties.FPS) +
-           ')';
+            "(FPS=" +
+            std::to_string(m_properties.FPS) +
+            ")(Frame delay=" +
+            std::to_string(1000 * m_properties.since_FPS / m_properties.FPS) +
+            ')';
 }
 
 void

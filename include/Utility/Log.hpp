@@ -1,7 +1,6 @@
 /**
  * @File Log.hpp
- * @brief Logging interface
- * @details Uses spdlog as implementation
+ * @brief Logging interface with spdlog as implementation
  * @sa https://github.com/gabime/spdlog/wiki/1.-QuickStart
  * @author Zhen Luo 461652354@qq.com
  */

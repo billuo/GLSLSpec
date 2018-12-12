@@ -1,3 +1,7 @@
+/**
+ * @File Camera.cpp
+ * @author Zhen Luo 461652354@qq.com
+ */
 #include <Scene/Camera.hpp>
 #include <Scene/Node.hpp>
 #include <Scene/Camera.hpp>

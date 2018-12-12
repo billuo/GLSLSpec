@@ -1,3 +1,7 @@
+/**
+ * @File Program.cpp
+ * @author Zhen Luo 461652354@qq.com
+ */
 #include <Utility/Log.hpp>
 #include <OpenGL/Introspection/Interface.hpp>
 #include <algorithm>

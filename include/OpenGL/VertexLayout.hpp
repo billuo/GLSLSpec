@@ -1,3 +1,7 @@
+/**
+ * @File VertexLayout.hpp
+ * @author Zhen Luo 461652354@qq.com
+ */
 #pragma once
 
 #include <OpenGL/Common.hpp>
@@ -91,23 +95,20 @@ class VertexLayout {
     /// @brief Bind a vertex buffer as data source of a vertex attribute.
     /// @param buffer The vertex buffer to bind.
     /// @param usage The specified usage, used to fetch the attribute already defined in this layout.
+    /// @note It only binds a buffer to a buffer binding point,
+    /// which should be later bound to vertex attribute indices with attribute_binding().
     void bind_buffer(const Buffer& buffer, Usage usage);
 
     /// @brief Bind a vertex buffer as data source of the vertex attribute
     /// @param buffer The vertex buffer to bind.
     /// @param attribute The vertex attribute to bind to. It replaces the already defined one, if any.
     /// @param enabled Defaults to true, which means upon binding finished the attribute will also be enabled as an array.
-    void bind_buffer(const Buffer& buffer, const VertexAttribute& attribute, bool enabled = true)
-    {
-        define(attribute);
-        bind_buffer(buffer, attribute.usage);
-        if (enabled) {
-            enable(attribute.index);
-        } else {
-            disable(attribute.index);
-        }
-    }
+    /// @note It calls attribute_binding() to bind the binding point for @p attribute.usage to @p attribute.index.
+    void bind_buffer(const Buffer& buffer, const VertexAttribute& attribute, bool enabled = true);
 
+    /// @brief Bind a binding point to an attribute index.
+    /// @param attribute_index The index of the attribute.
+    /// @param binding_index The index of the binding point.
     void attribute_binding(GLuint attribute_index, GLuint binding_index);
 
   private:
@@ -115,6 +116,7 @@ class VertexLayout {
     VertexArray m_vao{};
 
     /// Attributes each of a specific usage.
+    /// @note Indices of attributes in the array is exactly the index of the binding point they will be bound to.
     /// @sa VertexAttribute::Usage
     std::array<Shared<VertexAttribute>, underlying_cast(Usage::Max)> m_attributes{};
 };

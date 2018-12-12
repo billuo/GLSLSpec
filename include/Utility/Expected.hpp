@@ -1,3 +1,8 @@
+/**
+ * @File Expected.hpp
+ * @brief Wraps tl::expected.
+ * @author Zhen Luo 461652354@qq.com
+ */
 #pragma once
 
 #include <expected/expected.hpp>

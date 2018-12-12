@@ -1,5 +1,8 @@
-#ifndef OPENGL_LAB_TRIGONOMETRIC_HPP
-#define OPENGL_LAB_TRIGONOMETRIC_HPP
+/**
+ * @File Trigonometric.hpp
+ * @author Zhen Luo 461652354@qq.com
+ */
+#pragma once
 
 #include <glm/trigonometric.hpp>
 #include <ostream>
@@ -385,4 +388,3 @@ inline constexpr Math::Degree
 operator "" _deg(unsigned long long int n)
 { return {Math::Degree::Tag(), static_cast<Math::Degree::value_type>(n)}; }
 
-#endif //OPENGL_LAB_TRIGONOMETRIC_HPP

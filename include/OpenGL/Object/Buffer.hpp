@@ -1,10 +1,7 @@
 /**
- * @file OpenGL/Buffer.hpp
- * @brief Encapsulates OpenGL buffer objects.
+ * @File Buffer.hpp
  * @author Zhen Luo 461652354@qq.com
  */
-#ifndef OPENGL_LAB_BUFFER_HPP
-#define OPENGL_LAB_BUFFER_HPP
 #pragma once
 
 #include <OpenGL/Object/Object.hpp>
@@ -16,7 +13,7 @@ class Buffer : public Object {
 
     static auto& pool()
     {
-        static auto singleton = makeNamePool(glGenBuffers, glDeleteBuffers);
+        static auto singleton = make_pool(glGenBuffers, glDeleteBuffers);
         return singleton;
     }
 
@@ -27,12 +24,32 @@ class Buffer : public Object {
     static void Unbind(GLenum target)
     { glBindBuffer(target, 0); }
 
-  public:
-    explicit Buffer() : Object(pool().get())
+    static void Update(GLenum target, GLintptr offset, GLsizeiptr size, const GLvoid* data = nullptr)
+    { glBufferSubData(target, offset, size, data); }
+
+    static void Clear(GLenum target, GLenum internal_format, GLenum format, GLenum type, const GLvoid* data)
+    { glClearBufferData(target, internal_format, format, type, data); }
+
+    /// @brief Map the buffer data with given access.
+    /// @param target The target to which the buffer to map is bound.
+    /// @param access Access policy, write only by default. GL_(READ_ONLY|WRITE_ONLY|READ_WRITE)
+    /// @return A pointer the user can read from or write to based on @p access.
+    static void* Map(GLenum target, GLenum access = GL_WRITE_ONLY)
+    { return glMapBuffer(target, access); }
+
+    /// @brief Unmap the buffer data.
+    /// @param target The target to which the buffer to map is bound.
+    static void Unmap(GLenum target)
+    { glUnmapBuffer(target); }
+
+    Buffer() : Object(pool().get())
+    {}
+
+    /// @param usage Optionally specify the usage of buffer data. Defaults to GL_STATIC_DRAW.
+    explicit Buffer(GLenum usage) : Object(pool().get()), m_usage(usage)
     {}
 
     Buffer(Buffer&&) = default;
-
     Buffer& operator=(Buffer&&) = default;
 
     ~Buffer()
@@ -46,52 +63,40 @@ class Buffer : public Object {
     void bind(GLenum target) const
     { Bind(target, *this); }
 
-    // void Data(GLsizeiptr size, const GLvoid* data, GLenum usage);
-    // void Storage(GLsizei size, const GLvoid* data, GLbitfield flags);
+    /// @brief Allocate data store using previously specified data usage.
+    /// @param size Size of the data store in bytes.
+    /// @param data Address of the initial data if any. Defaults to nullptr.
+    void data(GLsizeiptr size, const GLvoid* data = nullptr)
+    { this->data(size, data, m_usage); }
 
-    // GLvoid* Map(GLenum access)const;
-    // void Unmap() const;
+    /// @brief Allocate data store using given data usage.
+    /// @param size Size of the data store in bytes.
+    /// @param data Address of the initial data if any, can be nullptr.
+    /// @param usage Usage of the data. GL_(STREAM|STATIC|DYNAMIC)_(DRAW|READ|COPY)
+    /// @sa glBufferData()
+    void data(GLsizeiptr size, const GLvoid* data, GLenum usage)
+    {
+        m_usage = usage;
+        glBufferData(name(), size, data, usage);
+    }
 
-    // void Clear(GLenum internalformat, GLenum format, GLenum type, const GLvoid* data);
+    /// @brief Invalidate the whole data store.
+    void invalidate()
+    { glInvalidateBufferData(name()); }
 
-    // void Invalidate();
+    /// @brief Partially invalidate the data store.
+    /// @param offset Offset of the first byte to invalidate in the data store.
+    /// @param length Number of bytes to invalidate.
+    void invalidate(GLintptr offset, GLsizeiptr length)
+    { glInvalidateBufferSubData(name(), offset, length); }
 
-    // bool Immutable() const { return m_flags & IsImmutable; }
-    // bool Mapped() const { return m_flags & IsMapped; }
-    // GLsizei Size() const { return m_size; }
-    // bool Empty() const { return !(m_flags & IsAllocated); }
+    GLint get(GLenum param) const;
 
   private:
-    // enum Flags : GLbitfield {
-    //     IsImmutable = 0x1,
-    //     IsMapped = 0x2,
-    //     IsAllocated = 0x4,
-    // };
-    // mutable GLbitfield m_flags = 0;
-    // GLsizei m_size = 0;
+    /// cached usage of current data store
+    GLenum m_usage = GL_STATIC_DRAW;
 
-    // enum Parameter : GLenum {
-    //     BufferAccess = GL_BUFFER_ACCESS,
-    //     BufferAccessFlags = GL_BUFFER_ACCESS_FLAGS,
-    //     BufferImmutableStorage = GL_BUFFER_IMMUTABLE_STORAGE,
-    //     BufferMapped = GL_BUFFER_MAPPED,
-    //     BufferMapLength = GL_BUFFER_MAP_LENGTH,
-    //     BufferMapOffset = GL_BUFFER_MAP_OFFSET,
-    //     BufferSize = GL_BUFFER_SIZE,
-    //     BufferStorageFlags = GL_BUFFER_STORAGE_FLAGS,
-    //     BufferUsage = GL_BUFFER_USAGE,
-    // };
-
-    // GLint get(Parameter param) const;
-
-    // bool aux_CheckMapped(bool expected) const {
-    //     if (Mapped() != expected) {
-    //         DEBUG("%s %s mapped", type_name<Buffer>(), Mapped() ? "already" : "not");
-    //         return false;
-    //     }
-    //     return true;
-    // }
 };
+
 } // namespace OpenGL
 
-#endif /* end of include guard: OPENGL_LAB_BUFFER_HPP */

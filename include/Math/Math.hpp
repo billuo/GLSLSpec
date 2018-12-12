@@ -1,3 +1,8 @@
+/**
+ * @File Math.hpp
+ * @brief Basic math functions wrapper on glm.
+ * @author Zhen Luo 461652354@qq.com
+ */
 #pragma once
 
 #define GLM_ENABLE_EXPERIMENTAL 1

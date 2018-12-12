@@ -1,6 +1,5 @@
 /**
  * @file OpenGL/VertexArray.hpp
- * @brief Encapsulates OpenGL vertex array obejcts.
  * @author Zhen Luo 461652354@qq.com
  */
 #pragma once
@@ -13,7 +12,7 @@ namespace OpenGL {
 class VertexArray : public Object {
     static auto pool()
     {
-        static auto singleton = makeNamePool(glGenVertexArrays, glDeleteVertexArrays);
+        static auto singleton = make_pool(glGenVertexArrays, glDeleteVertexArrays);
         return singleton;
     }
 

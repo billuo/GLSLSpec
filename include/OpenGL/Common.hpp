@@ -1,12 +1,14 @@
+/**
+ * @File Common.hpp
+ * @basic Provide entry point to OpenGL API.
+ * @author Zhen Luo 461652354@qq.com
+ */
 #pragma once
 
-// TODO this is platform dependent
+// TODO make it platform independent
 #include <glad/glad.h>
-// <GLFW/glfw3.h> must be included after "glad/glad.h"
+// XXX <GLFW/glfw3.h> must be included after "glad/glad.h"
 #include <GLFW/glfw3.h>
-
-
-struct Window;
 
 /// OpenGL C++ wrapper
 namespace OpenGL {

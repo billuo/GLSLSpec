@@ -1,3 +1,7 @@
+/**
+ * @File Shader.cpp
+ * @author Zhen Luo 461652354@qq.com
+ */
 #include <OpenGL/Object/Shader.hpp>
 #include <OpenGL/Constants.hpp>
 #include <Utility/Log.hpp>

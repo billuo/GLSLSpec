@@ -1,3 +1,7 @@
+/**
+ * @File ProgramPipeline.cpp
+ * @author Zhen Luo 461652354@qq.com
+ */
 #include <OpenGL/Object/ProgramPipeline.hpp>
 #include <OpenGL/Constants.hpp>
 

@@ -1,6 +1,5 @@
 /**
  * @file OpenGL/Object.hpp
- * @brief Base class representing generic OpenGL objects, each contains a name of type GLuint of OpenGL object.
  * @author Zhen Luo 461652354@qq.com
  */
 #pragma once
@@ -16,7 +15,7 @@
 
 namespace OpenGL {
 
-/// Base class of various OpenGL objects, owning a Name and an optional label.
+/// Base class of various OpenGL objects, owning a Name and an optional label string.
 class Object {
   protected:
     /**
@@ -67,7 +66,7 @@ class Object {
     class NamePool;
 
     template <typename F1, typename F2>
-    static Object::NamePool<F1, F2> makeNamePool(F1 f1, F2 f2)
+    static Object::NamePool<F1, F2> make_pool(F1 f1, F2 f2)
     {
         return Object::NamePool<F1, F2>(f1, f2);
     }

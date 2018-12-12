@@ -1,5 +1,7 @@
-#ifndef OPENGL_LAB_TRANSFORM_HPP
-#define OPENGL_LAB_TRANSFORM_HPP
+/**
+ * @File Transform.hpp
+ * @author Zhen Luo 461652354@qq.com
+ */
 #pragma once
 
 #include <Math/Math.hpp>
@@ -30,7 +32,3 @@ class Transform {
 };
 
 } // namespace Math
-
-
-
-#endif //OPENGL_LAB_TRANSFORM_HPP

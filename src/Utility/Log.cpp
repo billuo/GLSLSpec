@@ -1,3 +1,7 @@
+/**
+ * @File Log.cpp
+ * @author Zhen Luo 461652354@qq.com
+ */
 #include <Utility/Log.hpp>
 #include <Options.hpp>
 #include <Console.hpp>

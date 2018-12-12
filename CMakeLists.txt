@@ -51,8 +51,17 @@ link_libraries(third_party assimp)
 add_dependencies(third_party generated-glad)
 
 add_library(MainLib
+		src/Console.cpp
+		src/FileSystem.cpp
+		src/Mesh.cpp
+		src/Options.cpp
+		src/Sandbox.cpp
+		src/Watcher.cpp
+		src/Window.cpp
+		src/Math/Transform.cpp
         src/OpenGL/Common.cpp
         src/OpenGL/Constants.cpp
+		src/OpenGL/Debug.cpp
         src/OpenGL/Introspection/Interface.cpp
         src/OpenGL/Introspection/Introspector.cpp
         src/OpenGL/Introspection/ProgramInput.cpp
@@ -61,20 +70,16 @@ add_library(MainLib
         src/OpenGL/Introspection/SubroutineUniform.cpp
         src/OpenGL/Introspection/Uniform.cpp
         src/OpenGL/Introspection/UniformBlock.cpp
+		src/OpenGL/Object/Buffer.cpp
 		src/OpenGL/Object/Object.cpp
         src/OpenGL/Object/Program.cpp
+		src/OpenGL/Object/ProgramPipeline.cpp
         src/OpenGL/Object/Shader.cpp
-		src/OpenGL/Debug.cpp
-		src/Console.cpp
-		src/FileSystem.cpp
+		src/OpenGL/VertexLayout.cpp
+		src/Scene/Camera.cpp
+		src/Scene/Node.cpp
 		src/Utility/Log.cpp
-        src/Mesh.cpp
-		src/Options.cpp
-		src/Math/Transform.cpp
-		src/Utility/Misc.cpp
-		src/Watcher.cpp
-		src/Window.cpp
-		src/Sandbox.cpp src/Scene/Camera.cpp include/Scene/Camera.hpp src/Scene/Node.cpp include/Scene/Node.hpp src/OpenGL/ProgramPipeline.cpp src/OpenGL/VertexLayout.cpp include/OpenGL/VertexLayout.hpp)
+		src/Utility/Misc.cpp)
 
 message(STATUS "Build target:${CMAKE_HOST_SYSTEM_NAME}")
 set(HOST ${CMAKE_HOST_SYSTEM_NAME})

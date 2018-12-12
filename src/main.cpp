@@ -1,6 +1,5 @@
 /**
  * @file main.cpp
- * @brief Program entry point.
  * @author Zhen Luo 461652354@qq.com
  */
 #include <Console.hpp>

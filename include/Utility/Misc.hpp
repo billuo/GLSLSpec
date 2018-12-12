@@ -1,6 +1,5 @@
 /**
  * @file Utility.hpp
- * @brief Commonly used functions and macros
  * @author Zhen Luo 461652354@qq.com
  */
 #pragma once

@@ -1,4 +1,7 @@
-
+/**
+ * @File VertexLayout.cpp
+ * @author Zhen Luo 461652354@qq.com
+ */
 #include <Utility/Debug.hpp>
 #include <OpenGL/VertexLayout.hpp>
 
@@ -62,6 +65,19 @@ VertexLayout::attribute_binding(GLuint attribute_index, GLuint binding_index)
     check_attribute_index(m_attributes, attribute_index, "attribute binding point");
     m_vao.bind();
     glVertexAttribBinding(attribute_index, binding_index);
+}
+
+void
+VertexLayout::bind_buffer(const Buffer& buffer, const VertexAttribute& attribute, bool enabled)
+{
+    define(attribute);
+    bind_buffer(buffer, attribute.usage);
+    if (enabled) {
+        enable(attribute.index);
+    } else {
+        disable(attribute.index);
+    }
+    attribute_binding(attribute.index, underlying_cast(attribute.usage));
 }
 
 } // namespace OpenGL

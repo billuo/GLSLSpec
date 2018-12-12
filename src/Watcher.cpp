@@ -1,7 +1,12 @@
+/**
+ * @File Watcher.cpp
+ * @author Zhen Luo 461652354@qq.com
+ */
 #include <Watcher.hpp>
-#include <Utility/Enumeration.hpp>
+
 #include <Sandbox.hpp>
 #include <Utility/Debug.hpp>
+#include <Utility/Enumeration.hpp>
 
 #include <fstream>
 #include <iterator>

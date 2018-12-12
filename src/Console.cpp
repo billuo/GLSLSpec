@@ -1,3 +1,7 @@
+/**
+ * @File Console.cpp
+ * @author Zhen Luo 461652354@qq.com
+ */
 #include <Console.hpp>
 #include <Window.hpp>
 #include <Math/Math.hpp>
@@ -728,8 +732,8 @@ declare_commands()
                          [](const std::string& cmd, const std::list<std::string>& args)
                          {
                              static const std::string header = options.application.name +
-                                                               options.application.version +
-                                                               options.application.acknowledgement;
+                                     options.application.version +
+                                     options.application.acknowledgement;
                              switch (args.size()) {
                                  case 0:
                                      *console << header << "\n\n";

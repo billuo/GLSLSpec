@@ -1,6 +1,5 @@
 /**
  * @file Introspection.hpp
- * @brief OpenGL Program object introspection.
  * @sa https://www.khronos.org/opengl/wiki/Program_Introspection#Interface_qeury
  * @author Zhen Luo 461652354@qq.com
  */

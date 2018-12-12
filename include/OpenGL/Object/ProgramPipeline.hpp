@@ -1,6 +1,5 @@
 /**
  * @File ProgramPipeline.hpp
- * @brief Encapsulates OpenGL program pipeline object
  * @author Zhen Luo 461652354@qq.com
  */
 #pragma once
@@ -15,7 +14,7 @@ namespace OpenGL {
 class ProgramPipeline : Object {
     static auto& pool()
     {
-        static auto singleton = makeNamePool(glGenProgramPipelines, glDeleteProgramPipelines);
+        static auto singleton = make_pool(glGenProgramPipelines, glDeleteProgramPipelines);
         return singleton;
     }
 

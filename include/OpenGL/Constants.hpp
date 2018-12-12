@@ -1,6 +1,9 @@
-#ifndef OPENGL_LAB_CONSTANTS_HPP
-#define OPENGL_LAB_CONSTANTS_HPP
-
+/**
+ * @File Constants.hpp
+ * @basic Provide the whole bunch of GLenums with better usability.
+ * @author Zhen Luo 461652354@qq.com
+ */
+#pragma once
 #include <Utility/Expected.hpp>
 #include <OpenGL/Common.hpp>
 
@@ -45,4 +48,3 @@ nameOfProgramInterface(GLenum interface);
 
 } // namespace OpenGL
 
-#endif //OPENGL_LAB_CONSTANTS_HPP

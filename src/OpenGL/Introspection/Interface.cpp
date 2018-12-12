@@ -1,3 +1,7 @@
+/**
+ * @File Interface.cpp
+ * @author Zhen Luo 461652354@qq.com
+ */
 #include <OpenGL/Introspection/Interface.hpp>
 
 
@@ -13,6 +17,5 @@ constexpr ProgramInput::GLintfield ProgramInput::fields[];
 
 constexpr GLenum ProgramOutput::properties[];
 constexpr ProgramOutput::GLintfield ProgramOutput::fields[];
-
 
 } // namespace OpenGL

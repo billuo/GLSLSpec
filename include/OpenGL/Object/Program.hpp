@@ -1,6 +1,5 @@
 /**
  * @file Program.hpp
- * @brief Encapsulates OpenGL shader program objects.
  * @author Zhen Luo 461652354@qq.com
  */
 #pragma once

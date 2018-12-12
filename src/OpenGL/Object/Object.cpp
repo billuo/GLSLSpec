@@ -1,3 +1,7 @@
+/**
+ * @File Object.cpp
+ * @author Zhen Luo 461652354@qq.com
+ */
 #include <OpenGL/Object/Object.hpp>
 #include <Utility/Debug.hpp>
 

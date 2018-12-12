@@ -1,3 +1,7 @@
+/**
+ * @File Misc.cpp
+ * @author Zhen Luo 461652354@qq.com
+ */
 #include <Utility/Misc.hpp>
 #include <Utility/Log.hpp>
 

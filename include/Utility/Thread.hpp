@@ -1,3 +1,8 @@
+/**
+ * @File Thread.hpp
+ * @brief Threading specific helpers.
+ * @author Zhen Luo 461652354@qq.com
+ */
 #pragma once
 
 #include <atomic>

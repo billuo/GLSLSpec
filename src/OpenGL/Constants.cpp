@@ -1,9 +1,11 @@
-#include <Utility/Expected.hpp>
+/**
+ * @File Constants.cpp
+ * @author Zhen Luo 461652354@qq.com
+ */
 #include <OpenGL/Constants.hpp>
-
-#include <OpenGL/Constants.hpp>
-#include <Math/Math.hpp>
 #include <Utility/Debug.hpp>
+#include <Utility/Expected.hpp>
+#include <Math/Math.hpp>
 
 
 using namespace glm;
