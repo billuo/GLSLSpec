@@ -14,13 +14,13 @@ Resource::referenced_stages(const GLint referenced[MaxShaderStage])
     std::stringstream ss;
     ss << "Referenced by:";
 
-#define STAGE(stage) if (referenced[stage]) ss << "\n\t" << #stage;
-    STAGE(VertexShader);
-    STAGE(TessellationControlShader);
-    STAGE(TessellationEvaluationShader);
-    STAGE(GeometryShader);
-    STAGE(FragmentShader);
-    STAGE(ComputeShader);
+#define STAGE(stage) if (referenced[underlying_cast(ShaderStage::stage)]) ss << "\n\t" << #stage;
+    STAGE(Vertex);
+    STAGE(TessellationControl);
+    STAGE(TessellationEvaluation);
+    STAGE(Geometry);
+    STAGE(Fragment);
+    STAGE(Compute);
 #undef STAGE
 
     return ss.str();

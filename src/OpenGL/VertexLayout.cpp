@@ -3,6 +3,7 @@
  * @author Zhen Luo 461652354@qq.com
  */
 #include <Utility/Debug.hpp>
+#include <OpenGL/Constants.hpp>
 #include <OpenGL/VertexLayout.hpp>
 
 
@@ -16,21 +17,6 @@ DEFINE_ENUMERATION_DATABASE(Usage) {{Usage::Position, "position"},
 
 namespace OpenGL {
 
-template <typename Container>
-static void
-check_attribute_index(const Container& c, GLuint index, const std::string& when)
-{
-    #if DEBUG_BUILD
-    using V = typename std::iterator_traits<typename Container::iterator>::value_type;
-    static_assert(std::is_convertible_v<V, Shared<const VertexAttribute>>);
-    auto it = std::find_if(c.begin(), c.end(), [index](const V& v)
-    { return v && v->index == index; });
-    if (it == c.end()) {
-        DEBUG("index={} doesn't exist when {}", when);
-    }
-    #endif
-}
-
 VertexAttribute::VertexAttribute(Usage usage, GLint size, GLenum data_type, const std::string& name)
 {
     if (name.empty()) {
@@ -39,12 +25,12 @@ VertexAttribute::VertexAttribute(Usage usage, GLint size, GLenum data_type, cons
     this->usage = usage;
     this->size = size;
     this->data_type = data_type;
+    this->stride = size * sizeOfDataType(data_type);
 }
 
 void
 VertexLayout::enable(GLuint index)
 {
-    check_attribute_index(m_attributes, index, "enable attribute");
     m_vao.bind();
     glEnableVertexAttribArray(index);
 }
@@ -52,7 +38,6 @@ VertexLayout::enable(GLuint index)
 void
 VertexLayout::disable(GLuint index)
 {
-    check_attribute_index(m_attributes, index, "disable attribute");
     m_vao.bind();
     glDisableVertexAttribArray(index);
 }
@@ -61,7 +46,7 @@ void
 VertexLayout::bind_buffer(const Buffer& buffer, Usage usage)
 {
     auto& attr = attribute(usage);
-    if (attr == nullptr) {
+    if (!attr) {
         Log::e("Attribute with which to bind a buffer not defined.");
         return;
     }
@@ -72,31 +57,21 @@ VertexLayout::bind_buffer(const Buffer& buffer, Usage usage)
 void
 VertexLayout::attribute_binding(GLuint attribute_index, GLuint binding_index)
 {
-    check_attribute_index(m_attributes, attribute_index, "attribute binding point");
     m_vao.bind();
     glVertexAttribBinding(attribute_index, binding_index);
 }
 
-void
-VertexLayout::bind_buffer(const Buffer& buffer, const VertexAttribute& attribute, bool enabled)
-{
-    define(attribute);
-    bind_buffer(buffer, attribute.usage);
-    if (enabled) {
-        enable(attribute.index);
-    } else {
-        disable(attribute.index);
-    }
-    attribute_binding(attribute.index, underlying_cast(attribute.usage));
-}
-
-void
-VertexLayout::clear()
-{
-    for (auto& p : m_attributes) {
-        p.reset();
-    }
-    m_vao.~VertexArray();
-}
+// void
+// VertexLayout::bind_buffer(const Buffer& buffer, const VertexAttribute& attribute, bool enabled)
+// {
+//     define(attribute);
+//     bind_buffer(buffer, attribute.usage);
+//     if (enabled) {
+//         enable(attribute.index);
+//     } else {
+//         disable(attribute.index);
+//     }
+//     attribute_binding(attribute.index, underlying_cast(attribute.usage));
+// }
 
 } // namespace OpenGL

@@ -17,7 +17,7 @@ namespace details {
 // TODO double may as well be supported. Detect it?
 
 template <typename To, typename ...Args> static constexpr auto all_convertible_v = (std::is_convertible_v<Args, To> &&
-...);
+        ...);
 
 template <typename T> static constexpr auto is_GL_type_v =
         std::is_convertible_v<T, GLfloat> || std::is_convertible_v<T, GLint> || std::is_convertible_v<T, GLuint>;
@@ -32,6 +32,8 @@ std::conditional_t<all_convertible_v<GLfloat, Args...>,
         std::conditional_t<all_convertible_v<GLint, Args...>,
                 GLint,
                 std::conditional_t<all_convertible_v<GLuint, Args...>, GLuint, void>>>;
+
+//region glUniformXX
 
 template <typename ...Args>
 static inline void
@@ -98,6 +100,77 @@ void
 glUniformxx<GLuint>(GLint location, GLuint v0, GLuint v1, GLuint v2, GLuint v3)
 { return glUniform4ui(location, v0, v1, v2, v3); }
 
+//endregion
+
+//region glProgramUniformXX
+
+template <typename ...Args>
+static inline void
+glProgramUniformxx(GLuint program, GLint location, Args... args)
+{ static_assert(1 <= sizeof...(args) && sizeof...(args) <= 4, "Invalid parameter pack size"); }
+
+template <>
+void
+glProgramUniformxx<GLfloat>(GLuint program, GLint location, GLfloat v0)
+{ return glProgramUniform1f(program, location, v0); }
+
+template <>
+void
+glProgramUniformxx<GLfloat>(GLuint program, GLint location, GLfloat v0, GLfloat v1)
+{ return glProgramUniform2f(program, location, v0, v1); }
+
+template <>
+void
+glProgramUniformxx<GLfloat>(GLuint program, GLint location, GLfloat v0, GLfloat v1, GLfloat v2)
+{ return glProgramUniform3f(program, location, v0, v1, v2); }
+
+template <>
+void
+glProgramUniformxx<GLfloat>(GLuint program, GLint location, GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3)
+{ return glProgramUniform4f(program, location, v0, v1, v2, v3); }
+
+template <>
+void
+glProgramUniformxx<GLint>(GLuint program, GLint location, GLint v0)
+{ return glProgramUniform1i(program, location, v0); }
+
+template <>
+void
+glProgramUniformxx<GLint>(GLuint program, GLint location, GLint v0, GLint v1)
+{ return glProgramUniform2i(program, location, v0, v1); }
+
+template <>
+void
+glProgramUniformxx<GLint>(GLuint program, GLint location, GLint v0, GLint v1, GLint v2)
+{ return glProgramUniform3i(program, location, v0, v1, v2); }
+
+template <>
+void
+glProgramUniformxx<GLint>(GLuint program, GLint location, GLint v0, GLint v1, GLint v2, GLint v3)
+{ return glProgramUniform4i(program, location, v0, v1, v2, v3); }
+
+template <>
+void
+glProgramUniformxx<GLuint>(GLuint program, GLint location, GLuint v0)
+{ return glProgramUniform1ui(program, location, v0); }
+
+template <>
+void
+glProgramUniformxx<GLuint>(GLuint program, GLint location, GLuint v0, GLuint v1)
+{ return glProgramUniform2ui(program, location, v0, v1); }
+
+template <>
+void
+glProgramUniformxx<GLuint>(GLuint program, GLint location, GLuint v0, GLuint v1, GLuint v2)
+{ return glProgramUniform3ui(program, location, v0, v1, v2); }
+
+template <>
+void
+glProgramUniformxx<GLuint>(GLuint program, GLint location, GLuint v0, GLuint v1, GLuint v2, GLuint v3)
+{ return glProgramUniform4ui(program, location, v0, v1, v2, v3); }
+
+//endregion
+
 } // namespace details
 
 struct Uniform : public Resource {
@@ -136,8 +209,17 @@ struct Uniform : public Resource {
     void assign(Args... args) const noexcept
     {
         static_assert((details::all_GL_type_v<Args...>), "T must be convertible to GLfloat, GLint or GLuint.");
-        // TODO check type & size against recored data type
+        // TODO check type & size against recorded data type
         details::glUniformxx(location, std::forward<Args>(args)...);
+    }
+
+    /// assign this uniform with a list of values
+    template <typename ...Args>
+    void assign(GLuint program, Args... args) const noexcept
+    {
+        static_assert((details::all_GL_type_v<Args...>), "T must be convertible to GLfloat, GLint or GLuint.");
+        // TODO check type & size against recorded data type
+        details::glProgramUniformxx(program, location, std::forward<Args>(args)...);
     }
 
     /// assign this uniform with a pointer

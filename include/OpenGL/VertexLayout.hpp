@@ -40,9 +40,6 @@ struct VertexAttribute {
     std::string name{};
     /// User defined type of usage.
     Usage usage{Usage::Other};
-    /// Index in shader
-    /// @note It's the first argument passed to glVertexArrayFormat().
-    GLuint index{-1u};
     /// Number of components this attribute has.
     GLint size{-1};
     /// Data type of each component that are stored in client memory.
@@ -68,8 +65,7 @@ class VertexLayout {
     VertexLayout(VertexLayout&&) = default;
     VertexLayout& operator=(VertexLayout&&) = default;
 
-    ~VertexLayout()
-    { clear(); }
+    ~VertexLayout() = default;
 
     auto& attribute(Usage usage)
     { return m_attributes[underlying_cast(usage)]; }
@@ -98,9 +94,17 @@ class VertexLayout {
         }
     }
 
-    /// @brief Release all resources.
-    /// @note It only deletes, but not unbinds the VAO it owns.
-    void clear();
+    auto begin()
+    { return m_attributes.begin(); }
+
+    auto end()
+    { return m_attributes.end(); }
+
+    auto begin() const
+    { return m_attributes.begin(); }
+
+    auto end() const
+    { return m_attributes.end(); }
 
     /// @brief Enable a vertex attribute as an attribute array.
     /// @param index The index of the attribute.
@@ -126,7 +130,7 @@ class VertexLayout {
     /// @param attribute The vertex attribute to bind to. It replaces the already defined one, if any.
     /// @param enabled Defaults to true, which means upon binding finished the attribute will also be enabled as an array.
     /// @note It calls attribute_binding() to bind the binding point for @p attribute.usage to @p attribute.index.
-    void bind_buffer(const Buffer& buffer, const VertexAttribute& attribute, bool enabled = true);
+    // void bind_buffer(const Buffer& buffer, const VertexAttribute& attribute, bool enabled = true);
 
     /// @brief Bind a binding point to an attribute index.
     /// @param attribute_index The index of the attribute.

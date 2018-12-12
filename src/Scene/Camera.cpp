@@ -31,6 +31,20 @@ Camera::projection_view() const
     return m_matrices.projection_view;
 }
 
+const glm::mat4&
+Camera::view_world() const
+{
+    compute_all();
+    return m_matrices.view_world;
+}
+
+const glm::mat3&
+Camera::normal_matrix() const
+{
+    compute_all();
+    return m_matrices.normal;
+}
+
 glm::vec3
 Camera::world_to_view(glm::vec3 vec) const
 {
@@ -58,6 +72,7 @@ Camera::compute_all() const
     }
     m_matrices.view_world = glm::lookAt(m_transform.position, m_transform.position + look_dir(), m_up);
     m_matrices.projection_world = m_matrices.projection_view * m_matrices.view_world;
+    m_matrices.normal = glm::transpose(glm::inverse(glm::mat3(m_matrices.view_world)));
     m_matrices.cached = true;
 }
 

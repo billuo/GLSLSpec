@@ -36,6 +36,12 @@ struct DynamicFile {
     bool operator<(const DynamicFile& rhs) const
     { return m_path < rhs.m_path; }
 
+    bool operator==(const DynamicFile& rhs) const
+    { return m_path == rhs.m_path; }
+
+    bool operator!=(const DynamicFile& rhs) const
+    { return !(rhs == *this); }
+
     /// @brief Fetch the file content of this file.
     /// @param latest Set to true to ensure reading the latest file content.
     /// @return Content of the file as a string
@@ -82,4 +88,12 @@ class Watcher {
     std::unordered_map<FS::path, DynamicFile> m_watching_files;
     std::mutex mutex_watching_files;
 };
+
+namespace std {
+template <>
+struct hash<DynamicFile> {
+    std::size_t operator()(const DynamicFile& path) const noexcept
+    { return std::hash<std::string>{}(path.path().string()); }
+};
+}
 

@@ -20,6 +20,8 @@ class Camera : public Node {
 
     const glm::mat4& projection_world() const;
     const glm::mat4& projection_view() const;
+    const glm::mat4& view_world() const;
+    const glm::mat3& normal_matrix() const;
 
     glm::vec3 world_to_view(glm::vec3 vec) const;
     glm::vec3 world_to_projection(glm::vec3 vec) const;
@@ -114,6 +116,8 @@ class Camera : public Node {
         glm::mat4 view_world = glm::mat4(1.0f);
         /// world -> NDC
         glm::mat4 projection_view = glm::mat4(1.0f);
+        /// transpose inverse of view_world to cancel out non-uniform scaling
+        glm::mat3 normal = glm::mat3(1.0f);
     };
     mutable Matrices m_matrices;
 

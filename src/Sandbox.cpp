@@ -10,8 +10,9 @@
 #include <tol/tiny_obj_loader.h>
 
 
-const char* const axes_vert = R"SHADER(#version 430 core
-layout(location = 0) uniform mat4 MVP;
+const char* const axes_vert = R"SHADER(
+#version 430 core
+layout(location = 0) uniform mat4 PVM;
 out gl_PerVertex {
     vec4 gl_Position;
 };
@@ -19,7 +20,7 @@ out vec3 color;
 vec4 ndc_world(vec3 pos){
     mat4 scale = mat4(1.0f);
     scale[3][3] = 1.0f;
-    return MVP * scale * vec4(pos, 1.0f);
+    return PVM * scale * vec4(pos, 1.0f);
 }
 void main(void) {
     const vec3[] vertices = vec3[](vec3(1.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 0.0f, 1.0f));
@@ -87,14 +88,18 @@ Sandbox::aux_import_shader(const DynamicFile& file, const std::string& tag)
         Log::e("Failed to fetch shader source: {}", source.error());
         return;
     }
-    DEBUG("Importing shader {}", file.path());
+//    DEBUG("Importing shader {}", file.path());
     OpenGL::Shader shader(*type);
     OpenGL::Program program;
     shader.label("import").source(source.value()).compile();
     program.label("import").set(GL_PROGRAM_SEPARABLE, GL_TRUE).attach(shader).link();
-    m_pipeline.use_stage(program, stage);
-    auto n = OpenGL::stageOfShaderBit(stage);
-    m_introspectors[n] = std::make_unique<OpenGL::Introspector>(program);
+    if (program.name()) {
+        m_pipeline.use_stage(program, stage);
+        auto n = underlying_cast(OpenGL::stageOfShaderBit(stage));
+        m_introspectors[n] = std::make_shared<OpenGL::Introspector>(program);
+    } else {
+        Log::e("Shader failed to compile.");
+    }
 }
 
 void
@@ -107,12 +112,13 @@ Sandbox::aux_import_image(const DynamicFile& file, const std::string& tag)
 void
 Sandbox::aux_import_geometry(const DynamicFile& file, const std::string& tag)
 {
+    using namespace OpenGL;
     std::string extension(tag);
     for (auto& c : extension) {
         c = static_cast<char>(std::toupper(c));
     }
     if (extension == "OBJ") {
-        DEBUG("Importing wave front .obj: {}", file.path());
+//        DEBUG("Importing wave front .obj: {}", file.path());
         tinyobj::attrib_t attributes;
         std::vector<tinyobj::shape_t> shapes;
         std::vector<tinyobj::material_t> materials;
@@ -140,45 +146,47 @@ Sandbox::aux_import_geometry(const DynamicFile& file, const std::string& tag)
                 Log::w("Empty group. skipped");
                 continue;
             }
-            OpenGL::VertexLayout layout;
+            VertexLayout layout;
             std::vector<glm::vec3> positions;
             std::vector<glm::vec3> normals;
             std::vector<glm::vec2> tex_coords;
             std::vector<glm::vec3> colors;
             auto& sample = mesh.indices[0];
+            using Usage = VertexAttribute::Usage;
             if (sample.vertex_index != -1) {
-                layout.define(OpenGL::VertexAttribute(OpenGL::VertexAttribute::Usage::Position, 3, GL_FLOAT));
+                layout.define(VertexAttribute(Usage::Position, 3, GL_FLOAT));
             }
             if (sample.normal_index != -1) {
-                layout.define(OpenGL::VertexAttribute(OpenGL::VertexAttribute::Usage::Normal, 3, GL_FLOAT));
+                layout.define(VertexAttribute(Usage::Normal, 3, GL_FLOAT));
             }
             if (sample.texcoord_index != -1) {
-                layout.define(OpenGL::VertexAttribute(OpenGL::VertexAttribute::Usage::TexCoord, 2, GL_FLOAT));
+                layout.define(VertexAttribute(Usage::TexCoord, 2, GL_FLOAT));
             }
             for (auto& index : mesh.indices) {
-                if (layout.attribute(OpenGL::VertexAttribute::Usage::Position)) {
+                if (layout.attribute(Usage::Position)) {
                     assert(index.vertex_index != -1);
                     positions.emplace_back(attributes.vertices[3 * index.vertex_index],
                                            attributes.vertices[3 * index.vertex_index + 1],
                                            attributes.vertices[3 * index.vertex_index + 2]);
                 }
-                if (layout.attribute(OpenGL::VertexAttribute::Usage::Normal)) {
+                if (layout.attribute(Usage::Normal)) {
                     assert(index.normal_index != -1);
                     normals.emplace_back(attributes.normals[3 * index.normal_index],
                                          attributes.normals[3 * index.normal_index + 1],
                                          attributes.normals[3 * index.normal_index + 2]);
                 }
-                if (layout.attribute(OpenGL::VertexAttribute::Usage::TexCoord)) {
+                if (layout.attribute(Usage::TexCoord)) {
                     assert(index.texcoord_index != -1);
                     tex_coords.emplace_back(attributes.texcoords[2 * index.texcoord_index],
                                             attributes.texcoords[2 * index.texcoord_index + 1]);
                 }
             }
-            m_meshes.emplace_back(std::move(layout),
-                                  std::move(positions),
-                                  std::move(normals),
-                                  std::move(tex_coords),
-                                  std::move(colors));
+            m_meshes.emplace(std::make_pair(file,
+                                            Mesh(std::move(layout),
+                                                 std::move(positions),
+                                                 std::move(normals),
+                                                 std::move(tex_coords),
+                                                 std::move(colors))));
         }
     } else if (extension == "PLY") {
         // TODO
@@ -199,8 +207,41 @@ Sandbox::render()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     if (m_pipeline.valid()) {
         m_pipeline.bind();
-        for (auto&& mesh : m_meshes) {
-            mesh.draw();
+        constexpr auto stage = OpenGL::ShaderStage::Vertex;
+        const auto program = m_pipeline.stage(stage);
+        const auto vertex_introspect = m_introspectors[underlying_cast(stage)];
+        if (!vertex_introspect) {
+            ONCE_PER(Log::e("No vertex shader specified."), 60);
+            return;
+        }
+        auto&& uniforms = vertex_introspect->uniform();
+        auto&& update_mat = [&uniforms, program](const auto& mat, const char* name)
+        {
+            auto* u = uniforms.find(name);
+            if (!u)
+                return;
+            switch (sizeof(mat)) {
+                case sizeof(glm::mat4):
+                    return glProgramUniformMatrix4fv(program, u->location, 1, GL_FALSE, glm::value_ptr(mat));
+                case sizeof(glm::mat3):
+                    return glProgramUniformMatrix3fv(program, u->location, 1, GL_FALSE, glm::value_ptr(mat));
+            }
+        };
+        update_mat(camera.projection_world(), "PVM");
+        update_mat(camera.projection_view(), "PV");
+        update_mat(camera.view_world(), "VM");
+        update_mat(camera.normal_matrix(), "NM");
+        auto&& lpos = camera.world_to_view({4.0f, 10.0f, 4.0f});
+        uniforms.assign(program, "L.pos", lpos.x, lpos.y, lpos.z);
+        uniforms.assign(program, "L.la", 0.15f, 0.15f, 0.05f);
+        uniforms.assign(program, "L.ld", 0.8f, 0.8f, 0.03f);
+        uniforms.assign(program, "L.ls", 0.8f, 0.8f, 0.03f);
+        uniforms.assign(program, "M.ka", 0.5f, 0.5f, 1.0f);
+        uniforms.assign(program, "M.kd", 0.7f, 0.7f, 0.7f);
+        uniforms.assign(program, "M.ks", 0.5f, 0.5f, 0.5f);
+        uniforms.assign(program, "M.shininess", 16.0f);
+        for (auto&&[file, mesh] : m_meshes) {
+            mesh.draw(vertex_introspect);
         }
     }
 }
@@ -211,9 +252,9 @@ Sandbox::render_debug() const
     if (m_pipeline_debug.valid()) {
         m_pipeline_debug.bind();
         m_vao_debug.bind();
-        auto order = OpenGL::VertexShader;
-        auto&& mvp = camera.projection_world();
-        glProgramUniformMatrix4fv(m_pipeline_debug.stage(order), 0, 1, GL_FALSE, glm::value_ptr(mvp));
+        auto stage = OpenGL::ShaderStage::Vertex;
+        auto&& pvm = camera.projection_world();
+        glProgramUniformMatrix4fv(m_pipeline_debug.stage(stage), 0, 1, GL_FALSE, glm::value_ptr(pvm));
         glDrawArrays(GL_LINES, 0, 6);
     }
 }

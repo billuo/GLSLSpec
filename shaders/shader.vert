@@ -1,14 +1,16 @@
 #version 430 core
 
-/* clang-format off */
+out gl_PerVertex {
+    vec4 gl_Position;
+};
+
 out VS_GS {
     vec3 pos;
     vec3 color;
 } vs_out;
-/* clang-format on */
 
-layout(location = 0) in vec3 VertexPosition;
-layout(location = 1) in vec3 VertexNormal;
+in vec3 v_position;
+in vec3 v_normal;
 
 struct light_t {
     vec3 pos; // light position [eye coord.]
@@ -17,7 +19,7 @@ struct light_t {
     vec3 ls;  // specular light intensity
 };
 
-uniform light_t Light;
+uniform light_t L;
 
 struct material_t {
     vec3 ka;
@@ -25,33 +27,32 @@ struct material_t {
     vec3 ks;
     float shininess;
 };
-uniform material_t Material;
+uniform material_t M;
 
-uniform Transformations {
-    mat4 View_Model;
-    mat3 NormalMatrix;
-    mat4 NDC_View;
-    mat4 NDC_Model;
-};
+uniform mat4 PV;
+uniform mat4 VM;
+uniform mat4 PVM;
+uniform mat3 NM;
 
 void ViewSpace(out vec3 position, out vec3 normal) {
-    position = (View_Model * vec4(VertexPosition, 1.0f)).xyz;
-    normal = normalize(NormalMatrix * VertexNormal);
+    position = (VM * vec4(v_position, 1.0f)).xyz;
+    normal = normalize(NM * v_normal);
 }
-void NDCSpace(out vec4 position) { position = NDC_Model * vec4(VertexPosition, 1.0f); }
+
+void NDCSpace(out vec4 position) { position = PVM * vec4(v_position, 1.0f); }
 
 vec3 ADS(vec3 pos, vec3 norm) {
-    vec3 l = normalize(Light.pos - pos);
+    vec3 l = normalize(L.pos - pos);
     vec3 v = normalize(-pos.xyz);
     vec3 r = reflect(-l, norm);
     // float l_n = abs(dot(l, norm));
     float l_n = max(dot(l, norm), 0.0f);
-    vec3 diffuse = Light.ld * Material.kd * l_n;
-    vec3 ambient = Light.la * Material.ka;
+    vec3 diffuse = L.ld * M.kd * l_n;
+    vec3 ambient = L.la * M.ka;
     vec3 spec = vec3(0.0);
     if (l_n > 0.0f) {
         float r_v = max(dot(r, v), 0.0f);
-        spec = Light.ls * Material.ks * pow(r_v, Material.shininess);
+        spec = L.ls * M.ks * pow(r_v, M.shininess);
     }
     return clamp(ambient + diffuse + spec, vec3(0.0f), vec3(1.0f));
 }

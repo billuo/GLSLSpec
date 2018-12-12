@@ -399,25 +399,25 @@ bitOfShaderType(GLenum type)
     }
 }
 
-size_t
+ShaderStage
 stageOfShaderBit(GLbitfield bits)
 // TODO input is bit mask! it doesn't work generally.
 {
     switch (bits) {
         case GL_VERTEX_SHADER_BIT:
-            return VertexShader;
+            return ShaderStage::Vertex;
         case GL_TESS_CONTROL_SHADER_BIT:
-            return TessellationControlShader;
+            return ShaderStage::TessellationControl;
         case GL_TESS_EVALUATION_SHADER_BIT:
-            return TessellationEvaluationShader;
+            return ShaderStage::TessellationEvaluation;
         case GL_GEOMETRY_SHADER_BIT:
-            return GeometryShader;
+            return ShaderStage::Geometry;
         case GL_FRAGMENT_SHADER_BIT:
-            return FragmentShader;
+            return ShaderStage::Fragment;
         case GL_COMPUTE_SHADER_BIT:
-            return ComputeShader;
+            return ShaderStage::Compute;
         case GL_ALL_SHADER_BITS:
-            return -1;
+            return ShaderStage::Max;
         default:
             UNREACHABLE;
     }

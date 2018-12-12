@@ -39,5 +39,14 @@
         }                           \
     } while (0)
 
+#define ONCE_PER(expr, n)       \
+    do {                        \
+        static int counter = 0; \
+        if (counter % n == 0) { \
+            expr;               \
+        }                       \
+        ++counter;              \
+    } while (0)
+
 #define UNUSED(x) (void(x))
 

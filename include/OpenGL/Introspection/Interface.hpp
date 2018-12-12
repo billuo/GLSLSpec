@@ -104,6 +104,17 @@ struct ProgramInterface : public details::InterfaceBase {
         }
     }
 
+    template <typename ...Args>
+    void assign(GLuint program, const char* name, Args... args) const
+    {
+        auto R = find(name);
+        if (!R) {
+            Log::e("{} not found in interface {}", name, nameOfProgramInterface(interface));
+        } else {
+            R->assign(program, args...);
+        }
+    }
+
     friend std::ostream& operator<<(std::ostream& os, const ProgramInterface& interface)
     {
         os << "INTERFACE:";

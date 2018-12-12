@@ -895,6 +895,7 @@ Console::ConsoleSink::sink_it_(const spdlog::details::log_msg& msg)
 {
     fmt::memory_buffer formatted;
     sink::formatter_->format(msg, formatted);
-    oss << fmt::to_string(formatted);
+    std::string&& str = fmt::to_string(formatted);
+    oss << str;
 }
 

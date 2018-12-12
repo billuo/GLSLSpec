@@ -44,7 +44,7 @@ Watcher::Watcher(const std::vector<DynamicFile>& to_watch)
         if (file.path().empty()) {
             continue;
         }
-        DEBUG("{} added to watch", file.path());
+//        DEBUG("{} added to watch", file.path());
         m_watching_files.emplace(file.path(), std::move(file));
     }
 }
@@ -112,7 +112,7 @@ DynamicFile::check_update() const
 {
     auto last_modified = FS::last_write_time(m_path);
     if (last_modified > m_last_modified) {
-        DEBUG("Found {} modified", m_path);
+//        DEBUG("Found {} modified", m_path);
         m_last_modified = last_modified;
         return true;
     }

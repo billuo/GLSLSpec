@@ -11,7 +11,8 @@ namespace OpenGL {
 ProgramPipeline&
 ProgramPipeline::use_stage(const Program& program, GLbitfield stages)
 {
-    m_stages[stageOfShaderBit(stages)] = program.name();
+    auto n = underlying_cast(stageOfShaderBit(stages));
+    m_stages[n] = program.name();
     glUseProgramStages(name(), stages, program.name());
     return *this;
 }
@@ -42,6 +43,6 @@ ProgramPipeline::valid() const
 
 GLuint
 ProgramPipeline::stage(ShaderStage stage) const
-{ return m_stages[stage]; }
+{ return m_stages[underlying_cast(stage)]; }
 
 } // namespace OpenGL

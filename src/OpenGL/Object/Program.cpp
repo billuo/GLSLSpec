@@ -23,6 +23,7 @@ Program::link()
     glLinkProgram(name());
     if (get(GL_LINK_STATUS) == GL_FALSE) {
         Log::e("Shader program linking failed:\n{}", get_info_log().get());
+        this->~Program();
     }
     return *this;
 }

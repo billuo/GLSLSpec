@@ -6,12 +6,17 @@
 
 #include <Math/Math.hpp>
 #include <OpenGL/VertexLayout.hpp>
+#include <OpenGL/Introspection/Introspector.hpp>
 
 
 class Mesh {
+    using Position = glm::vec3;
+    using Normal = glm::vec3;
+    using TexCoord = glm::vec2;
+    using Color = glm::vec3;
   public:
-    Mesh(OpenGL::VertexLayout layout, std::vector<glm::vec3> positions, std::vector<glm::vec3> normals,
-         std::vector<glm::vec2> tex_coords, std::vector<glm::vec3> colors = {});
+    Mesh(OpenGL::VertexLayout layout, std::vector<Position> positions, std::vector<Normal> normals,
+         std::vector<TexCoord> tex_coords, std::vector<Color> colors = {});
 
     ~Mesh() = default;
 
@@ -21,23 +26,31 @@ class Mesh {
     Mesh(Mesh&&) = default;
     Mesh& operator=(Mesh&&) = default;
 
-    void draw();
+    void draw(Shared<OpenGL::Introspector> current);
 
     void upload();
 
   private:
     OpenGL::VertexLayout m_layout;
-    std::vector<glm::vec3> m_positions;
-    std::vector<glm::vec3> m_normals;
-    std::vector<glm::vec2> m_tex_coords;
-    std::vector<glm::vec3> m_colors;
+    Shared<OpenGL::Introspector> m_vertex_stage;
+    std::vector<Position> m_positions;
+    std::vector<Normal> m_normals;
+    std::vector<TexCoord> m_tex_coords;
+    std::vector<Color> m_colors;
+    size_t m_n_vertices;
+
     struct Buffers {
         using Buffer = OpenGL::Buffer;
         Buffer position;
         Buffer normal;
         Buffer tex_coord;
         Buffer color;
+
+        const Buffer& buffer_for(OpenGL::VertexAttribute::Usage usage) const;
     };
+
     Owned<Buffers> m_buffers;
+
+    void aux_update_layout_indices();
 };
 

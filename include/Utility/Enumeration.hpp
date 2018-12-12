@@ -77,6 +77,11 @@ struct E : public EDB<Enum> {
 
 };
 
+template <typename Enum, typename = std::enable_if_t<std::is_enum_v<Enum>>>
+std::string
+to_string(Enum e)
+{ return E<Enum>(e).to_string(); }
+
 #define DEFINE_ENUMERATION_DATABASE(type) template <> decltype(EDB<type>::database) EDB<type>::database =
 
 

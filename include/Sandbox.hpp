@@ -33,8 +33,8 @@ class Sandbox {
     std::mutex mutex_updated;
 
     OpenGL::ProgramPipeline m_pipeline;
-    std::unique_ptr<OpenGL::Introspector> m_introspectors[OpenGL::MaxShaderStage]{};
-    std::vector<Mesh> m_meshes;
+    Shared<OpenGL::Introspector> m_introspectors[OpenGL::MaxShaderStage]{};
+    std::unordered_map<DynamicFile, Mesh> m_meshes;
 
     OpenGL::VertexArray m_vao_debug;
     OpenGL::ProgramPipeline m_pipeline_debug;
