@@ -13,8 +13,7 @@ std::unordered_map<Handle, Window*> Window::Instances;
 
 Window::Window()
 {
-    m_properties.dimension = options.window.dimension;
-    auto& dim = m_properties.dimension;
+    auto& dim = options.window.dimension;
     auto& title = options.application.name;
     m_handle = glfwCreateWindow(dim.x, dim.y, title.c_str(), nullptr, nullptr);
     if (m_handle == nullptr) {
@@ -25,6 +24,7 @@ Window::Window()
     glfwMakeContextCurrent(m_handle);
     gladLoadGLLoader((GLADloadproc) glfwGetProcAddress); // XXX it needs a current context
     callbacks.register_all(m_handle);
+    resize(dim.x, dim.y);
 }
 
 Window::~Window()
@@ -192,7 +192,9 @@ Window::set_viewport(glm::ivec2 size)
 {
     glfwMakeContextCurrent(m_handle);
     glViewport(0, 0, size.x, size.y);
-    sandbox->camera.set_aspect(static_cast<float>(size.x) / size.y);
+    if (sandbox) {
+        sandbox->camera.set_aspect(static_cast<float>(size.x) / size.y);
+    }
     m_properties.viewport = glm::ivec4(0, 0, size.x, size.y);
 }
 

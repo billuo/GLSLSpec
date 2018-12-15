@@ -82,7 +82,9 @@ class Camera : public Node {
     }
 
     void roll(Degree degree)
-    {}
+    {
+        // TODO
+    }
 
     auto look_dir() const
     {
@@ -133,7 +135,7 @@ class Camera : public Node {
     glm::vec3 m_up;
     glm::vec2 m_clip = glm::vec2(1.0f / 128.0f, 128.0f);
     float m_FOV = 45.0f;
-    float m_aspect = 4.0f / 3.0f;
+    float m_aspect = 1.0f;
 };
 
 } // namespace Math

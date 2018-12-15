@@ -7,7 +7,6 @@
 #include <Window.hpp>
 #include <csignal>
 
-// TODO load meshes from .obj
 // TODO support simple texture
 // TODO load texture from .obj
 // TODO finish introspection
