@@ -1,12 +1,12 @@
 #version 430 core
 
-in GS_FS {
-    vec3 pos;
-    vec3 color;
-} fs_in;
+in vec3 position;
+in vec3 normal;
+in vec2 texcoord;
+in vec3 color;
 
-out vec4 color;
+out vec4 o_color;
 
 void main(void) {
-    color = vec4(fs_in.color, 1.0f);
+    o_color = vec4(color, 1.0f);
 }

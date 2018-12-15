@@ -60,4 +60,34 @@ operator<<(std::ostream& os, const Introspector& introspector)
     return os;
 }
 
+Weak<Introspector>
+Introspector::Get(const Program& program)
+{
+    assert(program.name());
+    auto it = Instances().find(program.name());
+    if (it == Instances().end()) {
+        auto intro = Shared<Introspector>(new Introspector(program));
+        auto&& p = Instances().emplace(std::make_pair(program.name(), std::move(intro)));
+        assert(p.second);
+        it = p.first;
+        Log::i("Introspecting OpenGL Program [{}]\"{}\".", program.name(), program.label());
+    }
+    return it->second;
+}
+
+Weak<Introspector>
+Introspector::Get(GLuint program)
+{
+    auto it = Instances().find(program);
+    if (it == Instances().end()) {
+        Log::w("Program [{}] not introspected.", program);
+        return {};
+    }
+    return it->second;
+}
+
+void
+Introspector::Put(const Program& program)
+{ Instances().erase(program.name()); }
+
 }

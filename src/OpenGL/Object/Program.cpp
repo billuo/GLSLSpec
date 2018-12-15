@@ -3,7 +3,7 @@
  * @author Zhen Luo 461652354@qq.com
  */
 #include <Utility/Log.hpp>
-#include <OpenGL/Introspection/Interface.hpp>
+#include <OpenGL/Introspection/Introspector.hpp>
 #include <algorithm>
 #include <OpenGL/Object/Program.hpp>
 
@@ -31,14 +31,12 @@ Program::link()
 std::unique_ptr<GLchar[]>
 Program::get_info_log() const
 {
-    std::unique_ptr<GLchar[]> ret;
     GLint length = get(GL_INFO_LOG_LENGTH);
-    assert(length >= 0);
-    ret = std::make_unique<GLchar[]>(length);
-    glGetProgramInfoLog(static_cast<GLuint>(m_name),
-                        length,
-                        nullptr,
-                        ret.get());
+    if (length <= 0) {
+        return {};
+    }
+    auto ret = std::make_unique<GLchar[]>(length);
+    glGetProgramInfoLog(static_cast<GLuint>(m_name), length, nullptr, ret.get());
     return ret;
 }
 
@@ -64,5 +62,15 @@ Program::set(GLenum param, GLint value)
     glProgramParameteri(name(), param, value);
     return *this;
 }
+
+Program::~Program()
+{
+    Introspector::Put(*this);
+    pool().put(std::move(m_name));
+}
+
+Weak<Introspector>
+Program::interfaces() const
+{ return Introspector::Get(*this); }
 
 } // namespace OpenGL

@@ -9,11 +9,9 @@
 namespace OpenGL {
 
 ProgramPipeline&
-ProgramPipeline::use_stage(const Program& program, GLbitfield stages)
+ProgramPipeline::use_stage(const Program& program, GLbitfield bits)
 {
-    auto n = underlying_cast(stageOfShaderBit(stages));
-    m_stages[n] = program.name();
-    glUseProgramStages(name(), stages, program.name());
+    glUseProgramStages(name(), bits, program.name());
     return *this;
 }
 
@@ -40,9 +38,5 @@ ProgramPipeline::valid() const
     glValidateProgramPipeline(name());
     return get(GL_VALIDATE_STATUS) == GL_TRUE;
 }
-
-GLuint
-ProgramPipeline::stage(ShaderStage stage) const
-{ return m_stages[underlying_cast(stage)]; }
 
 } // namespace OpenGL

@@ -11,6 +11,8 @@
 
 namespace OpenGL {
 
+class Introspector;
+
 /// OpenGL shader program object
 class Program : public Object {
     static auto& pool()
@@ -58,10 +60,12 @@ class Program : public Object {
     Program(Program&&) = default;
     Program& operator=(Program&&) = default;
 
-    ~Program()
-    { pool().put(std::move(m_name)); }
+    ~Program();
 
     using Object::label;
+
+    Program& label(const std::string& label)
+    { return this->label(label.c_str()); }
 
     Program& label(const GLchar* label)
     {
@@ -79,6 +83,8 @@ class Program : public Object {
         Use(*this);
         return *this;
     }
+
+    Weak<Introspector> interfaces() const;
 
     /// Query about a parameter
     GLint get(GLenum param) const;

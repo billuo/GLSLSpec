@@ -3,6 +3,7 @@
  * @sa https://www.khronos.org/opengl/wiki/Program_Introspection#Interface_qeury
  * @author Zhen Luo 461652354@qq.com
  */
+#pragma once
 
 #include <OpenGL/Constants.hpp>
 #include <OpenGL/Object/Program.hpp>
@@ -80,6 +81,9 @@ struct ProgramInterface : public details::InterfaceBase {
             }
         }
     }
+
+    const Resource* find(const std::string& name) const
+    { return find(name.c_str()); }
 
     const Resource* find(const char* name) const
     {

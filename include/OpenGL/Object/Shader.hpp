@@ -42,6 +42,9 @@ class Shader : public Object {
 
     using Object::label;
 
+    Shader& label(const std::string& label)
+    { return this->label(label.c_str()); }
+
     Shader& label(const GLchar* label)
     {
         Object::label(label, GL_SHADER);

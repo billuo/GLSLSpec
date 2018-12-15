@@ -36,7 +36,7 @@ Watcher::Watcher(const std::vector<DynamicFile>& to_watch)
                                 }
                             }
                         }
-                        sleep_for_ms(500);
+                        sleep_for_ms(250);
                     }
                 }).detach();
     std::lock_guard guard(mutex_watching_files);

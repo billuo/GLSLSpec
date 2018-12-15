@@ -18,8 +18,6 @@ class ProgramPipeline : Object {
         return singleton;
     }
 
-    GLuint m_stages[MaxShaderStage] = {};
-
   public:
     static void Bind(const ProgramPipeline& obj)
     { glBindProgramPipeline(obj.name()); }
@@ -41,9 +39,7 @@ class ProgramPipeline : Object {
         return *this;
     }
 
-    GLuint stage(ShaderStage stage) const;
-
-    ProgramPipeline& use_stage(const Program& program, GLbitfield stages);
+    ProgramPipeline& use_stage(const Program& program, GLbitfield bits);
 
     bool valid() const;
 

@@ -114,12 +114,38 @@ numelOfDataType(GLenum type)
         case GL_DOUBLE_VEC2:
         case GL_BOOL_VEC2:
             return 2;
+        case GL_FLOAT_VEC3:
+        case GL_INT_VEC3:
+        case GL_UNSIGNED_INT_VEC3:
+        case GL_DOUBLE_VEC3:
+        case GL_BOOL_VEC3:
+            return 3;
+        case GL_FLOAT_VEC4:
+        case GL_INT_VEC4:
+        case GL_UNSIGNED_INT_VEC4:
+        case GL_DOUBLE_VEC4:
+        case GL_BOOL_VEC4:
+            return 4;
         default:
-            UNREACHABLE;
+            throw unimplemented("numel():" + nameOfDataType(type));
     }
 }
 
-const char*
+GLenum
+componentTypeOfDataType(GLenum type)
+{
+    switch (type) {
+        case GL_FLOAT:
+        case GL_FLOAT_VEC2:
+        case GL_FLOAT_VEC3:
+        case GL_FLOAT_VEC4:
+            return GL_FLOAT;
+        default:
+            throw unimplemented("numel():" + nameOfDataType(type));
+    }
+}
+
+std::string
 nameOfDataType(GLenum type)
 {
     switch (type) {
@@ -253,27 +279,28 @@ nameOfDataType(GLenum type)
             return "usamplerBuffer";
         case GL_UNSIGNED_INT_SAMPLER_2D_RECT:
             return "usampler2DRect";
-            // TODO double floating point not yet fully supported
         case GL_DOUBLE_MAT2:
-//            return "dmat2";
+            // return "dmat2";
         case GL_DOUBLE_MAT3:
-//            return "dmat3";
+            // return "dmat3";
         case GL_DOUBLE_MAT4:
-//            return "dmat4";
+            // return "dmat4";
         case GL_DOUBLE_MAT2x3:
-//            return "dmat2x3";
+            // return "dmat2x3";
         case GL_DOUBLE_MAT2x4:
-//            return "dmat2x4";
+            // return "dmat2x4";
         case GL_DOUBLE_MAT3x2:
-//            return "dmat3x2";
+            // return "dmat3x2";
         case GL_DOUBLE_MAT3x4:
-//            return "dmat3x4";
+            // return "dmat3x4";
         case GL_DOUBLE_MAT4x2:
-//            return "dmat4x2";
+            // return "dmat4x2";
         case GL_DOUBLE_MAT4x3:
-//            return "dmat4x3";
+            // return "dmat4x3";
+            // TODO double type
+            throw unimplemented("name of double type");
         default:
-            UNREACHABLE;
+            return "UNKNOWN";
     }
 }
 
@@ -306,7 +333,7 @@ shaderTypeOfSuffix(std::string suffix)
     return make_unexpected("Unknown suffix ." + suffix);
 }
 
-const char*
+std::string
 nameOfShaderType(GLenum type)
 {
     switch (type) {
@@ -378,7 +405,7 @@ nameOfProgramInterface(GLenum interface)
     }
 }
 
-GLenum
+GLbitfield
 bitOfShaderType(GLenum type)
 {
     switch (type) {
@@ -421,6 +448,51 @@ stageOfShaderBit(GLbitfield bits)
         default:
             UNREACHABLE;
     }
+}
+
+GLbitfield
+bitOfShaderStage(ShaderStage stage)
+{
+    switch (stage) {
+        case ShaderStage::Vertex:
+            return GL_VERTEX_SHADER_BIT;
+        case ShaderStage::TessellationControl:
+            return GL_TESS_CONTROL_SHADER_BIT;
+        case ShaderStage::TessellationEvaluation:
+            return GL_TESS_EVALUATION_SHADER_BIT;
+        case ShaderStage::Geometry:
+            return GL_GEOMETRY_SHADER_BIT;
+        case ShaderStage::Fragment:
+            return GL_FRAGMENT_SHADER_BIT;
+        case ShaderStage::Compute:
+            return GL_COMPUTE_SHADER_BIT;
+        case ShaderStage::Max:
+            return GL_ALL_SHADER_BITS;
+        default:
+            UNREACHABLE;
+    }
+}
+
+ShaderStage
+stageOfShaderType(GLenum type)
+{
+    switch (type) {
+        case GL_VERTEX_SHADER:
+            return ShaderStage::Vertex;
+        case GL_TESS_CONTROL_SHADER:
+            return ShaderStage::TessellationControl;
+        case GL_TESS_EVALUATION_SHADER:
+            return ShaderStage::TessellationEvaluation;
+        case GL_GEOMETRY_SHADER:
+            return ShaderStage::Geometry;
+        case GL_FRAGMENT_SHADER:
+            return ShaderStage::Fragment;
+        case GL_COMPUTE_SHADER:
+            return ShaderStage::Compute;
+        default:
+            UNREACHABLE;
+    }
+
 }
 
 } // namespace OpenGL

@@ -24,6 +24,13 @@ namespace {
 
 using Parser = unsigned (*)(const std::string& match, unsigned argc, const std::string* argv);
 
+Parser AddShaderToWatch = [](const std::string& match, unsigned, const std::string* arg)
+{
+    options.input_files.emplace_back(*arg, FileType::Shader);
+    options.input_files.back().tag = match;
+    return 0u;
+};
+
 struct NamedOption {
     /// A string of single character names of option, when used should be specified as '-x' resp.
     const std::string short_names;
@@ -241,24 +248,26 @@ const std::vector<NamedOption> NamedOptions = {
         // More importantly, the parser now only receive the option name, or file name itself. n_args is ignored.
         // XXX These special cases must be the last in the Options vector! It's assumed in parse_options().
         // XXX Also, none of the normal options shall have a short name containing '.' to avoid ambiguity.
-        {".", {"frag", "fs"},
-                "Load fragment shader",
-                {0, 0}, {"shader"},
-                [](const std::string& match, unsigned, const std::string* arg) -> unsigned
-                {
-                    options.input_files.emplace_back(*arg, FileType::Shader);
-                    options.input_files.back().tag = match;
-                    return 0u;
-                }},
         {".", {"vert", "vs"},
                 "Load vertex shader",
                 {0, 0}, {"shader"},
-                [](const std::string& match, unsigned, const std::string* arg) -> unsigned
-                {
-                    options.input_files.emplace_back(*arg, FileType::Shader);
-                    options.input_files.back().tag = match;
-                    return 0u;
-                }},
+                AddShaderToWatch},
+        {".", {"tesc"},
+                "Load tessellation control shader",
+                {0, 0}, {"shader"},
+                AddShaderToWatch},
+        {".", {"tese"},
+                "Load tessellation evaluation shader",
+                {0, 0}, {"shader"},
+                AddShaderToWatch},
+        {".", {"geom"},
+                "Load geometry shader",
+                {0, 0}, {"shader"},
+                AddShaderToWatch},
+        {".", {"frag", "fs"},
+                "Load fragment shader",
+                {0, 0}, {"shader"},
+                AddShaderToWatch},
         {".", {"ply",  "obj", "OBJ", "PLY"},
                 "Load an .obj or .ply file",
                 {0, 0}, {"model"},

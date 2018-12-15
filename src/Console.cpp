@@ -761,8 +761,10 @@ declare_commands()
                          "Display version string of application",
                          [](const std::string& cmd, const Arguments& args)
                          {
+                             auto& glv = options.opengl.version;
                              *console << options.application.name << ' ' << options.application.version << '\n';
-                             *console << glfwGetVersionString() << '\n';
+                             *console << "OpenGL " << glv.major << '.' << glv.minor << '\n';
+                             *console << "glfw:" << glfwGetVersionString() << '\n';
                              return true;
                          });
 

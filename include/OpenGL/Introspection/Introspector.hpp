@@ -5,13 +5,19 @@
 #pragma once
 
 #include <OpenGL/Introspection/Interface.hpp>
+#include <unordered_map>
 
 
 namespace OpenGL {
 
 class Introspector {
+    friend class Program;
+
   public:
-    explicit Introspector(const Program& program);
+    static Weak<Introspector> Get(const Program& program);
+    static Weak<Introspector> Get(GLuint program);
+    static void Put(const Program& program);
+
     ~Introspector() = default;
 
     /// A weak reference to program object
@@ -100,6 +106,14 @@ class Introspector {
     }
 
   private:
+    static auto& Instances()
+    {
+        static std::unordered_map<GLuint, Shared<Introspector>> singleton;
+        return singleton;
+    };
+
+    explicit Introspector(const Program& program);
+
     mutable Owned<UniformInterface> IUniform;
     mutable Owned<UniformBlockInterface> IUniformBlock;
     mutable Owned<ProgramInputInterface> IInput;

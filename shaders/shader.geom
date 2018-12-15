@@ -3,9 +3,18 @@
 layout(triangles) in;
 layout(triangle_strip, max_vertices = 3) out;
 
+in gl_PerVertex {
+    vec4 gl_Position;
+} gl_in[];
+
+out gl_PerVertex {
+    vec4 gl_Position;
+};
+
 in VS_GS {
     vec3 pos;
     vec3 color;
+    vec2 uv;
 } gs_in[];
 
 out GS_FS {
@@ -15,14 +24,12 @@ out GS_FS {
 
 subroutine vec3 colorOfIndex(int i);
 
-layout(index = 1)
-subroutine (colorOfIndex)
+layout(index = 0) subroutine (colorOfIndex)
 vec3 smoothColor(int i) {
     return gs_in[i].color;
 }
 
-layout(index = 2)
-subroutine (colorOfIndex)
+layout(index = 1) subroutine (colorOfIndex)
 vec3 flatColor(int i) {
     return (gs_in[0].color + gs_in[1].color + gs_in[2].color) / 3;
 }

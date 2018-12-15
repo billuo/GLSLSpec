@@ -23,6 +23,7 @@ numel(T(& array)[N])
 
 template <typename T, typename D = std::default_delete<T>> using Owned = std::unique_ptr<T, D>;
 template <typename T> using Shared = std::shared_ptr<T>;
+template <typename T> using Weak = std::weak_ptr<T>;
 
 template <typename E, typename = std::enable_if_t<std::is_enum_v<E>>>
 inline constexpr auto

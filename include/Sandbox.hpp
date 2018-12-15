@@ -7,7 +7,7 @@
 #include <Mesh.hpp>
 #include <Scene/Camera.hpp>
 #include <Watcher.hpp>
-#include <OpenGL/Introspection/Introspector.hpp>
+#include <OpenGL/Constants.hpp>
 #include <OpenGL/Object/Buffer.hpp>
 #include <OpenGL/Object/ProgramPipeline.hpp>
 #include <OpenGL/Object/VertexArray.hpp>
@@ -23,7 +23,9 @@ class Sandbox {
 
     void render();
 
-    void render_debug() const;
+    void render_debug();
+
+    void render_background();
 
     Scene::Camera camera{glm::vec3(3.0f, 0.0f, 3.0f), glm::vec3()};
 
@@ -32,12 +34,19 @@ class Sandbox {
     std::set<DynamicFile> m_updated;
     std::mutex mutex_updated;
 
-    OpenGL::ProgramPipeline m_pipeline;
-    Shared<OpenGL::Introspector> m_introspectors[OpenGL::MaxShaderStage]{};
-    std::unordered_map<DynamicFile, Mesh> m_meshes;
-
-    OpenGL::VertexArray m_vao_debug;
-    OpenGL::ProgramPipeline m_pipeline_debug;
+    /// Program pipeline using stages of shader programs that were compiled from user specified shader sources.
+    /// @note Should always be validated before use.
+    OpenGL::ProgramPipeline m_pipeline_user;
+    /// User shader programs, theoretically all optional.
+    std::array<std::optional<OpenGL::Program>, OpenGL::MaxShaderStage> m_programs_user;
+    /// User supplied meshes to draw.
+    std::unordered_map<DynamicFile, Shared<MeshBase>> m_meshes;
+    /// VAO for internal and static usage, like when drawing background or debug curves/planes.
+    OpenGL::VertexArray m_vao_internal;
+    /// Program pipeline for internal usage, consisting of statges from pre-defined shader only.
+    OpenGL::ProgramPipeline m_pipeline_internal;
+    /// Debug drawing -- RGB unit axes located at world origin
+    OpenGL::Program m_debug_axes;
 
     void import(const DynamicFile& file);
     void aux_import_shader(const DynamicFile& file, const std::string& tag);

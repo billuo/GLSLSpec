@@ -56,7 +56,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-function -Wno-unused-variabl
 add_library(MainLib
 		src/Console.cpp
 		src/FileSystem.cpp
-		src/Mesh.cpp
 		src/Options.cpp
 		src/Sandbox.cpp
 		src/Watcher.cpp
@@ -78,11 +77,10 @@ add_library(MainLib
         src/OpenGL/Object/Program.cpp
 		src/OpenGL/Object/ProgramPipeline.cpp
         src/OpenGL/Object/Shader.cpp
-		src/OpenGL/VertexLayout.cpp
 		src/Scene/Camera.cpp
 		src/Scene/Node.cpp
 		src/Utility/Log.cpp
-		src/Utility/Misc.cpp)
+		src/Utility/Misc.cpp include/OpenGL/VertexBuffer.hpp src/OpenGL/VertexAttribute.cpp)
 
 message(STATUS "Build target:${CMAKE_HOST_SYSTEM_NAME}")
 set(HOST ${CMAKE_HOST_SYSTEM_NAME})
