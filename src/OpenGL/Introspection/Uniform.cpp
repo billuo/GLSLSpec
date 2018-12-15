@@ -4,8 +4,6 @@
  */
 #include <OpenGL/Introspection/Uniform.hpp>
 
-#include <OpenGL/Introspection/Uniform.hpp>
-
 
 namespace OpenGL {
 Uniform::Uniform(GLuint program, GLint index, GLchar* name, const GLint* values) : Resource(index,
@@ -26,7 +24,7 @@ operator<<(std::ostream& os, const Uniform& uniform)
     os << static_cast<const Resource&>(uniform) << '\n';
     if (uniform.location == -1) {
         os << "type=" << nameOfDataType(uniform.type) << ", block_index=" << uniform.block_index
-                << '\n';
+           << '\n';
     } else {
         os << "type=" << nameOfDataType(uniform.type) << ", location=" << uniform.location << '\n';
     }

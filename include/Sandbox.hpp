@@ -17,9 +17,7 @@ class Sandbox {
   public:
     Sandbox();
 
-    void on_update(const DynamicFile& file);
-
-    void update();
+    void import(const DynamicFile& file);
 
     void render();
 
@@ -48,7 +46,6 @@ class Sandbox {
     /// Debug drawing -- RGB unit axes located at world origin
     OpenGL::Program m_debug_axes;
 
-    void import(const DynamicFile& file);
     void aux_import_shader(const DynamicFile& file, const std::string& tag);
     void aux_import_image(const DynamicFile& file, const std::string& tag);
     void aux_import_geometry(const DynamicFile& file, const std::string& tag);

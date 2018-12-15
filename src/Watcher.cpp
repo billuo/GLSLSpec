@@ -3,14 +3,8 @@
  * @author Zhen Luo 461652354@qq.com
  */
 #include <Watcher.hpp>
-
 #include <Sandbox.hpp>
-#include <Utility/Debug.hpp>
-#include <Utility/Enumeration.hpp>
-
 #include <fstream>
-#include <iterator>
-#include <Watcher.hpp>
 
 
 DEFINE_ENUMERATION_DATABASE(FileType) {
@@ -20,37 +14,37 @@ DEFINE_ENUMERATION_DATABASE(FileType) {
         {FileType::Dependency, "Dependency"},
 };
 
-Watcher::Watcher(const std::vector<DynamicFile>& to_watch)
+Watcher::Watcher(const std::vector<DynamicFile>& to_watch) :
+        m_thread([this]()
+                 {
+                     while (m_watching) {
+                         {
+                             std::lock_guard guard1(mutex_watching_files);
+                             for (auto&&[_, file] : m_watching_files) {
+                                 if (file.check_update()) {
+                                     std::lock_guard guard2(mutex_updated);
+                                     m_updated.insert(file);
+                                 }
+                             }
+                         }
+                         sleep_for_ms(250);
+                     }
+                 })
 {
-    std::thread([&]()
-                {
-                    while (!sandbox) {
-                        sleep_for_ms(1);
-                    }
-                    while (this->m_watching) {
-                        {
-                            std::lock_guard guard(mutex_watching_files);
-                            for (auto&&[_, file] : m_watching_files) {
-                                if (file.check_update()) {
-                                    sandbox->on_update(file);
-                                }
-                            }
-                        }
-                        sleep_for_ms(250);
-                    }
-                }).detach();
     std::lock_guard guard(mutex_watching_files);
     for (auto file : to_watch) {
         if (file.path().empty()) {
-            continue;
+            continue; // XXX non-existent path is emptied during pre-processing
         }
-//        DEBUG("{} added to watch", file.path());
         m_watching_files.emplace(file.path(), std::move(file));
     }
 }
 
 Watcher::~Watcher()
-{ m_watching = false; }
+{
+    m_watching = false;
+    m_thread.join();
+}
 
 void
 Watcher::watch(const FS::path& path, FileType type)

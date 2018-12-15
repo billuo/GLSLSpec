@@ -4,8 +4,6 @@
  */
 #include <Utility/Log.hpp>
 #include <OpenGL/Introspection/Introspector.hpp>
-#include <algorithm>
-#include <OpenGL/Object/Program.hpp>
 
 
 namespace OpenGL {

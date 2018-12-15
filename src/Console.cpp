@@ -7,10 +7,8 @@
 #include <Math/Math.hpp>
 #include <OpenGL/Common.hpp>
 
-#include <thread>
 #include <iostream>
 #include <fstream>
-#include <utility>
 #include <regex>
 
 

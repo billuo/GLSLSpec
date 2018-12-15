@@ -57,16 +57,16 @@ SafeDemangle(const char* mangled_name, char* output_buffer, size_t* length);
 /// @author Howard Hinnant
 /// @see https://stackoverflow.com/questions/81870/is-it-possible-to-print-a-variables-type-in-standard-c
 template <typename T>
-inline const char*
+inline std::string
 type_name()
 {
     using TR = typename std::remove_reference<T>::type;
     static std::string r;
     if (!r.empty()) {
-        return r.c_str();
+        return r;
     }
 #if !CXX_MSVC
-    size_t length = 80;
+    size_t length = 128;
     auto buffer = static_cast<char*>(malloc(length));
     buffer = SafeDemangle(typeid(TR).name(), buffer, &length);
     r = buffer;
@@ -75,19 +75,19 @@ type_name()
     r = typeid(TR).name();
 #endif
 
-    if (std::is_const<TR>::value) {
-        r += " const";
+    if (std::is_const_v<TR>) {
+        r = "const " + r;
     }
-    if (std::is_volatile<TR>::value) {
-        r += " volatile";
+    if (std::is_volatile_v<TR>) {
+        r = "volatile " + r;
     }
-    if (std::is_lvalue_reference<T>::value) {
+    if (std::is_lvalue_reference_v<T>) {
         r += "&";
-    } else if (std::is_rvalue_reference<T>::value) {
+    } else if (std::is_rvalue_reference_v<T>) {
         r += "&&";
     }
 
-    return r.c_str();
+    return r;
 }
 
 template <typename T>

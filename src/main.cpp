@@ -4,10 +4,7 @@
  */
 #include <Console.hpp>
 #include <Sandbox.hpp>
-#include <Options.hpp>
 #include <Window.hpp>
-#include <OpenGL/Common.hpp>
-#include <OpenGL/Debug.hpp>
 #include <csignal>
 
 // TODO load meshes from .obj
@@ -67,7 +64,10 @@ main(int argc, char** argv)
         main_window->next_frame();
         console->execute_all();
         console->flush();
-        sandbox->update();
+        auto&& updated = watcher.updated();
+        for (auto&& file : updated) {
+            sandbox->import(file);
+        }
         sandbox->render();
         if (options.flags.debug_draw) {
             sandbox->render_debug();

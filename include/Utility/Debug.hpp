@@ -29,16 +29,24 @@
 #endif
 #endif
 
-/// Evaluate expr only ONCE.
-#define ONCE(expr)                  \
+/// Evaluate expr only ONCE per thread.
+#define ONCE_ST(expr)               \
     do {                            \
-        static bool _done_ = false; \
-        if (!_done_) {              \
+        static bool flag = false;   \
+        if (!flag) {                \
             expr;                   \
-            _done_ = true;          \
+            flag = true;            \
         }                           \
     } while (0)
 
+/// Evaluate expr only ONCE among multiple threads.
+#define ONCE_MT(expr)                       \
+    do {                                    \
+        static std::once_flag flag;         \
+        std::call_once(flag, [](){expr;});  \
+    } while (0)
+
+/// Evaluate expr once per n times.
 #define ONCE_PER(expr, n)       \
     do {                        \
         static int counter = 0; \
@@ -48,5 +56,6 @@
         ++counter;              \
     } while (0)
 
+/// Cancel warning of unused variables.
 #define UNUSED(x) (void(x))
 

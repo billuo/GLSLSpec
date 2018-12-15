@@ -7,8 +7,8 @@
 #include <Utility/Expected.hpp>
 #include <Utility/Thread.hpp>
 #include <FileSystem.hpp>
-
 #include <unordered_map>
+#include <unordered_set>
 
 
 enum class FileType : int {
@@ -59,6 +59,14 @@ struct DynamicFile {
     mutable FS::ModifiedTimePoint m_last_modified;
 };
 
+namespace std {
+template <>
+struct hash<DynamicFile> {
+    std::size_t operator()(const DynamicFile& path) const noexcept
+    { return std::hash<std::string>{}(path.path().string()); }
+};
+}
+
 /// Thread watching a set of files
 class Watcher {
   public:
@@ -70,30 +78,24 @@ class Watcher {
 
     void unwatch(const FS::path& path, FileType type);
 
-    // using Callback = std::function<void(const DynamicFile&)>;
-
-    // Callback set_callback(Callback callback)
-    // {
-    //     std::swap(callback, m_callback);
-    //     return callback;
-    // }
-
     expected<DynamicFile, std::string> find(const FS::path& path);
 
-  private:
-    bool m_watching = true;
-    // Callback m_callback = [](const DynamicFile& path)
-    // {};
+    /// Move out the set of currently updated files.
+    /// @warning Don't ignore its return value unless you really mean to.
+    std::unordered_set<DynamicFile> updated()
+    {
+        std::lock_guard guard(mutex_updated);
+        return std::move(m_updated);
+    }
 
+  private:
     std::unordered_map<FS::path, DynamicFile> m_watching_files;
     std::mutex mutex_watching_files;
+    std::unordered_set<DynamicFile> m_updated;
+    std::mutex mutex_updated;
+
+    std::atomic_bool m_watching = true;
+    std::thread m_thread; // XXX MUST be initialized after mutexes and atomics it might uses.
 };
 
-namespace std {
-template <>
-struct hash<DynamicFile> {
-    std::size_t operator()(const DynamicFile& path) const noexcept
-    { return std::hash<std::string>{}(path.path().string()); }
-};
-}
 

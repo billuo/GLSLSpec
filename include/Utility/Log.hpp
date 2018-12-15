@@ -9,6 +9,7 @@
 #include <spdlog/spdlog.h>
 #include <spdlog/fmt/bundled/ostream.h>
 
+
 class Log {
   public:
 

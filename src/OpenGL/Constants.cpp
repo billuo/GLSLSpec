@@ -4,7 +4,6 @@
  */
 #include <OpenGL/Constants.hpp>
 #include <Utility/Debug.hpp>
-#include <Utility/Expected.hpp>
 #include <Math/Math.hpp>
 
 

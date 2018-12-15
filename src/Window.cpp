@@ -5,13 +5,6 @@
 #include <Window.hpp>
 #include <Options.hpp>
 #include <Sandbox.hpp>
-#include <OpenGL/Common.hpp>
-#include <Utility/Debug.hpp>
-#include <Utility/Thread.hpp>
-
-#include <ctime>
-#include <Window.hpp>
-#include <Scene/Camera.hpp>
 
 
 std::unique_ptr<Window> main_window;
@@ -233,11 +226,11 @@ std::string
 Window::default_title() const
 {
     return options.application.name +
-            "(FPS=" +
-            std::to_string(m_properties.FPS) +
-            ")(Frame delay=" +
-            std::to_string(1000 * m_properties.since_FPS / m_properties.FPS) +
-            ')';
+           "(FPS=" +
+           std::to_string(m_properties.FPS) +
+           ")(Frame delay=" +
+           std::to_string(1000 * m_properties.since_FPS / m_properties.FPS) +
+           ')';
 }
 
 void

@@ -274,21 +274,3 @@ Sandbox::render_debug()
     glDrawArrays(GL_LINES, 0, 6);
 }
 
-void
-Sandbox::update()
-{
-    std::lock_guard guard(mutex_updated);
-    for (auto&& file : m_updated) {
-        import(file);
-    }
-    m_updated.clear();
-}
-
-void
-Sandbox::on_update(const DynamicFile& file)
-{
-    std::lock_guard guard(mutex_updated);
-    m_updated.insert(file);
-}
-
-

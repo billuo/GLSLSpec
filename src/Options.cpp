@@ -3,12 +3,9 @@
  * @author Zhen Luo 461652354@qq.com
  */
 #include <Console.hpp>
-#include <Options.hpp>
-#include <Watcher.hpp>
 #include <Utility/Misc.hpp>
 
 #include <iostream>
-#include <algorithm>
 
 
 GlobalOptions options;
