@@ -842,7 +842,7 @@ Console::execute(std::string line)
     auto&& cmd = begin_word->str();
     std::list<std::string> args;
     while (++begin_word != end_word) {
-        args.emplace_back(std::move(begin_word->str()));
+        args.emplace_back(begin_word->str());
     }
     auto it = CommandTable.find(cmd);
     if (it == CommandTable.end() || args.size() < it->second.n_args.first || args.size() > it->second.n_args.second) {

@@ -5,6 +5,7 @@
 
 #include <Sandbox.hpp>
 #include <tol/tiny_obj_loader.h>
+#include <regex>
 
 
 const std::string axes_vert_source = R"SHADER(
@@ -86,15 +87,16 @@ Sandbox::aux_import_shader(const DynamicFile& file, const std::string& tag)
         Log::e("Can't determine shader type: {}", ex_type.error());
         return;
     }
-    auto&& source = file.fetch();
-    if (!source) {
-        Log::e("Failed to fetch shader source: {}", source.error());
+    auto&& ex_source = file.fetch();
+    if (!ex_source) {
+        Log::e("Failed to fetch shader source: {}", ex_source.error());
         return;
     }
+    aux_preprocess_shader_source(*ex_source);
     // DEBUG("Importing shader {}", file.path());
     GLenum shader_type = ex_type.value();
     auto&& stage_name = OpenGL::nameOfShaderType(shader_type);
-    OpenGL::Program program(shader_type, {*source});
+    OpenGL::Program program(shader_type, {*ex_source});
     program.label("(imported)" + stage_name);
     if (auto log = program.get_info_log()) {
         Log::e("Shader failed to compile: {}", log.get());
@@ -103,6 +105,22 @@ Sandbox::aux_import_shader(const DynamicFile& file, const std::string& tag)
     Log::i("Updated {} stage of user pipeline", stage_name);
     auto n = underlying_cast(OpenGL::stageOfShaderType(shader_type));
     m_programs_user[n] = std::move(program);
+}
+
+void
+Sandbox::aux_preprocess_shader_source(std::string& source)
+{
+    // TODO anchor ('$') seems not to work??
+    std::regex version("^[:space:]*#version[^\r\n]*", std::regex_constants::basic);
+    std::smatch match;
+    std::string::const_iterator it = source.begin();
+    if (!std::regex_search(source, match, version)) {
+        Log::w("Could not locate '#version' directive; defining macros in the beginning of shader...");
+    } else {
+        it = match[0].second + 1; // still <= source.end()
+    }
+    auto&& defines = std::string("#define GLSLVIEWER\n");
+    source.insert(it, defines.begin(), defines.end());
 }
 
 void
@@ -273,4 +291,5 @@ Sandbox::render_debug()
     glProgramUniformMatrix4fv(m_debug_axes.name(), 0, 1, GL_FALSE, glm::value_ptr(pvm));
     glDrawArrays(GL_LINES, 0, 6);
 }
+
 

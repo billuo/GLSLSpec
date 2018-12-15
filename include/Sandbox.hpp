@@ -47,6 +47,8 @@ class Sandbox {
     OpenGL::Program m_debug_axes;
 
     void aux_import_shader(const DynamicFile& file, const std::string& tag);
+    void aux_preprocess_shader_source(std::string& source);
+
     void aux_import_image(const DynamicFile& file, const std::string& tag);
     void aux_import_geometry(const DynamicFile& file, const std::string& tag);
     void aux_import_dependency(const DynamicFile& path, const std::string& tag);
