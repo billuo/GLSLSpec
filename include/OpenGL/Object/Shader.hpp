@@ -24,7 +24,7 @@ class Shader : public Object {
                 return Name(name);
             }
 
-            void put(Name&& name)
+            void put(Name name)
             { glDeleteShader(name.get()); }
         } singleton;
         return singleton;

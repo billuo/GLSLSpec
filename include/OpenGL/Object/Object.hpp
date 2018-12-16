@@ -33,18 +33,18 @@ class Object {
         Name& operator=(const Name&) = delete;
 
         Name(Name&& obj) noexcept : m_name(obj.m_name)
-        { obj.release(); }
+        { obj.aux_release(); }
 
         Name& operator=(Name&& rhs) noexcept
         {
             GLuint name = rhs.m_name;
-            rhs.release();
+            rhs.aux_release();
             m_name = name;
             return *this;
         }
 
         ~Name()
-        { release(); }
+        { aux_release(); }
 
         GLuint get() const
         { return m_name; }
@@ -62,7 +62,7 @@ class Object {
         GLuint m_name;
 
         /// @warning It releases the object name without deleting it from OpenGL. Use carefully.
-        void release()
+        void aux_release()
         { m_name = 0; }
     };
 
@@ -80,7 +80,9 @@ class Object {
 
   public:
     Object() = default;
-    explicit Object(Name&& name);
+
+    explicit Object(Name name) : m_name(std::move(name))
+    {}
 
     GLuint name() const
     { return m_name.get(); }
@@ -126,11 +128,8 @@ class Object::NamePool {
     }
 
     /// Put a single name.
-    void put(Name&& name)
-    {
-        Name moved = std::move(name);
-        m_delete.push_back(moved.get());
-    }
+    void put(Name name)
+    { m_delete.emplace_back(name.get()); }
 
   private:
     void Refill()

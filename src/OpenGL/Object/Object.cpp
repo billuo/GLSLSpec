@@ -19,9 +19,6 @@ get_max_label_length()
 
 namespace OpenGL {
 
-Object::Object(Object::Name&& name) : m_name(std::move(name))
-{}
-
 #if DEBUG_BUILD
 
 void

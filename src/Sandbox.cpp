@@ -74,7 +74,7 @@ void main() {
     } else {
         gl_Position.xy = vertices[(gl_VertexID - 1) % 4];
     }
-    gl_Position.zw = vec2(0.9999f, 1.0f);
+    gl_Position.zw = vec2(1.0f, 1.0f);
 })SHADER";
 
 std::unique_ptr<Sandbox> sandbox;
@@ -375,7 +375,8 @@ void
 Sandbox::render_background()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    if (m_background_frag.name() == 0) { // TODO better way of avoid binding invalid program to pipeline
+    if (m_background_frag.name() == 0) {
+        // TODO better way of avoid binding invalid program to pipeline
         return;
     }
     m_pipeline_internal.use_stage(m_background_frag, GL_FRAGMENT_SHADER_BIT);
