@@ -84,29 +84,23 @@ struct GlobalOptions {
     std::vector<FS::path> includes;
 
     /// Additionally defined macros
-    // std::set<std::string> defines = {"GLSL_VIEWER 1"};
-
+    std::set<std::string> defines = {"GLSL_VIEWER=1"};
 
     /// Define a new macro. Will complain about duplicates.
-    // template <typename ...Args>
-    // void define(Args&& ... args)
-    // {
-    //     auto pair = defines.emplace(std::forward<Args>(args)...);
-    //     if (!pair.second) {
-    //         Log::w("{} already defined", *pair.first);
-    //     }
-    // }
+    void define(std::string macro)
+    { defines.emplace(std::move(macro)); }
 
-    // /// Undefine a macro. Will complain about undefining non-existent ones.
-    // void undefine(const std::string& str)
-    // {
-    //     auto it = defines.find(str);
-    //     if (it == defines.end()) {
-    //         Log::w("{} not yet defined", str);
-    //     } else {
-    //         defines.erase(it);
-    //     }
-    // }
+    // TODO undefine and define with separated macro name and value
+    /// Undefine a macro. Will complain about undefining non-existent ones.
+    void undefine(const std::string& str)
+    {
+        auto it = defines.find(str);
+        if (it == defines.end()) {
+            Log::w("{} not yet defined", str);
+        } else {
+            defines.erase(it);
+        }
+    }
 
 };
 

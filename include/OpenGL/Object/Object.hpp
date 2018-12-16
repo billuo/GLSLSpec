@@ -52,16 +52,18 @@ class Object {
         explicit operator GLuint() const
         { return m_name; }
 
+        bool operator==(GLuint name) const
+        { return m_name == name; }
+
         friend std::ostream& operator<<(std::ostream& os, const Object::Name& name)
         { return os << name.get(); }
 
       private:
         GLuint m_name;
 
-        /// @warning It relases the object name without deleting it from OpenGL. Use carefully.
+        /// @warning It releases the object name without deleting it from OpenGL. Use carefully.
         void release()
         { m_name = 0; }
-
     };
 
     template <typename F1, typename F2>
@@ -96,6 +98,9 @@ class Object {
     { return os << object.label() << '#' << object.name(); }
 
 };
+
+/// Tag OpenGL object as 'do not apply for a name upon construction'
+struct no_init {};
 
 /**
  * @brief Name pool for standard OpenGL objects.

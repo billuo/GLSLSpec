@@ -4,9 +4,32 @@
  */
 
 #include <Sandbox.hpp>
+#include <Options.hpp>
+#include <Window.hpp>
 #include <tol/tiny_obj_loader.h>
 #include <regex>
 
+
+namespace {
+
+void
+AssignCommonUniforms(Weak<OpenGL::Introspector> intro)
+{
+    auto&& I = intro.lock();
+    assert(I);
+    auto&& uni = I->uniform();
+    auto&& vp = main_window->viewport();
+    auto&& fbsize = main_window->frame_buffer_size();
+    auto&& mpos = main_window->mouse_position();
+    mpos.y = vp.w - mpos.y; // XXX
+    uni.assign(I->name, "u_viewport", vp.x, vp.y, vp.z, vp.w);
+    uni.assign(I->name, "u_fbsize", fbsize.x, fbsize.y);
+    uni.assign(I->name, "u_mpos", mpos.x, mpos.y);
+    uni.assign(I->name, "u_time", static_cast<float>(glfwGetTime()));
+//    ONCE_PER(PRINT_VALUE(mpos), 240);
+}
+
+} // namespace
 
 const std::string axes_vert_source = R"SHADER(
 #version 430 core
@@ -35,27 +58,45 @@ const std::string axes_frag_source = R"SHADER(
 #version 430 core
 in vec3 color;
 out vec4 color_out;
-void main(void) { color_out = vec4(color, 1.0f); }
-)SHADER";
+void main(void) {
+    color_out = vec4(color, 1.0f);
+})SHADER";
+
+const std::string background_vert_source = R"SHADER(
+#version 430 core
+out gl_PerVertex {
+    vec4 gl_Position;
+};
+void main() {
+    const vec2[] vertices = vec2[](vec2(-1.0f, -1.0f), vec2(1.0f, -1.0f), vec2(1.0f, 1.0f), vec2(-1.0f, 1.0f));
+    if (gl_VertexID < 3) {
+        gl_Position.xy = vertices[gl_VertexID];
+    } else {
+        gl_Position.xy = vertices[(gl_VertexID - 1) % 4];
+    }
+    gl_Position.zw = vec2(0.9999f, 1.0f);
+})SHADER";
 
 std::unique_ptr<Sandbox> sandbox;
 
 Sandbox::Sandbox()
 {
     m_pipeline_user.bind().label("user pipeline");
-    // initialize internal drawing
+    // initialize internal OpenGL objects
     m_vao_internal.bind().label("internal VAO");
     m_pipeline_internal.bind().label("internal pipeline");
-    OpenGL::Shader axes_vert(GL_VERTEX_SHADER), axes_frag(GL_FRAGMENT_SHADER);
+    // initialize internal programs
+    OpenGL::Shader axes_vert(GL_VERTEX_SHADER), axes_frag(GL_FRAGMENT_SHADER), background_vert(GL_VERTEX_SHADER);
     axes_vert.source(axes_vert_source).compile();
     axes_frag.source(axes_frag_source).compile();
+    background_vert.source(background_vert_source).compile();
     m_debug_axes.set(GL_PROGRAM_SEPARABLE, GL_TRUE).attach(axes_vert).attach(axes_frag).link();
     if (m_debug_axes.name() == 0) {
         ERROR("Debug drawing axes shader program invalid!");
     }
-    m_pipeline_internal.use_stage(m_debug_axes, GL_ALL_SHADER_BITS);
-    if (!m_pipeline_internal.valid()) {
-        ERROR("Internal pipeline is invalid!");
+    m_background_vert.set(GL_PROGRAM_SEPARABLE, GL_TRUE).attach(background_vert).link();
+    if (m_background_vert.name() == 0) {
+        ERROR("Background drawing vertex shader stage invalid!");
     }
 }
 
@@ -92,23 +133,14 @@ Sandbox::aux_import_shader(const DynamicFile& file, const std::string& tag)
         Log::e("Failed to fetch shader source: {}", ex_source.error());
         return;
     }
-    aux_preprocess_shader_source(*ex_source);
-    // DEBUG("Importing shader {}", file.path());
-    GLenum shader_type = ex_type.value();
-    auto&& stage_name = OpenGL::nameOfShaderType(shader_type);
-    OpenGL::Program program(shader_type, {*ex_source});
-    program.label("(imported)" + stage_name);
-    if (auto log = program.get_info_log()) {
-        Log::e("Shader failed to compile: {}", log.get());
-        return;
-    }
-    Log::i("Updated {} stage of user pipeline", stage_name);
-    auto n = underlying_cast(OpenGL::stageOfShaderType(shader_type));
-    m_programs_user[n] = std::move(program);
+    GLenum type = ex_type.value();
+    auto&& stage = OpenGL::stageOfShaderType(type);
+    m_sources_user[underlying_cast(stage)] = std::move(*ex_source);
+    m_programs_user[underlying_cast(stage)] = aux_recompile(type);
 }
 
-void
-Sandbox::aux_preprocess_shader_source(std::string& source)
+std::string
+Sandbox::aux_preprocess_shader_source(std::string source, const std::vector<std::string>& extra_defines)
 {
     // TODO anchor ('$') seems not to work??
     std::regex version("^[:space:]*#version[^\r\n]*", std::regex_constants::basic);
@@ -119,8 +151,22 @@ Sandbox::aux_preprocess_shader_source(std::string& source)
     } else {
         it = match[0].second + 1; // still <= source.end()
     }
-    auto&& defines = std::string("#define GLSLVIEWER\n");
+    static auto&& add_define = [](std::string& str, const auto& defines)
+    {
+        for (auto& macro : defines) {
+            std::string define = "#define " + macro + '\n';
+            auto pos = define.find_first_of('=');
+            if (pos != std::string::npos) {
+                define[pos] = ' ';
+            }
+            str += define;
+        }
+    };
+    std::string defines;
+    add_define(defines, options.defines);
+    add_define(defines, extra_defines);
     source.insert(it, defines.begin(), defines.end());
+    return source;
 }
 
 void
@@ -221,9 +267,56 @@ Sandbox::aux_import_dependency(const DynamicFile& path, const std::string& tag)
 }
 
 void
+Sandbox::recompile()
+{
+    using Stage = OpenGL::ShaderStage;
+    for (auto&&[stage, type] : {std::pair{Stage::Vertex, GL_VERTEX_SHADER},
+                                {Stage::TessellationControl, GL_TESS_CONTROL_SHADER},
+                                {Stage::TessellationEvaluation, GL_TESS_EVALUATION_SHADER},
+                                {Stage::Geometry, GL_GEOMETRY_SHADER},
+                                {Stage::Fragment, GL_FRAGMENT_SHADER},
+                                {Stage::Compute, GL_COMPUTE_SHADER}}) {
+        if (!m_sources_user[underlying_cast(stage)].empty()) {
+            m_programs_user[underlying_cast(stage)] = aux_recompile(type);
+        }
+    }
+    m_background_frag = aux_recompile(GL_FRAGMENT_SHADER);
+    // TODO if we assume empty cache means no compling, clear cache when appropriate!
+}
+
+OpenGL::Program
+Sandbox::aux_recompile(GLenum shader_type)
+{
+    // TODO pretty messy flow
+    auto stage = OpenGL::stageOfShaderType(shader_type);
+    auto&& name = OpenGL::nameOfShaderType(shader_type);
+    std::string source;
+    // background shader depends on user fragment shader
+    if (shader_type == GL_FRAGMENT_SHADER) {
+        source = aux_preprocess_shader_source(m_sources_user[underlying_cast(stage)], {"BACKGROUND"});
+        auto&& program = OpenGL::Program(shader_type, {source});
+        if (program.name() == 0) {
+            Log::e("Background fragment shader failed to compile: {}", program.get_info_log());
+        } else {
+            program.label("(internal)bg-fragment");
+            m_background_frag = std::move(program);
+        }
+    }
+    // user shader
+    source = aux_preprocess_shader_source(m_sources_user[underlying_cast(stage)]);
+    OpenGL::Program program(shader_type, {source});
+    if (program.name() == 0) {
+        Log::e("Shader failed to compile: {}", program.get_info_log());
+    } else {
+        program.label("(imported)" + name);
+        Log::i("Updated {} stage of user pipeline", name);
+    }
+    return program;
+}
+
+void
 Sandbox::render()
 {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     using Stage = OpenGL::ShaderStage;
     for (auto stage : {Stage::Vertex, Stage::TessellationControl, Stage::TessellationEvaluation, Stage::Geometry,
                        Stage::Fragment, Stage::Compute}) {
@@ -232,13 +325,19 @@ Sandbox::render()
             m_pipeline_user.use_stage(program.value(), OpenGL::bitOfShaderStage(stage));
         }
     }
+    // TODO can pipeline with only one stage bound to 'valid'?
     if (m_pipeline_user.valid()) {
         m_pipeline_user.bind();
         const auto& vertex_shader = m_programs_user[underlying_cast(OpenGL::ShaderStage::Vertex)];
+        // TODO maybe supply a default one?
         if (!vertex_shader) {
             ONCE_PER(Log::e("No vertex shader found."), 60);
             return;
+        } else if (!m_programs_user[underlying_cast(OpenGL::ShaderStage::Fragment)]) {
+            ONCE_PER(Log::e("No fragment shader found."), 60);
+            return;
         }
+        // TODO introspection: make assignment easier
         GLuint program = vertex_shader.value().name();
         auto&& uniforms = vertex_shader.value().interfaces().lock()->uniform();
         auto&& update_mat = [&uniforms](GLuint program, const auto& mat, const char* name)
@@ -269,27 +368,39 @@ Sandbox::render()
         for (auto&&[file, mesh] : m_meshes) {
             mesh->draw(program);
         }
-    } else {
-        ONCE_PER(Log::e("User pipeline invalid."), 120);
     }
 }
 
 void
 Sandbox::render_background()
 {
-    // TODO
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    if (m_background_frag.name() == 0) { // TODO better way of avoid binding invalid program to pipeline
+        return;
+    }
+    m_pipeline_internal.use_stage(m_background_frag, GL_FRAGMENT_SHADER_BIT);
+    m_pipeline_internal.use_stage(m_background_vert, GL_VERTEX_SHADER_BIT);
+    if (m_pipeline_internal.valid()) {
+        AssignCommonUniforms(m_background_frag.interfaces());
+        m_pipeline_internal.bind();
+        m_vao_internal.bind();
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+    } else {
+        ONCE_PER(ERROR("Background shader program invalid."), 60);
+    }
 }
 
 void
 Sandbox::render_debug()
 {
-    m_vao_internal.bind();
-    m_pipeline_internal.bind();
     m_pipeline_internal.use_stage(m_debug_axes, GL_ALL_SHADER_BITS);
     assert(m_pipeline_internal.valid());
+    m_pipeline_internal.bind();
     auto&& pvm = camera.projection_world();
     glProgramUniformMatrix4fv(m_debug_axes.name(), 0, 1, GL_FALSE, glm::value_ptr(pvm));
+    m_vao_internal.bind();
     glDrawArrays(GL_LINES, 0, 6);
 }
+
 
 

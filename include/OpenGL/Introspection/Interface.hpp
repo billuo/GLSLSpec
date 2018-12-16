@@ -102,7 +102,7 @@ struct ProgramInterface : public details::InterfaceBase {
     {
         auto R = find(name);
         if (!R) {
-            Log::e("{} not found in interface {}", name, nameOfProgramInterface(interface));
+//            Log::e("{} not found in interface {}", name, nameOfProgramInterface(interface));
         } else {
             R->assign(args...);
         }
@@ -113,7 +113,7 @@ struct ProgramInterface : public details::InterfaceBase {
     {
         auto R = find(name);
         if (!R) {
-            Log::e("{} not found in interface {}", name, nameOfProgramInterface(interface));
+//            Log::e("{} not found in interface {}", name, nameOfProgramInterface(interface));
         } else {
             R->assign(program, args...);
         }

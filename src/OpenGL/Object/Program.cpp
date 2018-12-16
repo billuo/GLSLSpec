@@ -4,6 +4,7 @@
  */
 #include <Utility/Log.hpp>
 #include <OpenGL/Introspection/Introspector.hpp>
+#include <OpenGL/Object/Program.hpp>
 
 
 namespace OpenGL {
@@ -19,15 +20,12 @@ Program&
 Program::link()
 {
     glLinkProgram(name());
-    if (get(GL_LINK_STATUS) == GL_FALSE) {
-        Log::e("Shader program linking failed:\n{}", get_info_log().get());
-        this->~Program();
-    }
+    aux_check_link();
     return *this;
 }
 
-std::unique_ptr<GLchar[]>
-Program::get_info_log() const
+Owned<GLchar[]>
+Program::aux_get_info_log() const
 {
     GLint length = get(GL_INFO_LOG_LENGTH);
     if (length <= 0) {
@@ -70,5 +68,16 @@ Program::~Program()
 Weak<Introspector>
 Program::interfaces() const
 { return Introspector::Get(*this); }
+
+void
+Program::aux_check_link()
+{
+    if (get(GL_LINK_STATUS) == GL_FALSE) {
+        auto&& ptr = aux_get_info_log();
+        m_info_log = ptr.get();
+        pool().put(std::move(m_name));
+        assert(m_name == 0);
+    }
+}
 
 } // namespace OpenGL

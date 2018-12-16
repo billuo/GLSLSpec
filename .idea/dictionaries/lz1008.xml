@@ -2,6 +2,8 @@
   <dictionary name="lz1008">
     <words>
       <w>introspector</w>
+      <w>preprocess</w>
+      <w>shaders</w>
     </words>
   </dictionary>
 </component>

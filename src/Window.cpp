@@ -24,7 +24,7 @@ Window::Window()
     glfwMakeContextCurrent(m_handle);
     gladLoadGLLoader((GLADloadproc) glfwGetProcAddress); // XXX it needs a current context
     callbacks.register_all(m_handle);
-    resize(dim.x, dim.y);
+    on_resize(dim.x, dim.y);
 }
 
 Window::~Window()
@@ -46,7 +46,7 @@ Window::Callbacks::default_on_window_size(GLFWwindow* handle, int w, int h)
 {
     auto* window = find_by_handle(handle);
     if (window) {
-        window->resize(w, h);
+        window->on_resize(w, h);
     }
 }
 
@@ -99,9 +99,9 @@ Window::Callbacks::default_on_mouse_button(GLFWwindow* handle, int button, int a
     auto window = find_by_handle(handle);
     if (window) {
         if (button == GLFW_MOUSE_BUTTON_LEFT) {
-            window->callbacks.button_down.x = action == GLFW_PRESS;
+            window->callbacks.m_button_down.x = action == GLFW_PRESS;
         } else if (button == GLFW_MOUSE_BUTTON_RIGHT) {
-            window->callbacks.button_down.y = action == GLFW_PRESS;
+            window->callbacks.m_button_down.y = action == GLFW_PRESS;
         }
     }
 }
@@ -122,15 +122,15 @@ Window::Callbacks::default_on_cursor_pos(GLFWwindow* handle, double xpos, double
     auto window = find_by_handle(handle);
     if (window) {
         auto& cb = window->callbacks;
-        auto&& delta = glm::dvec2(xpos, ypos) - cb.last_cursor_pos;
-        if (cb.last_button_down.x && cb.button_down.x) {
+        auto&& delta = glm::dvec2(xpos, ypos) - cb.m_last_cursor_pos;
+        if (cb.m_last_button_down.x && cb.m_button_down.x) {
             cb.on_mouse_drag(window, GLFW_MOUSE_BUTTON_LEFT, delta.x, delta.y);
         }
-        if (cb.last_button_down.y && cb.button_down.y) {
+        if (cb.m_last_button_down.y && cb.m_button_down.y) {
             cb.on_mouse_drag(window, GLFW_MOUSE_BUTTON_RIGHT, delta.x, delta.y);
         }
-        cb.last_cursor_pos = glm::dvec2(xpos, ypos);
-        cb.last_button_down = cb.button_down;
+        cb.m_last_cursor_pos = glm::dvec2(xpos, ypos);
+        cb.m_last_button_down = cb.m_button_down;
     }
 }
 
@@ -179,7 +179,7 @@ Window::find_by_handle(GLFWwindow* handle)
 }
 
 void
-Window::resize(int w, int h)
+Window::on_resize(int w, int h)
 {
     m_properties.dimension = glm::ivec2(w, h);
     auto& dim_frame = m_properties.dimension_frame;
@@ -258,3 +258,18 @@ Window::frame_buffer_size() const
 uint32_t
 Window::FPS() const
 { return m_properties.FPS; }
+
+glm::ivec2
+Window::mouse_position() const
+{ return callbacks.last_cursor_position(); }
+
+void
+Window::resize(int w, int h)
+{
+    Log::i("Resizing main window to ({}, {})", w, h);
+    glfwSetWindowSize(m_handle, w, h);
+    const char* err_string = nullptr;
+    if (glfwGetError(&err_string)) {
+        Log::e("{}", err_string);
+    }
+}

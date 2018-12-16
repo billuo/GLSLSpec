@@ -48,6 +48,8 @@ struct Window {
 
     void resize(int w, int h);
 
+    void on_resize(int w, int h);
+
     void next_frame();
 
     std::string default_title() const;
@@ -56,6 +58,7 @@ struct Window {
     glm::ivec2 size() const;
     glm::ivec2 frame_buffer_size() const;
     uint32_t FPS() const;
+    glm::ivec2 mouse_position() const;
 
     double frame_delay()
     { return m_properties.frame_delay; }
@@ -79,10 +82,14 @@ struct Window {
 
         void register_all(Handle);
 
+        auto last_cursor_position() const
+        { return m_last_cursor_pos; }
+
+      private:
         /// left/right button is down?
-        glm::bvec2 button_down = glm::bvec2(false, false);
-        glm::dvec2 last_cursor_pos = glm::dvec2(0.0, 0.0);
-        glm::bvec2 last_button_down = glm::bvec2(false, false);
+        glm::bvec2 m_button_down = glm::bvec2(false, false);
+        glm::dvec2 m_last_cursor_pos = glm::dvec2(0.0, 0.0);
+        glm::bvec2 m_last_button_down = glm::bvec2(false, false);
     } callbacks;
 
   private:

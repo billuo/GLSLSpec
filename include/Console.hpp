@@ -22,7 +22,7 @@ declare_commands();
 
 struct Command {
     using Arguments = std::list<std::string>;
-    using Action = bool (*)(const std::string&, const std::list<std::string>&);
+    using Action = void (*)(std::string, std::list<std::string>);
 
     Command(std::string name, std::pair<unsigned, unsigned> n_args,
             std::initializer_list<std::string> arg_names, std::string description, Action action);

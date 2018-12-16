@@ -59,7 +59,8 @@ main(int argc, char** argv)
     Watcher watcher(options.input_files);
     declare_commands();
     console->execute_all(options.initial_commands);
-    while (options.flags.running && !main_window->closed()) {
+    // main loop
+    while (1000 * glfwGetTime() < options.application.TTL && options.flags.running && !main_window->closed()) {
         main_window->next_frame();
         console->execute_all();
         console->flush();
@@ -67,6 +68,7 @@ main(int argc, char** argv)
         for (auto&& file : updated) {
             sandbox->import(file);
         }
+        sandbox->render_background();
         sandbox->render();
         if (options.flags.debug_draw) {
             sandbox->render_debug();

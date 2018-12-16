@@ -115,12 +115,12 @@ const std::vector<NamedOption> NamedOptions = {
                     return 1u;
                 }},
         {"",  {"ttl"},
-                "Exit the application after this many seconds.",
+                "Exit the application after this many seconds. (can be floating point number)",
                 {1, 1}, {"seconds"},
                 [](const std::string&, unsigned, const std::string* arg) -> unsigned
                 {
                     options.application.TTL = 1000 * static_cast<uint64_t>(string_to<float>(*arg));
-                    Log::i("Application will quit after {}seconds.", options.application.TTL);
+                    Log::i("Application will quit after {}ms.", options.application.TTL);
                     return 1u;
                 }},
         {"o", {"out",  "output"},
@@ -153,8 +153,7 @@ const std::vector<NamedOption> NamedOptions = {
                 {1, 1}, {"name"},
                 [](const std::string&, unsigned, const std::string* arg) -> unsigned
                 {
-                    // TODO
-                    // options.define(*arg);
+                    options.define(*arg);
                     return 1u;
                 }},
         {"e", {},
@@ -205,6 +204,8 @@ const std::vector<NamedOption> NamedOptions = {
                 {0, 0}, {"FPS"},
                 [](const std::string&, unsigned argc, const std::string* arg) -> unsigned
                 {
+                    // TODO but overridding desktop settings to disable vsync to unlimit FPS
+                    //  - usually only works under fullscreen and may be problematic. Consider removing it.
                     options.window.full_fps = true;
                     return 0u;
                 }},

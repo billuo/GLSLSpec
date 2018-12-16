@@ -24,7 +24,7 @@ class Program : public Object {
                 return Name(name);
             }
 
-            void put(Name&& name)
+            void put(Name name)
             { glDeleteProgram(name.get()); }
         } singleton;
         return singleton;
@@ -42,7 +42,7 @@ class Program : public Object {
         }
         auto ret = glCreateShaderProgramv(type, 1, strings.get());
         if (ret == 0) {
-            Log::e("Failed to create shader");
+            Log::e("Failed to create shader object name");
         }
         return Name(ret);
     }
@@ -54,8 +54,11 @@ class Program : public Object {
     explicit Program() : Object(pool().get())
     {}
 
-    explicit Program(GLenum type, std::initializer_list<std::string> sources) : Object(Standalone(type, sources))
+    explicit Program(no_init) : Object(Name(0))
     {}
+
+    explicit Program(GLenum type, std::initializer_list<std::string> sources) : Object(Standalone(type, sources))
+    { aux_check_link(); }
 
     Program(Program&&) = default;
     Program& operator=(Program&&) = default;
@@ -90,10 +93,20 @@ class Program : public Object {
     GLint get(GLenum param) const;
     /// Query about a property an interface
     GLint get_stage(GLenum stage, GLenum pname) const;
-    /// Retrive information log safely.
-    std::unique_ptr<GLchar[]> get_info_log() const;
+
+    /// Retrieve cached info log.
+    const std::string& get_info_log() const
+    { return m_info_log; }
+
     /// Set a parameter.
     Program& set(GLenum param, GLint value);
+  private:
+    std::string m_info_log;
+
+    /// Get info log from OpenGL.
+    Owned<GLchar[]> aux_get_info_log() const;
+    /// Check link status. If failed, program name is released and info log is stored, which can later be retrieved by get_info_log().
+    void aux_check_link();
 };
 
 } // namespace OpenGL
