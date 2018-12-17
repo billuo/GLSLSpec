@@ -102,7 +102,7 @@ class Object {
 };
 
 /// Tag OpenGL object as 'do not apply for a name upon construction'
-struct no_init {};
+struct Empty {};
 
 /**
  * @brief Name pool for standard OpenGL objects.

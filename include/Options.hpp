@@ -91,7 +91,8 @@ struct GlobalOptions {
     { defines.emplace(std::move(macro)); }
 
     // TODO undefine and define with separated macro name and value
-    /// Undefine a macro. Will complain about undefining non-existent ones.
+
+    /// @brief Undefine a macro. Will complain about undefining non-existent ones.
     void undefine(const std::string& str)
     {
         auto it = defines.find(str);

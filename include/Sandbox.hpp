@@ -45,7 +45,7 @@ class Sandbox {
     /// Vertex shader stage used to draw background.
     OpenGL::Program m_background_vert;
     /// Fragment shader stage used to draw background.
-    OpenGL::Program m_background_frag{OpenGL::no_init()};
+    OpenGL::Program m_background_frag{OpenGL::Empty()};
 
     /// User supplied meshes to draw.
     std::unordered_map<DynamicFile, Shared<MeshBase>> m_meshes;
@@ -59,8 +59,11 @@ class Sandbox {
     OpenGL::Program m_debug_axes;
 
     void aux_import_shader(const DynamicFile& file, const std::string& tag);
-    /// Add defines below '#version' directive.
-    std::string aux_preprocess_shader_source(std::string source, const std::vector<std::string>& extra_defines = {});
+    /// Insert custom '#define's directly below '#version' directive
+    /// and expand '#include's into the contents of corresponding files.
+    /// @return Expected preprocessed source string. Unexpected message string if any error occurred.
+    expected<std::string, std::string>
+    aux_preprocess_shader_source(std::string source, const std::vector<std::string>& extra_defines = {});
     /// Recompile a particular user shader with cached source. May compile other internal shaders that depend on user shaders as well.
     OpenGL::Program aux_recompile(GLenum shader_type);
 

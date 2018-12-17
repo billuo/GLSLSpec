@@ -9,7 +9,6 @@ namespace OpenGL {
 
 /// Define a single vertex attribute of on <B>server</B> side.
 /// @details Contains information for use in glVertexAttribFormat()
-// TODO remember to adapt to the new way of specifying vertices
 struct VertexAttribute {
     /// Enumerating the only attributes this application provide to shaders.
     enum class Usage {

@@ -19,14 +19,12 @@ AssignCommonUniforms(Weak<OpenGL::Introspector> intro)
     assert(I);
     auto&& uni = I->uniform();
     auto&& vp = main_window->viewport();
-    auto&& fbsize = main_window->frame_buffer_size();
     auto&& mpos = main_window->mouse_position();
     mpos.y = vp.w - mpos.y; // XXX
-    uni.assign(I->name, "u_viewport", vp.x, vp.y, vp.z, vp.w);
-    uni.assign(I->name, "u_fbsize", fbsize.x, fbsize.y);
-    uni.assign(I->name, "u_mpos", mpos.x, mpos.y);
+    uni.assign(I->name, "u_viewport", vp);
+    uni.assign(I->name, "u_fbsize", main_window->frame_buffer_size());
+    uni.assign(I->name, "u_mpos", mpos);
     uni.assign(I->name, "u_time", static_cast<float>(glfwGetTime()));
-//    ONCE_PER(PRINT_VALUE(mpos), 240);
 }
 
 } // namespace
@@ -139,7 +137,7 @@ Sandbox::aux_import_shader(const DynamicFile& file, const std::string& tag)
     m_programs_user[underlying_cast(stage)] = aux_recompile(type);
 }
 
-std::string
+expected<std::string, std::string>
 Sandbox::aux_preprocess_shader_source(std::string source, const std::vector<std::string>& extra_defines)
 {
     // TODO anchor ('$') seems not to work??
@@ -290,28 +288,33 @@ Sandbox::aux_recompile(GLenum shader_type)
     // TODO pretty messy flow
     auto stage = OpenGL::stageOfShaderType(shader_type);
     auto&& name = OpenGL::nameOfShaderType(shader_type);
-    std::string source;
     // background shader depends on user fragment shader
     if (shader_type == GL_FRAGMENT_SHADER) {
-        source = aux_preprocess_shader_source(m_sources_user[underlying_cast(stage)], {"BACKGROUND"});
-        auto&& program = OpenGL::Program(shader_type, {source});
-        if (program.name() == 0) {
-            Log::e("Background fragment shader failed to compile: {}", program.get_info_log());
-        } else {
-            program.label("(internal)bg-fragment");
-            m_background_frag = std::move(program);
+        if (auto ex_source = aux_preprocess_shader_source(m_sources_user[underlying_cast(stage)], {"BACKGROUND"})) {
+            auto& source = *ex_source;
+            auto&& program = OpenGL::Program(shader_type, {source});
+            if (program.name() == 0) {
+                Log::e("Background fragment shader failed to compile: {}", program.get_info_log());
+            } else {
+                program.label("(internal)bg-fragment");
+                Log::i("Updated background shader");
+                m_background_frag = std::move(program);
+            }
         }
     }
-    // user shader
-    source = aux_preprocess_shader_source(m_sources_user[underlying_cast(stage)]);
-    OpenGL::Program program(shader_type, {source});
-    if (program.name() == 0) {
-        Log::e("Shader failed to compile: {}", program.get_info_log());
-    } else {
-        program.label("(imported)" + name);
-        Log::i("Updated {} stage of user pipeline", name);
+    // user shaders
+    if (auto ex_source = aux_preprocess_shader_source(m_sources_user[underlying_cast(stage)])) {
+        auto& source = *ex_source;
+        OpenGL::Program program(shader_type, {source});
+        if (program.name() == 0) {
+            Log::e("Shader failed to compile: {}", program.get_info_log());
+        } else {
+            program.label("(imported)" + name);
+            Log::i("Updated {} stage of user pipeline", name);
+        }
+        return program;
     }
-    return program;
+    return OpenGL::Empty();
 }
 
 void
@@ -325,11 +328,11 @@ Sandbox::render()
             m_pipeline_user.use_stage(program.value(), OpenGL::bitOfShaderStage(stage));
         }
     }
-    // TODO can pipeline with only one stage bound to 'valid'?
+    // TODO can pipeline with only one stage bound be 'valid'?
     if (m_pipeline_user.valid()) {
         m_pipeline_user.bind();
         const auto& vertex_shader = m_programs_user[underlying_cast(OpenGL::ShaderStage::Vertex)];
-        // TODO maybe supply a default one?
+        // TODO maybe provide a default one?
         if (!vertex_shader) {
             ONCE_PER(Log::e("No vertex shader found."), 60);
             return;
@@ -337,27 +340,13 @@ Sandbox::render()
             ONCE_PER(Log::e("No fragment shader found."), 60);
             return;
         }
-        // TODO introspection: make assignment easier
         GLuint program = vertex_shader.value().name();
         auto&& uniforms = vertex_shader.value().interfaces().lock()->uniform();
-        auto&& update_mat = [&uniforms](GLuint program, const auto& mat, const char* name)
-        {
-            auto* u = uniforms.find(name);
-            if (!u)
-                return;
-            switch (sizeof(mat)) {
-                case sizeof(glm::mat4):
-                    return glProgramUniformMatrix4fv(program, u->location, 1, GL_FALSE, glm::value_ptr(mat));
-                case sizeof(glm::mat3):
-                    return glProgramUniformMatrix3fv(program, u->location, 1, GL_FALSE, glm::value_ptr(mat));
-            }
-        };
-        update_mat(program, camera.projection_world(), "PVM");
-        update_mat(program, camera.projection_view(), "PV");
-        update_mat(program, camera.view_world(), "VM");
-        update_mat(program, camera.normal_matrix(), "NM");
-        auto&& lpos = camera.world_to_view({4.0f, 10.0f, 4.0f});
-        uniforms.assign(program, "L.pos", lpos.x, lpos.y, lpos.z);
+        uniforms.assign(program, "PVM", camera.projection_world());
+        uniforms.assign(program, "PV", camera.projection_view());
+        uniforms.assign(program, "VM", camera.view_world());
+        uniforms.assign(program, "NM", camera.normal_matrix());
+        uniforms.assign(program, "L.pos", camera.world_to_view({4.0f, 10.0f, 4.0f}));
         uniforms.assign(program, "L.la", 0.15f, 0.15f, 0.05f);
         uniforms.assign(program, "L.ld", 0.8f, 0.8f, 0.03f);
         uniforms.assign(program, "L.ls", 0.8f, 0.8f, 0.03f);

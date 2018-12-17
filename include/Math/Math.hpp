@@ -160,11 +160,14 @@ struct Real {
     using value_type = float;
     value_type v;
 
-    constexpr Real(value_type value = 0.0f) : v(value)
+    constexpr explicit Real(value_type value = 0.0f) : v(value)
     {}
 
     Real& operator=(value_type value)
-    { return assign(value); }
+    {
+        assign(value);
+        return *this;
+    }
 
     explicit constexpr operator value_type() const
     { return v; }

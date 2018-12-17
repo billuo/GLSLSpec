@@ -21,9 +21,7 @@ Command::Command(std::string name, std::pair<unsigned, unsigned> n_args,
           description(std::move(description)),
           n_args(std::move(n_args)),
           action(action)
-{
-    assert(!this->name.empty());
-}
+{ assert(!this->name.empty()); }
 
 std::string
 Command::usage() const
