@@ -28,6 +28,7 @@ class Sandbox {
 
     void render_background();
 
+    // TODO encapsulate!
     Scene::Camera camera{glm::vec3(3.0f, 0.0f, 3.0f), glm::vec3()};
 
   private:

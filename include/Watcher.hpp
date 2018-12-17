@@ -30,7 +30,7 @@ struct DynamicFile {
     auto type() const
     { return m_type; }
 
-    /// @brief Check for update and mark as modified if needed.
+    /// @brief Check for update and mark as modified if it is.
     bool check_update() const;
 
     bool operator<(const DynamicFile& rhs) const

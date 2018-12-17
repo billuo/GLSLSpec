@@ -268,8 +268,4 @@ Window::resize(int w, int h)
 {
     Log::i("Resizing main window to ({}, {})", w, h);
     glfwSetWindowSize(m_handle, w, h);
-    const char* err_string = nullptr;
-    if (glfwGetError(&err_string)) {
-        Log::e("{}", err_string);
-    }
 }

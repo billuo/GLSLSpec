@@ -109,9 +109,7 @@ message(STATUS "OpenGL found at:\n${OPENGL_INCLUDE_DIR};\n${OPENGL_LIBRARIES};")
 include_directories(${OPENGL_INCLUDE_DIR})
 target_link_libraries(MainLib ${OPENGL_LIBRARIES})
 
-find_package(PkgConfig REQUIRED)
-pkg_search_module(GLFW REQUIRED glfw3)
-include_directories(${GLFW_INCLUDE_DIRS})
+find_package(glfw3 3.2 REQUIRED)
 target_link_libraries(MainLib ${GLFW_LIBRARIES} ${GLFW_STATIC_LIBRARIES})
 
 add_executable(GLSLSpec src/main.cpp)
