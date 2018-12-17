@@ -85,7 +85,7 @@ add_library(MainLib
 message(STATUS "Build target:${CMAKE_HOST_SYSTEM_NAME}")
 set(HOST ${CMAKE_HOST_SYSTEM_NAME})
 target_compile_definitions(MainLib PUBLIC APP_NAME=\"GLSLViewer\")
-target_compile_definitions(MainLib PUBLIC APP_VERSION=\"0.1.5\")
+target_compile_definitions(MainLib PUBLIC APP_VERSION=\"0.2.0\")
 target_compile_definitions(MainLib PUBLIC PLATFORM_NAME=\"${HOST}\")
 target_compile_definitions(MainLib PUBLIC $<$<STREQUAL:${HOST},Linux>:PLATFORM_LINUX>)
 target_compile_definitions(MainLib PUBLIC $<$<STREQUAL:${HOST},Windows>:PLATFORM_WINDOWS>)

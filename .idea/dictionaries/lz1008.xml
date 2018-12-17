@@ -2,8 +2,11 @@
   <dictionary name="lz1008">
     <words>
       <w>introspector</w>
+      <w>mipmap</w>
       <w>preprocess</w>
       <w>shaders</w>
+      <w>texel</w>
+      <w>texels</w>
     </words>
   </dictionary>
 </component>

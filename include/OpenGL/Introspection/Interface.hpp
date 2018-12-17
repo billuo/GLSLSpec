@@ -115,7 +115,7 @@ struct ProgramInterface : public details::InterfaceBase {
         if (!R) {
 //            Log::e("{} not found in interface {}", name, nameOfProgramInterface(interface));
         } else {
-            R->assign(program, args...);
+            R->assign(program, std::forward<Args>(args)...);
         }
     }
 

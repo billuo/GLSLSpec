@@ -54,7 +54,8 @@ class Program : public Object {
     explicit Program() : Object(pool().get())
     {}
 
-    explicit Program(no_init) : Object(Name(0))
+    // XXX no explicit
+    Program(Empty) : Object(Name(0))
     {}
 
     explicit Program(GLenum type, std::initializer_list<std::string> sources) : Object(Standalone(type, sources))
