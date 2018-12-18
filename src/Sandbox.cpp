@@ -116,7 +116,7 @@ Sandbox::Sandbox()
     texture.Storage(GL_TEXTURE_2D, 2, GL_RGBA16, 4, 4);
     texture.SubImage(GL_TEXTURE_2D, GL_RGB, GL_FLOAT, tex0, 0, {0, 4}, {0, 4});
     texture.SubImage(GL_TEXTURE_2D, GL_RGB, GL_FLOAT, tex1, 1, {0, 2}, {0, 2});
-    texture.active(0);
+    texture.activate(0);
     sampler.bind(0);
     sampler.set(GL_TEXTURE_WRAP_S, GL_REPEAT);
     sampler.set(GL_TEXTURE_WRAP_T, GL_REPEAT);

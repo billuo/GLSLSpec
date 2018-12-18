@@ -4,6 +4,7 @@
       <w>introspector</w>
       <w>mipmap</w>
       <w>preprocess</w>
+      <w>raii</w>
       <w>shaders</w>
       <w>texel</w>
       <w>texels</w>

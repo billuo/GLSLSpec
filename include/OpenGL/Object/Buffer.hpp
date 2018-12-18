@@ -40,10 +40,19 @@ class Buffer : public Object {
 
     /// @brief Map the buffer data with given access.
     /// @param target The target to which the buffer to map is bound.
-    /// @param access Access policy, write only by default. GL_(READ_ONLY|WRITE_ONLY|READ_WRITE)
+    /// @param access Access policy. GL_(READ_ONLY|WRITE_ONLY|READ_WRITE)
     /// @return A pointer the user can read from or write to based on @p access.
-    static void* Map(GLenum target, GLenum access = GL_WRITE_ONLY)
+    static void* Map(GLenum target, GLenum access)
     { return glMapBuffer(target, access); }
+
+    /// @brief Map a range of buffer with some hints.
+    /// @param target The target to which the buffer to map is bound.
+    /// @param offset Offset of the first byte to map from the beginning of buffer storage.
+    /// @param length Number of the bytes to map.
+    /// @param access Access policy. GL_MAP_(READ|WRITE|PERSISTENT|COHERENT)_BIT
+    /// @return A pointer application can read from or write to based on @p access.
+    static void* MapRange(GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access)
+    { return glMapBufferRange(target, offset, length, access); }
 
     /// @brief Unmap the buffer data.
     /// @param target The target to which the buffer to map is bound.
@@ -51,10 +60,6 @@ class Buffer : public Object {
     { glUnmapBuffer(target); }
 
     Buffer() : Object(pool().get())
-    {}
-
-    /// @param usage Optionally specify the usage of buffer data. Defaults to GL_STATIC_DRAW.
-    explicit Buffer(GLenum usage) : Object(pool().get())
     {}
 
     Buffer(Buffer&&) = default;
