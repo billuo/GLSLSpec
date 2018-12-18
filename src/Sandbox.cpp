@@ -125,6 +125,7 @@ Sandbox::Sandbox()
 void
 Sandbox::import(const DynamicFile& file)
 {
+    Log::i("Importing {}", file.path());
     auto& tag = file.tag;
     switch (file.type()) {
         case FileType::Shader:
@@ -207,12 +208,14 @@ Sandbox::aux_import_geometry(const DynamicFile& file, const std::string& tag)
         c = static_cast<char>(std::toupper(c));
     }
     if (extension == "OBJ") {
-//        DEBUG("Importing wave front .obj: {}", file.path());
         tinyobj::attrib_t attributes;
         std::vector<tinyobj::shape_t> shapes;
         std::vector<tinyobj::material_t> materials;
         std::string err;
-        bool result = tinyobj::LoadObj(&attributes, &shapes, &materials, &err, file.path().c_str(), nullptr, true);
+        auto path = file.path();
+        auto parent_path = file.path();
+        parent_path.remove_filename();
+        bool result = tinyobj::LoadObj(&attributes, &shapes, &materials, &err, path.c_str(), parent_path.c_str(), true);
         if (!err.empty()) {
             Log::w("When loading {}:\n{}", file.path().string(), err);
         }
@@ -221,7 +224,7 @@ Sandbox::aux_import_geometry(const DynamicFile& file, const std::string& tag)
             return;
         }
         for (auto& shape : shapes) {
-            // Log::d("group name '{}'", shape.name);
+            DEBUG("group name '{}'", shape.name);
             auto& mesh = shape.mesh;
             size_t n_vertices = mesh.indices.size();
             // XXX triangulated when loading, every face in mesh should have 3 vertices
@@ -260,26 +263,18 @@ Sandbox::aux_import_geometry(const DynamicFile& file, const std::string& tag)
                 }
                 for (auto& index : mesh.indices) {
                     if (positions) {
-                        // positions->add({attributes.vertices[3 * index.vertex_index],
-                        //                 attributes.vertices[3 * index.vertex_index + 1],
-                        //                 attributes.vertices[3 * index.vertex_index + 2]});
                         *ppos = {attributes.vertices[3 * index.vertex_index],
                                  attributes.vertices[3 * index.vertex_index + 1],
                                  attributes.vertices[3 * index.vertex_index + 2]};
                         ++ppos;
                     }
                     if (normals) {
-                        // normals->add({attributes.normals[3 * index.normal_index],
-                        //               attributes.normals[3 * index.normal_index + 1],
-                        //               attributes.normals[3 * index.normal_index + 2]});
                         *pnorms = {attributes.normals[3 * index.normal_index],
                                    attributes.normals[3 * index.normal_index + 1],
                                    attributes.normals[3 * index.normal_index + 2]};
                         ++pnorms;
                     }
                     if (tex_coords) {
-                        // tex_coords->add({attributes.texcoords[2 * index.texcoord_index],
-                        //                  attributes.texcoords[2 * index.texcoord_index + 1]});
                         *puvs = {attributes.texcoords[2 * index.texcoord_index],
                                  attributes.texcoords[2 * index.texcoord_index + 1]};
                         ++puvs;
@@ -292,9 +287,7 @@ Sandbox::aux_import_geometry(const DynamicFile& file, const std::string& tag)
                                                                                 std::move(normals),
                                                                                 std::move(tex_coords)));
             m_meshes.emplace(file, std::move(new_mesh));
-            // auto&&[it, _] = m_meshes.emplace(file, std::move(new_mesh));
-            // assert(_);
-            // it->second->upload_all();
+            break; // TODO for now, only load and draw the first mesh(shape)
         }
     } else if (extension == "PLY") {
         // TODO

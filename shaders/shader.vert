@@ -63,7 +63,8 @@ vec3 ADS(vec3 pos, vec3 norm) {
 void main(void) {
     ViewSpace(o_position, o_normal);
     o_color = ADS(o_position, o_normal);
-    o_color = mix(o_color, texture(u_sampler_1, v_texcoord).xyz, vec3(1.0f, 0.0f, 1.0f));
+    // o_color = mix(o_color, texture(u_sampler_1, v_texcoord).xyz, vec3(1.0f, 0.0f, 1.0f));
+    o_color = mix(o_color, texture(u_sampler_1, v_texcoord).xyz, vec3(0.3f, 0.7f, 0.3f));
     gl_Position = PVM * vec4(v_position, 1.0f);
     o_texcoord = v_texcoord;
 }
