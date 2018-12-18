@@ -11,8 +11,10 @@
 
 
 class MeshBase {
-
   public:
+    MeshBase(std::size_t n_vertices) : m_n_vertices(n_vertices)
+    {}
+
     void draw(GLuint program)
     {
         update_layout(program);
@@ -44,8 +46,9 @@ class Mesh : public MeshBase {
     template <typename _T>
     using VertexBuffer = OpenGL::VertexBuffer<_T>;
   public:
-    Mesh(Owned<VertexBuffer<P>> positions, Owned<VertexBuffer<N>> normals,
+    Mesh(std::size_t n_vertices, Owned<VertexBuffer<P>> positions, Owned<VertexBuffer<N>> normals,
          Owned<VertexBuffer<T>> tex_coords, Owned<VertexBuffer<C>> colors = {}) :
+            MeshBase(n_vertices),
             m_positions(std::move(positions)),
             m_normals(std::move(normals)),
             m_tex_coords(std::move(tex_coords)),
@@ -57,7 +60,6 @@ class Mesh : public MeshBase {
         auto&& upload = [this](auto& vbo)
         {
             if (vbo) {
-                this->m_n_vertices = vbo->size();
                 vbo->upload();
             }
         };

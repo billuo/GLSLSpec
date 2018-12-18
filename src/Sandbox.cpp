@@ -237,43 +237,64 @@ Sandbox::aux_import_geometry(const DynamicFile& file, const std::string& tag)
             Owned<VertexBuffer<glm::vec3>> positions;
             Owned<VertexBuffer<glm::vec3>> normals;
             Owned<VertexBuffer<glm::vec2>> tex_coords;
-            auto& sample = mesh.indices[0];
-            using Usage = VertexAttribute::Usage;
-            if (sample.vertex_index != -1) {
-                positions = std::make_unique<VertexBuffer<glm::vec3>>(Usage::Position);
-            }
-            if (sample.normal_index != -1) {
-                normals = std::make_unique<VertexBuffer<glm::vec3>>(Usage::Normal);
-            }
-            if (sample.texcoord_index != -1) {
-                tex_coords = std::make_unique<VertexBuffer<glm::vec2>>(Usage::TexCoord);
-            }
-            for (auto& index : mesh.indices) {
-                if (positions) {
-                    assert(index.vertex_index != -1);
-                    positions->add({attributes.vertices[3 * index.vertex_index],
-                                    attributes.vertices[3 * index.vertex_index + 1],
-                                    attributes.vertices[3 * index.vertex_index + 2]});
+            {
+                VertexBuffer<glm::vec3>::MappedPtr ppos;
+                VertexBuffer<glm::vec3>::MappedPtr pnorms;
+                VertexBuffer<glm::vec2>::MappedPtr puvs;
+                auto& sample = mesh.indices[0];
+                using Usage = VertexAttribute::Usage;
+                if (sample.vertex_index != -1) {
+                    positions = std::make_unique<VertexBuffer<glm::vec3>>(Usage::Position);
+                    positions->data(mesh.indices.size() * sizeof(glm::vec3), nullptr, GL_STATIC_DRAW);
+                    ppos = positions->map();
                 }
-                if (normals) {
-                    assert(index.normal_index != -1);
-                    normals->add({attributes.normals[3 * index.normal_index],
-                                  attributes.normals[3 * index.normal_index + 1],
-                                  attributes.normals[3 * index.normal_index + 2]});
+                if (sample.normal_index != -1) {
+                    normals = std::make_unique<VertexBuffer<glm::vec3>>(Usage::Normal);
+                    normals->data(mesh.indices.size() * sizeof(glm::vec3), nullptr, GL_STATIC_DRAW);
+                    pnorms = normals->map();
                 }
-                if (tex_coords) {
-                    assert(index.texcoord_index != -1);
-                    tex_coords->add({attributes.texcoords[2 * index.texcoord_index],
-                                     attributes.texcoords[2 * index.texcoord_index + 1]});
+                if (sample.texcoord_index != -1) {
+                    tex_coords = std::make_unique<VertexBuffer<glm::vec2>>(Usage::TexCoord);
+                    tex_coords->data(mesh.indices.size() * sizeof(glm::vec2), nullptr, GL_STATIC_DRAW);
+                    puvs = tex_coords->map();
+                }
+                for (auto& index : mesh.indices) {
+                    if (positions) {
+                        // positions->add({attributes.vertices[3 * index.vertex_index],
+                        //                 attributes.vertices[3 * index.vertex_index + 1],
+                        //                 attributes.vertices[3 * index.vertex_index + 2]});
+                        *ppos = {attributes.vertices[3 * index.vertex_index],
+                                 attributes.vertices[3 * index.vertex_index + 1],
+                                 attributes.vertices[3 * index.vertex_index + 2]};
+                        ++ppos;
+                    }
+                    if (normals) {
+                        // normals->add({attributes.normals[3 * index.normal_index],
+                        //               attributes.normals[3 * index.normal_index + 1],
+                        //               attributes.normals[3 * index.normal_index + 2]});
+                        *pnorms = {attributes.normals[3 * index.normal_index],
+                                   attributes.normals[3 * index.normal_index + 1],
+                                   attributes.normals[3 * index.normal_index + 2]};
+                        ++pnorms;
+                    }
+                    if (tex_coords) {
+                        // tex_coords->add({attributes.texcoords[2 * index.texcoord_index],
+                        //                  attributes.texcoords[2 * index.texcoord_index + 1]});
+                        *puvs = {attributes.texcoords[2 * index.texcoord_index],
+                                 attributes.texcoords[2 * index.texcoord_index + 1]};
+                        ++puvs;
+                    }
                 }
             }
             m_meshes.erase(file);
-            Shared<MeshBase> new_mesh(new Mesh<glm::vec3, glm::vec3, glm::vec2>(std::move(positions),
+            Shared<MeshBase> new_mesh(new Mesh<glm::vec3, glm::vec3, glm::vec2>(mesh.indices.size(),
+                                                                                std::move(positions),
                                                                                 std::move(normals),
                                                                                 std::move(tex_coords)));
-            auto&&[it, _] = m_meshes.emplace(file, std::move(new_mesh));
-            assert(_);
-            it->second->upload_all();
+            m_meshes.emplace(file, std::move(new_mesh));
+            // auto&&[it, _] = m_meshes.emplace(file, std::move(new_mesh));
+            // assert(_);
+            // it->second->upload_all();
         }
     } else if (extension == "PLY") {
         // TODO

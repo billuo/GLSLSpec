@@ -23,13 +23,15 @@ class VertexBuffer : public Buffer {
     /// @warning Don't use the mapped buffer until this mapped pointer goes out of scope and automatically unmap the buffer.
     /// Thus don't prolong its life time more than necessary.
     struct MappedPtr {
-        explicit MappedPtr(VertexBuffer& buffer, GLenum access = GL_READ_WRITE) : m_owner(buffer), m_ptr(nullptr)
+        MappedPtr() = default;
+
+        explicit MappedPtr(VertexBuffer& buffer, GLenum access = GL_READ_WRITE) : m_owner(&buffer)
         {
-            if (!m_owner.m_mapped.exchange(true)) {
-                m_owner.bind(GL_ARRAY_BUFFER);
-                m_ptr = Buffer::Map(GL_ARRAY_BUFFER, access);
+            if (!m_owner->m_mapped.exchange(true)) {
+                m_owner->bind(GL_ARRAY_BUFFER);
+                m_ptr = static_cast<T*>(Buffer::Map(GL_ARRAY_BUFFER, access));
                 if (m_ptr == nullptr) {
-                    m_owner.m_mapped.exchange(false);
+                    m_owner->m_mapped.exchange(false);
                 }
             }
             // possible: m_ptr == nullptr
@@ -39,10 +41,33 @@ class VertexBuffer : public Buffer {
         {
             if (m_ptr) {
                 m_ptr = nullptr;
-                m_owner.bind(GL_ARRAY_BUFFER);
+                m_owner->bind(GL_ARRAY_BUFFER);
                 Buffer::Unmap(GL_ARRAY_BUFFER);
-                m_owner.m_mapped.exchange(false);
+                m_owner->m_mapped.exchange(false);
             }
+        }
+
+        MappedPtr(const MappedPtr&) = delete;
+        MappedPtr& operator=(const MappedPtr&) = delete;
+
+        MappedPtr(MappedPtr&& obj) noexcept
+        {
+            m_owner = obj.m_owner;
+            m_ptr = obj.m_ptr;
+            obj.m_ptr = nullptr;
+        }
+
+        MappedPtr& operator=(MappedPtr&& rhs) noexcept
+        {
+            MappedPtr other(std::move(rhs));
+            swap(other);
+            return *this;
+        }
+
+        void swap(MappedPtr& obj) noexcept
+        {
+            std::swap(m_owner, obj.m_owner);
+            std::swap(m_ptr, obj.m_ptr);
         }
 
         MappedPtr& operator+=(std::size_t n) noexcept
@@ -69,6 +94,12 @@ class VertexBuffer : public Buffer {
             return *this;
         }
 
+        T& operator*()
+        { return *m_ptr; }
+
+        const T& operator*() const
+        { return *m_ptr; }
+
         T& operator[](std::size_t n)
         { return m_ptr[n]; }
 
@@ -94,8 +125,8 @@ class VertexBuffer : public Buffer {
         { return !(*this < rhs); }
 
       private:
-        VertexBuffer& m_owner;
-        T* m_ptr;
+        VertexBuffer* m_owner{nullptr};
+        T* m_ptr{nullptr};
     };
 
     friend struct MappedPtr;
@@ -117,10 +148,15 @@ class VertexBuffer : public Buffer {
     /// @details After uploading, the local cache becomes empty and memory is released, the old buffer data storage is also orphaned.
     void upload()
     {
-        Buffer::Bind(GL_ARRAY_BUFFER, *this);
-        Buffer::Data(GL_ARRAY_BUFFER, m_data.size() * sizeof(T), m_data.data(), GL_STATIC_DRAW);
+        data(m_data.size() * sizeof(T), m_data.data(), GL_STATIC_DRAW);
         decltype(m_data) empty;
         m_data.swap(empty);
+    }
+
+    void data(GLsizeiptr size, const GLvoid* data, GLenum usage)
+    {
+        Buffer::Bind(GL_ARRAY_BUFFER, *this);
+        Buffer::Data(GL_ARRAY_BUFFER, size, data, usage);
     }
 
     /// @brief Map this buffer after its data storage has been specified. Has no effect if already mapped.

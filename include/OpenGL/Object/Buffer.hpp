@@ -19,7 +19,7 @@ class Buffer : public Object {
 
   public:
     static void Bind(GLenum target, const Buffer& buffer)
-    { glBindBuffer(target, buffer.m_name.get()); }
+    { glBindBuffer(target, buffer.name()); }
 
     static void Unbind(GLenum target)
     { glBindBuffer(target, 0); }
