@@ -30,6 +30,8 @@ struct material_t {
 };
 uniform material_t M;
 
+uniform sampler2D u_sampler_1;
+
 uniform mat4 PV;
 uniform mat4 VM;
 uniform mat4 PVM;
@@ -61,6 +63,7 @@ vec3 ADS(vec3 pos, vec3 norm) {
 void main(void) {
     ViewSpace(o_position, o_normal);
     o_color = ADS(o_position, o_normal);
+    o_color = mix(o_color, texture(u_sampler_1, v_texcoord).xyz, vec3(1.0f, 0.0f, 1.0f));
     gl_Position = PVM * vec4(v_position, 1.0f);
     o_texcoord = v_texcoord;
 }

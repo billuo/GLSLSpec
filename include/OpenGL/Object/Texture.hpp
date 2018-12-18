@@ -84,11 +84,20 @@ class Texture : public Object {
     SubImage(GLenum target, GLenum format, GLenum type, const GLvoid* data, GLint level, Range x, Range y, Range z)
     { glTexSubImage3D(target, level, x.first, y.first, z.first, x.second, y.second, z.second, format, type, data); }
 
+    /// @brief Activate texture unit @p unit
+    /// @param unit The index of the unit to activate.
+    static void
+    Active(GLuint unit)
+    { glActiveTexture(GL_TEXTURE0 + unit); }
+
     Texture() : Object(pool().get())
     {}
 
     ~Texture()
     { pool().put(std::move(m_name)); }
+
+    void active(GLuint unit)
+    { glActiveTexture(GL_TEXTURE0 + unit); }
 
     void bind(GLenum target)
     { glBindTexture(target, name()); }

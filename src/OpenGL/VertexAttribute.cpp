@@ -7,9 +7,9 @@ using Usage = OpenGL::VertexAttribute::Usage;
 DEFINE_ENUMERATION_DATABASE(Usage) {{Usage::Position, "position"},
                                     {Usage::Color,    "color"},
                                     {Usage::Normal,   "normal"},
-                                    {Usage::TexCoord, "texture coordinate"},
+                                    {Usage::TexCoord, "texcoord"},
                                     {Usage::Tangent,  "tangent"},
-                                    {Usage::Other,    "others"}};
+                                    {Usage::Other,    "other"}};
 
 namespace OpenGL {
 

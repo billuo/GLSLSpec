@@ -12,6 +12,8 @@
 
 namespace {
 
+// TODO temp
+
 void
 AssignCommonUniforms(Weak<OpenGL::Introspector> intro)
 {
@@ -26,6 +28,17 @@ AssignCommonUniforms(Weak<OpenGL::Introspector> intro)
     uni.assign(I->name, "u_mpos", mpos);
     uni.assign(I->name, "u_time", static_cast<float>(glfwGetTime()));
 }
+
+const glm::vec3 tex0[] = {
+        glm::vec3(1.0f), glm::vec3(1.0f), glm::vec3(0.0f), glm::vec3(0.0f),
+        glm::vec3(1.0f), glm::vec3(1.0f), glm::vec3(0.0f), glm::vec3(0.0f),
+        glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f), glm::vec3(1.0f),
+        glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f), glm::vec3(1.0f),
+};
+const glm::vec3 tex1[] = {
+        glm::vec3(1.0f), glm::vec3(0.0f),
+        glm::vec3(0.0f), glm::vec3(1.0f),
+};
 
 } // namespace
 
@@ -96,6 +109,17 @@ Sandbox::Sandbox()
     if (m_background_vert.name() == 0) {
         ERROR("Background drawing vertex shader stage invalid!");
     }
+    // TODO temp
+    static OpenGL::Texture texture;
+    static OpenGL::Sampler sampler;
+    texture.bind(GL_TEXTURE_2D);
+    texture.Storage(GL_TEXTURE_2D, 2, GL_RGBA16, 4, 4);
+    texture.SubImage(GL_TEXTURE_2D, GL_RGB, GL_FLOAT, tex0, 0, {0, 4}, {0, 4});
+    texture.SubImage(GL_TEXTURE_2D, GL_RGB, GL_FLOAT, tex1, 1, {0, 2}, {0, 2});
+    texture.active(0);
+    sampler.bind(0);
+    sampler.set(GL_TEXTURE_WRAP_S, GL_REPEAT);
+    sampler.set(GL_TEXTURE_WRAP_T, GL_REPEAT);
 }
 
 void
@@ -341,6 +365,9 @@ Sandbox::render()
             return;
         }
         GLuint program = vertex_shader.value().name();
+        if (program == 0) {
+            return;
+        }
         auto&& uniforms = vertex_shader.value().interfaces().lock()->uniform();
         uniforms.assign(program, "PVM", camera.projection_world());
         uniforms.assign(program, "PV", camera.projection_view());
@@ -354,6 +381,7 @@ Sandbox::render()
         uniforms.assign(program, "M.kd", 0.7f, 0.7f, 0.7f);
         uniforms.assign(program, "M.ks", 0.5f, 0.5f, 0.5f);
         uniforms.assign(program, "M.shininess", 16.0f);
+        uniforms.assign(program, "u_sampler_0", 0);
         for (auto&&[file, mesh] : m_meshes) {
             mesh->draw(program);
         }

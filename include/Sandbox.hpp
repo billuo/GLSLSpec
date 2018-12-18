@@ -10,6 +10,8 @@
 #include <OpenGL/Constants.hpp>
 #include <OpenGL/Object/Buffer.hpp>
 #include <OpenGL/Object/ProgramPipeline.hpp>
+#include <OpenGL/Object/Texture.hpp>
+#include <OpenGL/Object/Sampler.hpp>
 #include <OpenGL/Object/VertexArray.hpp>
 
 

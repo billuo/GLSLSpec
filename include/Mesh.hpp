@@ -73,7 +73,8 @@ class Mesh : public MeshBase {
             return;
         }
         m_vertex_program = program;
-        auto& input = OpenGL::Introspector::Get(m_vertex_program).lock()->input();
+        auto&& locked = OpenGL::Introspector::Get(m_vertex_program).lock();
+        auto& input = locked->input();
         m_layout.clear();
         m_layout.bind();
         auto&& provide = [this, &input](auto& vbo)
@@ -85,6 +86,8 @@ class Mesh : public MeshBase {
                 if (a_input) {
                     m_layout.bind_buffer(*vbo);
                     m_layout.attribute_name_me(a_input->location, usage);
+                } else {
+                    Log::w("{} not found", m_layout.attribute(usage)->name);
                 }
             }
         };
