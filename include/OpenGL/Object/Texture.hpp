@@ -90,10 +90,23 @@ class Texture : public Object {
     ~Texture()
     { pool().put(std::move(m_name)); }
 
-    /// @brief Bind a named texture to a texuring target.
-    /// @param target Target to bind to.
     void bind(GLenum target)
     { glBindTexture(target, name()); }
+
+    void set(GLenum pname, GLfloat param)
+    { glTexParameterf(name(), pname, param); }
+
+    void set(GLenum pname, GLint param)
+    { glTexParameteri(name(), pname, param); }
+
+    void set(GLenum pname, const GLfloat* params)
+    { glTexParameterfv(name(), pname, params); }
+
+    void set(GLenum pname, const GLint* params)
+    { glTexParameterIiv(name(), pname, params); }
+
+    void set(GLenum pname, const GLuint* params)
+    { glTexParameterIuiv(name(), pname, params); }
 };
 
 } // namespace OpenGL
