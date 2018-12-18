@@ -15,6 +15,7 @@
 #include <OpenGL/Object/VertexArray.hpp>
 
 
+/// Contains everything... for now
 class Sandbox {
   public:
     Sandbox();

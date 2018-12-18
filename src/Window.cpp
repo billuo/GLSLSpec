@@ -205,12 +205,10 @@ Window::next_frame()
     m_properties.frame_count++;
     m_properties.frame_delay = glfwGetTime() - m_properties.start_last_frame;
     m_properties.start_last_frame += m_properties.frame_delay; // set to this frame
-    // Fix FPS if necessary
-    if (!options.window.full_fps) {
-        double leisure = options.window.frame_delay - frame_delay();
-        if (leisure > 0) {
-            sleep_for_sec(static_cast<float>(leisure));
-        }
+    // Fix FPS despite presence of v-sync
+    double leisure = options.window.frame_delay - frame_delay();
+    if (leisure > 0) {
+        sleep_for_sec(static_cast<float>(leisure));
     }
     // Measure performance by FPS
     m_properties.since_FPS += frame_delay();

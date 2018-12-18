@@ -145,8 +145,14 @@ const std::vector<NamedOption> NamedOptions = {
                 {1, 1}, {"directories..."},
                 [](const std::string&, unsigned, const std::string* arg) -> unsigned
                 {
-                    options.includes.emplace_back(FS::canonical(*arg));
-                    return 1u;
+                    auto&& ex_path = FS::canonical(*arg);
+                    if (ex_path) {
+                        options.includes.emplace_back(*ex_path);
+                        return 1u;
+                    } else {
+                        Log::e("{}", ex_path.error());
+                        return 0u;
+                    }
                 }},
         {"D", {},
                 "An additional #define directive for shader",
@@ -197,16 +203,6 @@ const std::vector<NamedOption> NamedOptions = {
                 [](const std::string&, unsigned, const std::string*) -> unsigned
                 {
                     options.window.cursor = true;
-                    return 0u;
-                }},
-        {"F", {},
-                "Don't restrict FPS at around 60, run at full speed",
-                {0, 0}, {"FPS"},
-                [](const std::string&, unsigned argc, const std::string* arg) -> unsigned
-                {
-                    // TODO but overridding desktop settings to disable vsync to unlimit FPS
-                    //  - usually only works under fullscreen and may be problematic. Consider removing it.
-                    options.window.full_fps = true;
                     return 0u;
                 }},
         {"C", {},

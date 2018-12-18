@@ -14,7 +14,7 @@ namespace OpenGL {
 class ProgramPipeline : Object {
     static auto& pool()
     {
-        static auto singleton = make_pool(glGenProgramPipelines, glDeleteProgramPipelines);
+        static auto&& singleton = make_pool(glGenProgramPipelines, glDeleteProgramPipelines);
         return singleton;
     }
 

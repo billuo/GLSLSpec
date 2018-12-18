@@ -82,9 +82,19 @@ Watcher::find(const FS::path& path)
     }
 }
 
-DynamicFile::DynamicFile(const std::string& path, FileType type) noexcept
-        : m_path(FS::canonical(path)), m_type(type), m_last_modified(FS::last_write_time(m_path))
-{}
+DynamicFile::DynamicFile(const std::string& path, FileType type) noexcept : m_type(type)
+{
+    if (auto&& ex = FS::canonical(path)) {
+        m_path = *ex;
+    } else {
+        Log::e("{}", ex.error());
+    }
+    if (auto&& ex = FS::last_write_time(m_path)) {
+        m_last_modified = *ex;
+    } else {
+        Log::e("{}", ex.error());
+    }
+}
 
 expected<std::string, std::string>
 DynamicFile::fetch() const
@@ -104,11 +114,13 @@ DynamicFile::fetch() const
 bool
 DynamicFile::check_update() const
 {
-    auto last_modified = FS::last_write_time(m_path);
-    if (last_modified > m_last_modified) {
-//        DEBUG("Found {} modified", m_path);
-        m_last_modified = last_modified;
-        return true;
+    if (auto&& ex = FS::last_write_time(m_path)) {
+        if (*ex > m_last_modified) {
+            m_last_modified = *ex;
+            return true;
+        }
+    } else {
+        Log::e("{}", ex.error());
     }
     return false;
 }

@@ -53,7 +53,7 @@ class Camera : public Node {
     void orbit(Degree dlat, Degree dlon, const glm::vec3& center)
     { orbit(dlat, dlon, center, m_up); }
 
-    /// @brief Set the node onto the orbit around a center.
+    /// @brief Set the node onto the orbit around @p center.
     /// @param lat Latitude of the orbit
     /// @param lon Longitude of the orbit
     /// @param center Center of the orbit

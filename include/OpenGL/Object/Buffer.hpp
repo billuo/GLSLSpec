@@ -13,7 +13,7 @@ class Buffer : public Object {
 
     static auto& pool()
     {
-        static auto singleton = make_pool(glGenBuffers, glDeleteBuffers);
+        static auto&& singleton = make_pool(glGenBuffers, glDeleteBuffers);
         return singleton;
     }
 

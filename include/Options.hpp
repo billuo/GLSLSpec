@@ -45,8 +45,6 @@ struct GlobalOptions {
         bool hidden = false;
         /// Window should always stay on top of any others?
         bool always_on_top = false;
-        /// Run at full FPS?
-        bool full_fps = false;
     } window;
 
     /// OpenGL specific options
