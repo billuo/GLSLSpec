@@ -27,7 +27,7 @@ AssignCommonUniforms(Weak<OpenGL::Introspector> intro)
     uni.assign(I->name, "u_fbsize", main_window->frame_buffer_size());
     uni.assign(I->name, "u_mpos", mpos);
     uni.assign(I->name, "u_time", static_cast<float>(glfwGetTime()));
-    return I;
+    return std::move(I);
 }
 
 const glm::vec3 tex0[] = {
@@ -93,6 +93,9 @@ std::unique_ptr<Sandbox> sandbox;
 
 Sandbox::Sandbox()
 {
+    for (auto& prog : m_programs_user) {
+        prog = OpenGL::Program(OpenGL::Empty());
+    }
     m_pipeline_user.bind().label("user pipeline");
     // initialize internal OpenGL objects
     m_vao_internal.bind().label("internal VAO");
@@ -319,7 +322,6 @@ Sandbox::recompile()
             m_programs_user[underlying_cast(stage)] = aux_recompile(type);
         }
     }
-    m_background_frag = aux_recompile(GL_FRAGMENT_SHADER);
     // TODO if we assume empty cache means no compling, clear cache when appropriate!
 }
 
@@ -337,7 +339,7 @@ Sandbox::aux_recompile(GLenum shader_type)
             if (program.name() == 0) {
                 Log::e("Background fragment shader failed to compile: {}", program.get_info_log());
             } else {
-                program.label("(internal)bg-fragment");
+                program.label("[background]fragment");
                 Log::i("Updated background shader");
                 m_background_frag = std::move(program);
             }
@@ -350,7 +352,7 @@ Sandbox::aux_recompile(GLenum shader_type)
         if (program.name() == 0) {
             Log::e("Shader failed to compile: {}", program.get_info_log());
         } else {
-            program.label("(imported)" + name);
+            program.label("[user]" + name);
             Log::i("Updated {} stage of user pipeline", name);
         }
         return program;
@@ -365,8 +367,8 @@ Sandbox::render()
     for (auto stage : {Stage::Vertex, Stage::TessellationControl, Stage::TessellationEvaluation, Stage::Geometry,
                        Stage::Fragment, Stage::Compute}) {
         auto& program = m_programs_user[underlying_cast(stage)];
-        if (program) {
-            m_pipeline_user.use_stage(program.value(), OpenGL::bitOfShaderStage(stage));
+        if (program.name()) {
+            m_pipeline_user.use_stage(program, OpenGL::bitOfShaderStage(stage));
         }
     }
     // TODO can pipeline with only one stage bound be 'valid'?
@@ -374,18 +376,18 @@ Sandbox::render()
         m_pipeline_user.bind();
         const auto& vertex_shader = m_programs_user[underlying_cast(OpenGL::ShaderStage::Vertex)];
         // TODO maybe provide a default one?
-        if (!vertex_shader) {
+        if (vertex_shader.name() == 0) {
             ONCE_PER(Log::e("No vertex shader found."), 60);
             return;
-        } else if (!m_programs_user[underlying_cast(OpenGL::ShaderStage::Fragment)]) {
+        } else if (m_programs_user[underlying_cast(OpenGL::ShaderStage::Fragment)].name() == 0) {
             ONCE_PER(Log::e("No fragment shader found."), 60);
             return;
         }
-        GLuint program = vertex_shader->name();
+        GLuint program = vertex_shader.name();
         if (program == 0) {
             return;
         }
-        auto&& uniforms = AssignCommonUniforms(vertex_shader->interfaces())->uniform();
+        auto&& uniforms = AssignCommonUniforms(vertex_shader.interfaces())->uniform();
         uniforms.assign(program, "PVM", camera.projection_world());
         uniforms.assign(program, "PV", camera.projection_view());
         uniforms.assign(program, "VM", camera.view_world());
@@ -435,6 +437,21 @@ Sandbox::render_debug()
     glProgramUniformMatrix4fv(m_debug_axes.name(), 0, 1, GL_FALSE, glm::value_ptr(pvm));
     m_vao_internal.bind();
     glDrawArrays(GL_LINES, 0, 6);
+}
+
+std::vector<std::pair<GLuint, std::string>>
+Sandbox::programs()
+{
+    std::vector<std::pair<GLuint, std::string>> ret;
+    for (auto&& program : m_programs_user) {
+        if (program.name() != 0) {
+            ret.emplace_back(program.name(), program.label());
+        }
+    }
+    if (m_background_frag.name()) {
+        ret.emplace_back(m_background_frag.name(), m_background_frag.label());
+    }
+    return ret;
 }
 
 

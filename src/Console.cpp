@@ -186,6 +186,39 @@ declare_commands()
                          "Display current frame buffer size in pixels",
                          [](std::string cmd, Arguments args)
                          { *console << main_window->frame_buffer_size() << '\n'; });
+    Console::add_command("programs", {0, 0}, {},
+                         "Display current imported shader programs by their OpenGL object names and optional labels.",
+                         [](std::string cmd, Arguments args)
+                         {
+                             *console << "Program list:\n";
+                             for (auto&&[name, label] : sandbox->programs()) {
+                                 *console << "\tProgram" << name << ':' << label << '\n';
+                             }
+                         });
+    Console::add_command("program", {1, 2}, {"name", "interface name:uniform|uniform_block|input"},
+                         "Introspect specified program and optionally in the specified interface.",
+                         [](std::string cmd, Arguments args)
+                         {
+                             auto name = string_to<GLuint>(args.front());
+                             auto&& intro = OpenGL::Introspector::Get(name).lock();
+                             if (!intro) {
+                                 return;
+                             }
+                             *console << "Introspecting Program" << args.front() << ":\n";
+                             if (args.size() == 2) {
+                                 if (args.back() == "uniform") {
+                                     *console << intro->uniform() << '\n';
+                                 } else if (args.back() == "uniform_block") {
+                                     *console << intro->uniform_block() << '\n';
+                                 } else if (args.back() == "input") {
+                                     *console << intro->input() << '\n';
+                                 } else {
+                                     Log::w("Unimplemented: print interface {} to console", args.back());
+                                 }
+                             } else {
+                                 *console << *intro << '\n';
+                             };
+                         });
     // Console::add_command("command", {0, 0}, {},
     //                      "description",
     //                      [](std::string cmd, Arguments args)

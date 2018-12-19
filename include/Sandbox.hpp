@@ -22,7 +22,7 @@ class Sandbox {
 
     void import(const DynamicFile& file);
 
-    /// Recompile all shaders using cached sources.
+    /// Recompile all shaders using cached sources, when it's not the source that's updated.
     void recompile();
 
     void render();
@@ -34,6 +34,10 @@ class Sandbox {
     // TODO encapsulate!
     Scene::Camera camera{glm::vec3(3.0f, 0.0f, 3.0f), glm::vec3()};
 
+    /// @brief Obtain a list of program names and labels.
+    /// @return The aforementioned list.
+    std::vector<std::pair<GLuint, std::string>> programs();
+
   private:
 
     /// Program pipeline using stages of shader programs that were compiled from user specified shader sources.
@@ -43,11 +47,11 @@ class Sandbox {
     /// @note Contents of these sources are consistent with their source files, with no pre-processing involved.
     std::array<std::string, OpenGL::MaxShaderStage> m_sources_user;
     /// User shader programs, theoretically all optional.
-    std::array<std::optional<OpenGL::Program>, OpenGL::MaxShaderStage> m_programs_user;
+    std::array<OpenGL::Program, OpenGL::MaxShaderStage> m_programs_user;
 
-    /// Vertex shader stage used to draw background.
+    /// Vertex shader stage used to draw background, compiled from internal shader.
     OpenGL::Program m_background_vert;
-    /// Fragment shader stage used to draw background.
+    /// Fragment shader stage used to draw background, compiled from user fragment shader.
     OpenGL::Program m_background_frag{OpenGL::Empty()};
 
     /// User supplied meshes to draw.
