@@ -114,6 +114,14 @@ const std::vector<NamedOption> NamedOptions = {
                     options.window.dimension.y = string_to<int>(*arg);
                     return 1u;
                 }},
+        {"",  {"fixed-size"},
+                "Disable resizing window",
+                {0, 0}, {},
+                [](const std::string&, unsigned, const std::string* arg) -> unsigned
+                {
+                    options.flags.resizable = false;
+                    return 0u;
+                }},
         {"",  {"ttl"},
                 "Exit the application after this many seconds. (can be floating point number)",
                 {1, 1}, {"seconds"},

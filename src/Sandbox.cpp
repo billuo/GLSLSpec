@@ -14,23 +14,6 @@ namespace {
 
 // TODO temp
 
-auto
-AssignCommonUniforms(Weak<OpenGL::Introspector> intro)
-{
-    auto&& I = intro.lock();
-    assert(I);
-    auto&& uni = I->uniform();
-    auto&& vp = main_window->viewport();
-    auto&& mpos = main_window->mouse_position();
-    mpos.y = vp.w - mpos.y; // XXX
-    uni.assign(I->name, "u_viewport", vp);
-    uni.assign(I->name, "u_fbsize", main_window->frame_buffer_size());
-    uni.assign(I->name, "u_mpos", mpos);
-    uni.assign(I->name, "u_time", static_cast<float>(glfwGetTime()));
-    uni.assign(I->name, "u_camera", sandbox->camera.transform().position);
-    uni.assign(I->name, "u_camera_clip", sandbox->camera.clip());
-    return std::move(I);
-}
 
 const glm::vec3 tex0[] = {
         glm::vec3(1.0f), glm::vec3(1.0f), glm::vec3(0.0f), glm::vec3(0.0f),
@@ -45,15 +28,27 @@ const glm::vec3 tex1[] = {
 
 } // namespace
 
+const std::string default_vert_source = R"SHADER(
+#version 430 core
+uniform mat4 PVM;
+out gl_PerVertex {
+    vec4 gl_Position;
+};
+in vec3 v_position;
+void main() {
+    gl_Position = PVM * vec4(v_position, 1.0f);
+})SHADER";
+
 const std::string axes_vert_source = R"SHADER(
 #version 430 core
 layout(location = 0) uniform mat4 PVM;
+layout(location = 1) uniform float internal_axes_scale;
 out gl_PerVertex {
     vec4 gl_Position;
 };
 out vec3 color;
 vec4 ndc_world(vec3 pos){
-    mat4 scale = mat4(1.0f);
+    mat4 scale = mat4(internal_axes_scale);
     scale[3][3] = 1.0f;
     return PVM * scale * vec4(pos, 1.0f);
 }
@@ -95,38 +90,50 @@ std::unique_ptr<Sandbox> sandbox;
 
 Sandbox::Sandbox()
 {
-    for (auto& prog : m_programs_user) {
-        prog = OpenGL::Program(OpenGL::Empty());
-    }
-    m_pipeline_user.bind().label("user pipeline");
+    m_pipeline_user.bind().label("[user]");
     // initialize internal OpenGL objects
-    m_vao_internal.bind().label("internal VAO");
-    m_pipeline_internal.bind().label("internal pipeline");
+    m_vao_internal.bind().label("[internal]");
+    m_pipeline_internal.bind().label("[internal]");
     // initialize internal programs
-    OpenGL::Shader axes_vert(GL_VERTEX_SHADER), axes_frag(GL_FRAGMENT_SHADER), background_vert(GL_VERTEX_SHADER);
+    OpenGL::Shader axes_vert(GL_VERTEX_SHADER), axes_frag(GL_FRAGMENT_SHADER);
     axes_vert.source(axes_vert_source).compile();
     axes_frag.source(axes_frag_source).compile();
-    background_vert.source(background_vert_source).compile();
     m_debug_axes.set(GL_PROGRAM_SEPARABLE, GL_TRUE).attach(axes_vert).attach(axes_frag).link();
     if (m_debug_axes.name() == 0) {
         ERROR("Debug drawing axes shader program invalid!");
+    } else {
+        m_debug_axes.label("[internal]axes");
     }
+    // initialize background vertex shader
+    OpenGL::Shader background_vert(GL_VERTEX_SHADER);
+    background_vert.source(background_vert_source).compile();
     m_background_vert.set(GL_PROGRAM_SEPARABLE, GL_TRUE).attach(background_vert).link();
     if (m_background_vert.name() == 0) {
         ERROR("Background drawing vertex shader stage invalid!");
+    } else {
+        m_background_vert.label("[background]vertex");
     }
-    // TODO temp
-    return;
-    static OpenGL::Texture texture;
-    static OpenGL::Sampler sampler;
-    texture.bind(GL_TEXTURE_2D);
-    texture.Storage(GL_TEXTURE_2D, 2, GL_RGBA16, 4, 4);
-    texture.SubImage(GL_TEXTURE_2D, GL_RGB, GL_FLOAT, tex0, 0, {0, 4}, {0, 4});
-    texture.SubImage(GL_TEXTURE_2D, GL_RGB, GL_FLOAT, tex1, 1, {0, 2}, {0, 2});
-    texture.activate(0);
-    sampler.bind(0);
-    sampler.set(GL_TEXTURE_WRAP_S, GL_REPEAT);
-    sampler.set(GL_TEXTURE_WRAP_T, GL_REPEAT);
+    // initialize framebuffer
+#if 0 // TODO below are temp
+    m_scene.bind(GL_FRAMEBUFFER).label("[scene]");
+    static OpenGL::Texture color_texture, depth_texture; // scene textures
+    static OpenGL::Sampler color_sampler, depth_sampler; // scene samplers
+    auto&& fbsize = main_window->frame_buffer_size();
+    color_texture.bind(GL_TEXTURE_2D);
+    color_texture.Storage(GL_TEXTURE_2D, 1, GL_RGBA8, fbsize.x, fbsize.y);
+    color_texture.activate(0);
+    color_sampler.bind(0);
+    color_sampler.set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    color_sampler.set(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    depth_texture.bind(GL_TEXTURE_2D);
+    depth_texture.Storage(GL_TEXTURE_2D, 1, GL_DEPTH_COMPONENT32F, fbsize.x, fbsize.y);
+    depth_texture.activate(1);
+    depth_sampler.bind(1);
+    m_scene.Attach(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, color_texture, 0);
+    m_scene.Attach(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depth_texture, 0);
+    glDrawBuffer(GL_COLOR_ATTACHMENT0);
+    m_scene.unbind(GL_FRAMEBUFFER);
+#endif
 }
 
 void
@@ -365,6 +372,10 @@ Sandbox::aux_recompile(GLenum shader_type)
 void
 Sandbox::render()
 {
+    // if postprocessing is enabled, render into custom framebuffer rather than the default one.
+    if (m_scene.name() != 0) {
+        m_scene.bind(GL_FRAMEBUFFER);
+    }
     using Stage = OpenGL::ShaderStage;
     for (auto stage : {Stage::Vertex, Stage::TessellationControl, Stage::TessellationEvaluation, Stage::Geometry,
                        Stage::Fragment, Stage::Compute}) {
@@ -376,35 +387,58 @@ Sandbox::render()
     // TODO can pipeline with only one stage bound be 'valid'?
     if (m_pipeline_user.valid()) {
         m_pipeline_user.bind();
-        const auto& vertex_shader = m_programs_user[underlying_cast(OpenGL::ShaderStage::Vertex)];
+        const auto& vertex_shader = m_programs_user[underlying_cast(Stage::Vertex)];
         // TODO maybe provide a default one?
         if (vertex_shader.name() == 0) {
             ONCE_PER(Log::e("No vertex shader found."), 60);
             return;
-        } else if (m_programs_user[underlying_cast(OpenGL::ShaderStage::Fragment)].name() == 0) {
+        } else if (m_programs_user[underlying_cast(Stage::Fragment)].name() == 0) {
             ONCE_PER(Log::e("No fragment shader found."), 60);
             return;
-        }
-        GLuint program = vertex_shader.name();
-        if (program == 0) {
-            return;
-        }
-        auto&& uniforms = AssignCommonUniforms(vertex_shader.interfaces())->uniform();
-        uniforms.assign(program, "PVM", camera.projection_world());
-        uniforms.assign(program, "PV", camera.projection_view());
-        uniforms.assign(program, "VM", camera.view_world());
-        uniforms.assign(program, "NM", camera.normal_matrix());
+        };
+        auto&& uniforms = aux_assign_uniforms(vertex_shader);
         // TODO material and illumination is per-mesh at least.
-        uniforms.assign(program, "L.pos", camera.world_to_view({4.0f, 10.0f, 4.0f}));
-        uniforms.assign(program, "L.la", 0.15f, 0.15f, 0.05f);
-        uniforms.assign(program, "L.ld", 0.8f, 0.8f, 0.03f);
-        uniforms.assign(program, "L.ls", 0.8f, 0.8f, 0.03f);
-        uniforms.assign(program, "M.ka", 0.5f, 0.5f, 1.0f);
-        uniforms.assign(program, "M.kd", 0.7f, 0.7f, 0.7f);
-        uniforms.assign(program, "M.ks", 0.5f, 0.5f, 0.5f);
-        uniforms.assign(program, "M.shininess", 16.0f);
+        GLuint name = vertex_shader.name();
+        uniforms.assign(name, "L.pos", camera.world_to_view({4.0f, 10.0f, 4.0f}));
+        uniforms.assign(name, "L.la", 0.15f, 0.15f, 0.05f);
+        uniforms.assign(name, "L.ld", 0.8f, 0.8f, 0.03f);
+        uniforms.assign(name, "L.ls", 0.8f, 0.8f, 0.03f);
+        uniforms.assign(name, "M.ka", 0.5f, 0.5f, 1.0f);
+        uniforms.assign(name, "M.kd", 0.7f, 0.7f, 0.7f);
+        uniforms.assign(name, "M.ks", 0.5f, 0.5f, 0.5f);
+        uniforms.assign(name, "M.shininess", 16.0f);
         for (auto&&[file, mesh] : m_meshes) {
-            mesh->draw(program);
+            mesh->draw(name);
+        }
+    }
+}
+
+void
+Sandbox::render_postprocess()
+{
+    // If postprocessing is disabled, do nothing.
+    if (m_scene.name() == 0) {
+        return;
+    }
+    using Stage = OpenGL::ShaderStage;
+    for (auto stage : {Stage::Vertex, Stage::TessellationControl, Stage::TessellationEvaluation, Stage::Geometry,
+                       Stage::Fragment, Stage::Compute}) {
+        auto& program = m_programs_user[underlying_cast(stage)];
+        if (program.name()) {
+            m_pipeline_internal.use_stage(program, OpenGL::bitOfShaderStage(stage));
+        }
+    }
+    // Otherwise, now we render into the default framebuffer.
+    m_scene.unbind(GL_FRAMEBUFFER);
+    if (m_pipeline_internal.valid()) {
+        m_pipeline_internal.bind();
+        // TODO
+        const auto& vertex_shader = m_programs_user[underlying_cast(Stage::Vertex)];
+        auto&& uniforms = aux_assign_uniforms(vertex_shader);
+        // TODO material and illumination is per-mesh at least.
+        GLuint name = vertex_shader.name();
+        for (auto&&[file, mesh] : m_meshes) {
+            mesh->draw(name);
         }
     }
 }
@@ -414,13 +448,12 @@ Sandbox::render_background()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     if (m_background_frag.name() == 0) {
-        // TODO better way of avoid binding invalid program to pipeline
         return;
     }
     m_pipeline_internal.use_stage(m_background_frag, GL_FRAGMENT_SHADER_BIT);
     m_pipeline_internal.use_stage(m_background_vert, GL_VERTEX_SHADER_BIT);
     if (m_pipeline_internal.valid()) {
-        AssignCommonUniforms(m_background_frag.interfaces());
+        aux_assign_uniforms(m_background_frag);
         m_pipeline_internal.bind();
         m_vao_internal.bind();
         glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -437,6 +470,7 @@ Sandbox::render_debug()
     m_pipeline_internal.bind();
     auto&& pvm = camera.projection_world();
     glProgramUniformMatrix4fv(m_debug_axes.name(), 0, 1, GL_FALSE, glm::value_ptr(pvm));
+    glProgramUniform1f(m_debug_axes.name(), 1, 1.0f);
     m_vao_internal.bind();
     glDrawArrays(GL_LINES, 0, 6);
 }
@@ -456,5 +490,24 @@ Sandbox::programs()
     return ret;
 }
 
-
+const OpenGL::ProgramInterface<OpenGL::Uniform>&
+Sandbox::aux_assign_uniforms(const OpenGL::Program& program)
+{
+    auto&& uni = program.interfaces().lock()->uniform();
+    GLuint name = program.name();
+    auto&& vp = main_window->viewport();
+    auto&& mpos = main_window->mouse_position();
+    mpos.y = vp.w - mpos.y; // XXX
+    uni.assign(name, "u_viewport", vp);
+    uni.assign(name, "u_fbsize", main_window->frame_buffer_size());
+    uni.assign(name, "u_mpos", mpos);
+    uni.assign(name, "u_time", static_cast<float>(glfwGetTime()));
+    uni.assign(name, "u_camera", sandbox->camera.transform().position);
+    uni.assign(name, "u_camera_clip", sandbox->camera.clip());
+    uni.assign(name, "PVM", camera.projection_world());
+    uni.assign(name, "PV", camera.projection_view());
+    uni.assign(name, "VM", camera.view_world());
+    uni.assign(name, "NM", camera.normal_matrix());
+    return uni;
+}
 

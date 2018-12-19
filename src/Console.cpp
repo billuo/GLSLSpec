@@ -145,6 +145,10 @@ declare_commands()
                          "Resize main window",
                          [](std::string cmd, Arguments args)
                          {
+                             if (!options.flags.resizable) {
+                                 Log::e("Window resizing already disabled.");
+                                 return;
+                             }
                              switch (args.size()) {
                                  case 1: {
                                      int sz = string_to<int>(args.front());

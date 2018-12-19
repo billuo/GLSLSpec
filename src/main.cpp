@@ -70,6 +70,7 @@ main(int argc, char** argv)
         }
         sandbox->render_background();
         sandbox->render();
+        sandbox->render_postprocess();
         if (options.flags.debug_draw) {
             sandbox->render_debug();
         }

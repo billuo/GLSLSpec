@@ -57,6 +57,8 @@ struct GlobalOptions {
 
     /// Various boolean flags
     struct Flags {
+        /// Window is resizable?
+        bool resizable = true;
         /// Enable debug drawing?
         bool debug_draw = DEBUG_BUILD;
         /// Enable verbose output?
