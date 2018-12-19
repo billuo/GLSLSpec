@@ -93,6 +93,9 @@ class Camera : public Node {
         return glm::vec3(v.cos() * h.sin(), v.sin(), v.cos() * -h.cos());
     }
 
+    auto clip() const
+    { return m_clip; }
+
   protected:
 
     void on_position(const glm::vec3& result) override

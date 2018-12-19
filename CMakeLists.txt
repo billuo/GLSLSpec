@@ -80,7 +80,7 @@ add_library(MainLib
 		src/Scene/Camera.cpp
 		src/Scene/Node.cpp
 		src/Utility/Log.cpp
-		src/Utility/Misc.cpp include/OpenGL/VertexBuffer.hpp src/OpenGL/VertexAttribute.cpp src/OpenGL/Object/Texture.cpp include/OpenGL/Object/Texture.hpp src/OpenGL/Object/Sampler.cpp include/OpenGL/Object/Sampler.hpp)
+		src/Utility/Misc.cpp include/OpenGL/VertexBuffer.hpp src/OpenGL/VertexAttribute.cpp src/OpenGL/Object/Texture.cpp include/OpenGL/Object/Texture.hpp src/OpenGL/Object/Sampler.cpp include/OpenGL/Object/Sampler.hpp src/OpenGL/FrameBuffer.cpp include/OpenGL/FrameBuffer.hpp)
 
 message(STATUS "Build target:${CMAKE_HOST_SYSTEM_NAME}")
 set(HOST ${CMAKE_HOST_SYSTEM_NAME})

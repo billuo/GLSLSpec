@@ -27,6 +27,8 @@ AssignCommonUniforms(Weak<OpenGL::Introspector> intro)
     uni.assign(I->name, "u_fbsize", main_window->frame_buffer_size());
     uni.assign(I->name, "u_mpos", mpos);
     uni.assign(I->name, "u_time", static_cast<float>(glfwGetTime()));
+    uni.assign(I->name, "u_camera", sandbox->camera.transform().position);
+    uni.assign(I->name, "u_camera_clip", sandbox->camera.clip());
     return std::move(I);
 }
 
