@@ -14,7 +14,7 @@ namespace {
 
 // TODO temp
 
-void
+auto
 AssignCommonUniforms(Weak<OpenGL::Introspector> intro)
 {
     auto&& I = intro.lock();
@@ -27,6 +27,7 @@ AssignCommonUniforms(Weak<OpenGL::Introspector> intro)
     uni.assign(I->name, "u_fbsize", main_window->frame_buffer_size());
     uni.assign(I->name, "u_mpos", mpos);
     uni.assign(I->name, "u_time", static_cast<float>(glfwGetTime()));
+    return I;
 }
 
 const glm::vec3 tex0[] = {
@@ -110,6 +111,7 @@ Sandbox::Sandbox()
         ERROR("Background drawing vertex shader stage invalid!");
     }
     // TODO temp
+    return;
     static OpenGL::Texture texture;
     static OpenGL::Sampler sampler;
     texture.bind(GL_TEXTURE_2D);
@@ -216,8 +218,9 @@ Sandbox::aux_import_geometry(const DynamicFile& file, const std::string& tag)
         auto parent_path = file.path();
         parent_path.remove_filename();
         bool result = tinyobj::LoadObj(&attributes, &shapes, &materials, &err, path.c_str(), parent_path.c_str(), true);
+        // TODO use materials
         if (!err.empty()) {
-            Log::w("When loading {}:\n{}", file.path().string(), err);
+            Log::w("{}", err);
         }
         if (!result) {
             Log::e("Failed to load .obj file.");
@@ -378,15 +381,16 @@ Sandbox::render()
             ONCE_PER(Log::e("No fragment shader found."), 60);
             return;
         }
-        GLuint program = vertex_shader.value().name();
+        GLuint program = vertex_shader->name();
         if (program == 0) {
             return;
         }
-        auto&& uniforms = vertex_shader.value().interfaces().lock()->uniform();
+        auto&& uniforms = AssignCommonUniforms(vertex_shader->interfaces())->uniform();
         uniforms.assign(program, "PVM", camera.projection_world());
         uniforms.assign(program, "PV", camera.projection_view());
         uniforms.assign(program, "VM", camera.view_world());
         uniforms.assign(program, "NM", camera.normal_matrix());
+        // TODO material and illumination is per-mesh at least.
         uniforms.assign(program, "L.pos", camera.world_to_view({4.0f, 10.0f, 4.0f}));
         uniforms.assign(program, "L.la", 0.15f, 0.15f, 0.05f);
         uniforms.assign(program, "L.ld", 0.8f, 0.8f, 0.03f);
@@ -395,7 +399,6 @@ Sandbox::render()
         uniforms.assign(program, "M.kd", 0.7f, 0.7f, 0.7f);
         uniforms.assign(program, "M.ks", 0.5f, 0.5f, 0.5f);
         uniforms.assign(program, "M.shininess", 16.0f);
-        uniforms.assign(program, "u_sampler_0", 0);
         for (auto&&[file, mesh] : m_meshes) {
             mesh->draw(program);
         }

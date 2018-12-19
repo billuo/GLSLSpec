@@ -221,7 +221,7 @@ const std::vector<NamedOption> NamedOptions = {
                     options.input_files.emplace_back(*arg, FileType::Image).tag = "cube";
                     return 1u;
                 }},
-        {"S", {""},
+        {"S", {},
                 "Load and draw an environmental sphere map",
                 {1, 1}, {"spheremap.png/jpg/hdr"},
                 [](const std::string&, unsigned, const std::string* arg) -> unsigned
@@ -229,7 +229,7 @@ const std::vector<NamedOption> NamedOptions = {
                     options.input_files.emplace_back(*arg, FileType::Image).tag = "SPHERE";
                     return 1u;
                 }},
-        {"s", {""},
+        {"s", {},
                 "Same as -S, but does not draw immediately",
                 {1, 1}, {"spheremap.png/jpg/hdr"},
                 [](const std::string&, unsigned, const std::string* arg) -> unsigned

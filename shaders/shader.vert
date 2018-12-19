@@ -37,13 +37,16 @@ uniform mat4 VM;
 uniform mat4 PVM;
 uniform mat3 NM;
 
+uniform float u_time;
+
 void ViewSpace(out vec3 position, out vec3 normal) {
     position = (VM * vec4(v_position, 1.0f)).xyz;
     normal = normalize(NM * v_normal);
 }
 
 vec3 ADS(vec3 pos, vec3 norm) {
-    vec3 l = normalize(L.pos - pos);
+    vec3 lpos = vec3(L.pos.x * sin(u_time), L.pos.y, L.pos.z * cos(u_time));
+    vec3 l = normalize(lpos - pos);
     vec3 v = normalize(-pos.xyz);
     vec3 r = reflect(-l, norm);
     // float l_n = abs(dot(l, norm));
@@ -64,7 +67,7 @@ void main(void) {
     ViewSpace(o_position, o_normal);
     o_color = ADS(o_position, o_normal);
     // o_color = mix(o_color, texture(u_sampler_1, v_texcoord).xyz, vec3(1.0f, 0.0f, 1.0f));
-    o_color = mix(o_color, texture(u_sampler_1, v_texcoord).xyz, vec3(0.3f, 0.7f, 0.3f));
+    // o_color = mix(o_color, texture(u_sampler_1, v_texcoord).xyz, vec3(0.3f, 0.7f, 0.3f));
     gl_Position = PVM * vec4(v_position, 1.0f);
     o_texcoord = v_texcoord;
 }
