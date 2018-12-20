@@ -9,6 +9,10 @@
 #include <tol/tiny_obj_loader.h>
 #include <regex>
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb/stb_image.h"
+
+
 
 namespace {
 
@@ -170,7 +174,8 @@ Sandbox::aux_preprocess_shader_source(std::string source, const std::vector<std:
 void
 Sandbox::aux_import_image(const DynamicFile& file, const std::string& tag)
 {
-    // TODO
+    int x, y, n;
+    unsigned char *data = stbi_load(filename, &x, &y, &n, 0);
     throw unimplemented("Load image");
 }
 
