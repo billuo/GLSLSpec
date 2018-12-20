@@ -179,7 +179,7 @@ declare_commands()
                                  for (auto&& arg : args) {
                                      options.define(arg);
                                  }
-                                 sandbox->recompile();
+                                 sandbox->recompile_all();
                              }
                          });
     Console::add_command("mouse", {0, 0}, {},
@@ -190,6 +190,15 @@ declare_commands()
                          "Display current frame buffer size in pixels",
                          [](std::string cmd, Arguments args)
                          { *console << main_window->frame_buffer_size() << '\n'; });
+    Console::add_command("imported", {0, 0}, {},
+                         "Display a list of imported and currently watching files.",
+                         [](std::string cmd, Arguments args)
+                         {
+                             *console << "Imported files:\n";
+                             for (auto&&[path, tag] : sandbox->watcher.files()) {
+                                 *console << "\tPath:" << path << '[' << tag << "]\n";
+                             }
+                         });
     Console::add_command("programs", {0, 0}, {},
                          "Display current imported shader programs by their OpenGL object names and optional labels.",
                          [](std::string cmd, Arguments args)
@@ -201,6 +210,7 @@ declare_commands()
                          });
     Console::add_command("program", {1, 2}, {"name", "interface name:uniform|uniform_block|input"},
                          "Introspect specified program and optionally in the specified interface.",
+            // TODO built-in introspection might not be worth it, NVIDIA Nsight has done a great job.
                          [](std::string cmd, Arguments args)
                          {
                              auto name = string_to<GLuint>(args.front());
@@ -223,6 +233,19 @@ declare_commands()
                                  *console << *intro << '\n';
                              };
                          });
+    Console::add_command("background", {0, 1}, {"shader.frag"},
+                         "Toggle background rendering. When supplied with a path to a fragment shader,"
+                         "it always enable background rendering using the specified shader.",
+                         [](std::string cmd, Arguments args)
+                         {
+                             if (args.empty()) {
+                                 sandbox->toggle_background();
+                             } else {
+                                 assert(args.size() == 1);
+                                 ImportedFile file(args.front(), FileType::Shader, "background");
+                                 sandbox->import(file, true);
+                             }
+                         });
     // Console::add_command("command", {0, 0}, {},
     //                      "description",
     //                      [](std::string cmd, Arguments args)
@@ -231,9 +254,8 @@ declare_commands()
     //                              case 0:
     //                                  break;
     //                              default:
-    //                                  return false;
+    //                                  break;
     //                          }
-    //                          return true;
     //                      });
 }
 

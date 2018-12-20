@@ -23,8 +23,7 @@ using Parser = unsigned (*)(const std::string& match, unsigned argc, const std::
 
 Parser AddShaderToWatch = [](const std::string& match, unsigned, const std::string* arg)
 {
-    options.input_files.emplace_back(*arg, FileType::Shader);
-    options.input_files.back().tag = match;
+    options.input_files.emplace_back(*arg, FileType::Shader, "user");
     return 0u;
 };
 
@@ -52,6 +51,12 @@ struct NamedOption {
               parser(parser)
     {}
 };
+
+// struct Importable {
+//     const std::set<std::string> extensions;
+//     const std::string description;
+//     FileType type;
+// };
 
 //region Options
 
@@ -218,15 +223,7 @@ const std::vector<NamedOption> NamedOptions = {
                 {1, 1}, {"cubemap.png/jpg/hdr"},
                 [](const std::string&, unsigned, const std::string* arg) -> unsigned
                 {
-                    options.input_files.emplace_back(*arg, FileType::Image).tag = "CUBE";
-                    return 1u;
-                }},
-        {"c", {},
-                "Same as -C, but does not draw immediately",
-                {1, 1}, {"cubemap.png/jpg/hdr"},
-                [](const std::string&, unsigned, const std::string* arg) -> unsigned
-                {
-                    options.input_files.emplace_back(*arg, FileType::Image).tag = "cube";
+                    options.input_files.emplace_back(*arg, FileType::Image, "cubemap");
                     return 1u;
                 }},
         {"S", {},
@@ -234,15 +231,7 @@ const std::vector<NamedOption> NamedOptions = {
                 {1, 1}, {"spheremap.png/jpg/hdr"},
                 [](const std::string&, unsigned, const std::string* arg) -> unsigned
                 {
-                    options.input_files.emplace_back(*arg, FileType::Image).tag = "SPHERE";
-                    return 1u;
-                }},
-        {"s", {},
-                "Same as -S, but does not draw immediately",
-                {1, 1}, {"spheremap.png/jpg/hdr"},
-                [](const std::string&, unsigned, const std::string* arg) -> unsigned
-                {
-                    options.input_files.emplace_back(*arg, FileType::Image).tag = "sphere";
+                    options.input_files.emplace_back(*arg, FileType::Image, "spheremap");
                     return 1u;
                 }},
         // Below are special options with a short name of '.',
@@ -275,8 +264,7 @@ const std::vector<NamedOption> NamedOptions = {
                 {0, 0}, {"model"},
                 [](const std::string& match, unsigned, const std::string* arg) -> unsigned
                 {
-                    options.input_files.emplace_back(*arg, FileType::Geometry);
-                    options.input_files.back().tag = match;
+                    options.input_files.emplace_back(*arg, FileType::Geometry, "geometry");
                     return 0u;
                 }},
         {".", {"hdr",  "png", "jpg", "jpeg", "HDR", "PNG", "JPG", "JPEG"},
@@ -284,8 +272,7 @@ const std::vector<NamedOption> NamedOptions = {
                 {0, 0}, {"image"},
                 [](const std::string& match, unsigned, const std::string* arg) -> unsigned
                 {
-                    options.input_files.emplace_back(*arg, FileType::Image);
-                    options.input_files.back().tag = "texture";
+                    options.input_files.emplace_back(*arg, FileType::Image, "texture");
                     return 0u;
                 }}
 };
