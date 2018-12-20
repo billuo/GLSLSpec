@@ -15,21 +15,23 @@ namespace OpenGL {
 namespace details {
 
 template <typename To, typename ...Args> static constexpr auto
-        all_convertible_v = (std::is_convertible_v<Args, To> && ...);
+        all_convertible_from_v = (std::is_convertible_v<Args, To> && ...);
 
 template <typename T> static constexpr auto is_GL_type_v =
         std::is_convertible_v<T, GLfloat> || std::is_convertible_v<T, GLint> || std::is_convertible_v<T, GLuint>;
 
 template <typename ...Args> static constexpr auto all_GL_type_v =
-        all_convertible_v<GLfloat, Args...> || all_convertible_v<GLint, Args...> || all_convertible_v<GLuint, Args...>;
+        all_convertible_from_v<GLfloat, Args...> ||
+        all_convertible_from_v<GLint, Args...> ||
+        all_convertible_from_v<GLuint, Args...>;
 
-// TODO the order of conditional may have unexpected effect on result...
+// TODO order of conditional may has unexpected effect
 template <typename ...Args> using GL_cast =
-std::conditional_t<all_convertible_v<GLfloat, Args...>,
+std::conditional_t<all_convertible_from_v<GLfloat, Args...>,
         GLfloat,
-        std::conditional_t<all_convertible_v<GLint, Args...>,
+        std::conditional_t<all_convertible_from_v<GLint, Args...>,
                 GLint,
-                std::conditional_t<all_convertible_v<GLuint, Args...>, GLuint, void>>>;
+                std::conditional_t<all_convertible_from_v<GLuint, Args...>, GLuint, void>>>;
 
 //region glUniformxx
 
@@ -522,7 +524,9 @@ struct Uniform : public Resource {
 
     friend std::ostream& operator<<(std::ostream& os, const Uniform& uniform);
 
-    /// assign this uniform with a list of values
+    /// @brief Mimics glUniform{1234}{fi(ui)d}.
+    /// @tparam Args Types of arguments
+    /// @param args A list of value, each the components of uniform.
     template <typename ...Args, typename = std::enable_if_t<details::all_GL_type_v<Args...>>>
     void assign(Args... args) const noexcept
     {
@@ -530,10 +534,23 @@ struct Uniform : public Resource {
         details::glUniformxx(location, std::forward<Args>(args)...);
     }
 
+    /// @brief Mimics glUniform{1234}{fi(ui)d}.
+    /// @tparam L Number of components of @p vec.
+    /// @tparam T Data type of components of @p vec.
+    /// @tparam Q Precision qualifier.
+    /// @param vec Value of the uniform.
     template <glm::length_t L, typename T, glm::qualifier Q>
     void assign(const glm::vec<L, T, Q>& vec) const noexcept
     { details::glUniformxx(location, vec); }
 
+    /// @brief Mimics glUniformMatrix*v.
+    /// @tparam C Number of columns of @p mat
+    /// @tparam R Number of rows of @p mat
+    /// @tparam T Data type of elements of @p mat
+    /// @tparam Q Precision qualifier.
+    /// @param count Number of contiguous matrices to assign value.
+    /// @param transpose True if the supplied data should be transposed before assignment.
+    /// @param mat Value of the uniform.
     template <glm::length_t C, glm::length_t R, typename T, glm::qualifier Q>
     void assign(GLsizei count, GLboolean transpose, const glm::mat<C, R, T, Q>& mat) const noexcept
     {
@@ -544,7 +561,26 @@ struct Uniform : public Resource {
         }
     }
 
-    /// assign this uniform with a list of values
+    /// @brief Mimics glUniformMatrix*v, but with only one matrix and no transpose.
+    /// @tparam C Number of columns of @p mat
+    /// @tparam R Number of rows of @p mat
+    /// @tparam T Data type of elements of @p mat
+    /// @tparam Q Precision qualifier.
+    /// @param mat Value of the uniform.
+    template <glm::length_t C, glm::length_t R, typename T, glm::qualifier Q>
+    void assign(const glm::mat<C, R, T, Q>& mat) const noexcept
+    {
+        if constexpr (std::is_same_v<T, GLfloat>) {
+            details::glUniformMatrixxfv(location, 1, GL_FALSE, mat);
+        } else if constexpr (std::is_same_v<T, GLdouble>) {
+            details::glUniformMatrixxdv(location, 1, GL_FALSE, mat);
+        }
+    }
+
+    /// @brief Mimics glProgramUniform{1234}{fi(ui)d}.
+    /// @tparam Args Types of arguments
+    /// @param program Name of the program to which the uniform belongs.
+    /// @param args A list of value, each the components of uniform.
     template <typename ...Args, typename = std::enable_if_t<details::all_GL_type_v<Args...>>>
     void assign(GLuint program, Args... args) const noexcept
     {
@@ -552,10 +588,25 @@ struct Uniform : public Resource {
         details::glProgramUniformxx(program, location, std::forward<Args>(args)...);
     }
 
+    /// @brief Mimics glProgramUniform{1234}{fi(ui)d}.
+    /// @tparam L Number of components of @p vec.
+    /// @tparam T Data type of components of @p vec.
+    /// @tparam Q Precision qualifier.
+    /// @param program Name of the program to which the uniform belongs.
+    /// @param vec Value of the uniform.
     template <glm::length_t L, typename T, glm::qualifier Q>
     void assign(GLuint program, const glm::vec<L, T, Q>& vec) const noexcept
     { details::glProgramUniformxx(program, location, vec); }
 
+    /// @brief Mimics glProgramUniformMatrix*v.
+    /// @tparam C Number of columns of @p mat
+    /// @tparam R Number of rows of @p mat
+    /// @tparam T Data type of elements of @p mat
+    /// @tparam Q Precision qualifier.
+    /// @param program Name of the program to which the uniform belongs.
+    /// @param count Number of contiguous matrices to assign value.
+    /// @param transpose True if the supplied data should be transposed before assignment.
+    /// @param mat Value of the uniform.
     template <glm::length_t C, glm::length_t R, typename T, glm::qualifier Q>
     void assign(GLuint program, GLsizei count, GLboolean transpose, const glm::mat<C, R, T, Q>& mat) const noexcept
     {
@@ -563,6 +614,23 @@ struct Uniform : public Resource {
             details::glProgramUniformMatrixxfv(program, location, count, transpose, mat);
         } else if constexpr (std::is_same_v<T, GLdouble>) {
             details::glProgramUniformMatrixxdv(program, location, count, transpose, mat);
+        }
+    }
+
+    /// @brief Mimics glProgramUniformMatrix*v, but with only one matrix and no transpose.
+    /// @tparam C Number of columns of @p mat
+    /// @tparam R Number of rows of @p mat
+    /// @tparam T Data type of elements of @p mat
+    /// @tparam Q Precision qualifier.
+    /// @param program Name of the program to which the uniform belongs.
+    /// @param mat Value of the uniform.
+    template <glm::length_t C, glm::length_t R, typename T, glm::qualifier Q>
+    void assign(GLuint program, const glm::mat<C, R, T, Q>& mat) const noexcept
+    {
+        if constexpr (std::is_same_v<T, GLfloat>) {
+            details::glProgramUniformMatrixxfv(program, location, 1, GL_FALSE, mat);
+        } else if constexpr (std::is_same_v<T, GLdouble>) {
+            details::glProgramUniformMatrixxdv(program, location, 1, GL_FALSE, mat);
         }
     }
 

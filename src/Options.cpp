@@ -23,8 +23,7 @@ using Parser = unsigned (*)(const std::string& match, unsigned argc, const std::
 
 Parser AddShaderToWatch = [](const std::string& match, unsigned, const std::string* arg)
 {
-    options.input_files.emplace_back(*arg, FileType::Shader);
-    options.input_files.back().tag = match;
+    options.input_files.emplace_back(*arg, FileType::Shader, "user");
     return 0u;
 };
 
@@ -52,6 +51,12 @@ struct NamedOption {
               parser(parser)
     {}
 };
+
+// struct Importable {
+//     const std::set<std::string> extensions;
+//     const std::string description;
+//     FileType type;
+// };
 
 //region Options
 
@@ -114,6 +119,14 @@ const std::vector<NamedOption> NamedOptions = {
                     options.window.dimension.y = string_to<int>(*arg);
                     return 1u;
                 }},
+        {"",  {"fixed-size"},
+                "Disable resizing window",
+                {0, 0}, {},
+                [](const std::string&, unsigned, const std::string* arg) -> unsigned
+                {
+                    options.flags.resizable = false;
+                    return 0u;
+                }},
         {"",  {"ttl"},
                 "Exit the application after this many seconds. (can be floating point number)",
                 {1, 1}, {"seconds"},
@@ -145,8 +158,14 @@ const std::vector<NamedOption> NamedOptions = {
                 {1, 1}, {"directories..."},
                 [](const std::string&, unsigned, const std::string* arg) -> unsigned
                 {
-                    options.includes.emplace_back(FS::canonical(*arg));
-                    return 1u;
+                    auto&& ex_path = FS::canonical(*arg);
+                    if (ex_path) {
+                        options.includes.emplace_back(*ex_path);
+                        return 1u;
+                    } else {
+                        Log::e("{}", ex_path.error());
+                        return 0u;
+                    }
                 }},
         {"D", {},
                 "An additional #define directive for shader",
@@ -199,46 +218,20 @@ const std::vector<NamedOption> NamedOptions = {
                     options.window.cursor = true;
                     return 0u;
                 }},
-        {"F", {},
-                "Don't restrict FPS at around 60, run at full speed",
-                {0, 0}, {"FPS"},
-                [](const std::string&, unsigned argc, const std::string* arg) -> unsigned
-                {
-                    // TODO but overridding desktop settings to disable vsync to unlimit FPS
-                    //  - usually only works under fullscreen and may be problematic. Consider removing it.
-                    options.window.full_fps = true;
-                    return 0u;
-                }},
         {"C", {},
                 "Load and draw an environmental cube map",
                 {1, 1}, {"cubemap.png/jpg/hdr"},
                 [](const std::string&, unsigned, const std::string* arg) -> unsigned
                 {
-                    options.input_files.emplace_back(*arg, FileType::Image).tag = "CUBE";
+                    options.input_files.emplace_back(*arg, FileType::Image, "cubemap");
                     return 1u;
                 }},
-        {"c", {},
-                "Same as -C, but does not draw immediately",
-                {1, 1}, {"cubemap.png/jpg/hdr"},
-                [](const std::string&, unsigned, const std::string* arg) -> unsigned
-                {
-                    options.input_files.emplace_back(*arg, FileType::Image).tag = "cube";
-                    return 1u;
-                }},
-        {"S", {""},
+        {"S", {},
                 "Load and draw an environmental sphere map",
                 {1, 1}, {"spheremap.png/jpg/hdr"},
                 [](const std::string&, unsigned, const std::string* arg) -> unsigned
                 {
-                    options.input_files.emplace_back(*arg, FileType::Image).tag = "SPHERE";
-                    return 1u;
-                }},
-        {"s", {""},
-                "Same as -S, but does not draw immediately",
-                {1, 1}, {"spheremap.png/jpg/hdr"},
-                [](const std::string&, unsigned, const std::string* arg) -> unsigned
-                {
-                    options.input_files.emplace_back(*arg, FileType::Image).tag = "sphere";
+                    options.input_files.emplace_back(*arg, FileType::Image, "spheremap");
                     return 1u;
                 }},
         // Below are special options with a short name of '.',
@@ -271,8 +264,7 @@ const std::vector<NamedOption> NamedOptions = {
                 {0, 0}, {"model"},
                 [](const std::string& match, unsigned, const std::string* arg) -> unsigned
                 {
-                    options.input_files.emplace_back(*arg, FileType::Geometry);
-                    options.input_files.back().tag = match;
+                    options.input_files.emplace_back(*arg, FileType::Geometry, "geometry");
                     return 0u;
                 }},
         {".", {"hdr",  "png", "jpg", "jpeg", "HDR", "PNG", "JPG", "JPEG"},
@@ -280,8 +272,7 @@ const std::vector<NamedOption> NamedOptions = {
                 {0, 0}, {"image"},
                 [](const std::string& match, unsigned, const std::string* arg) -> unsigned
                 {
-                    options.input_files.emplace_back(*arg, FileType::Image);
-                    options.input_files.back().tag = "texture";
+                    options.input_files.emplace_back(*arg, FileType::Image, "texture");
                     return 0u;
                 }}
 };

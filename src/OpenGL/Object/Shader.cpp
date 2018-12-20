@@ -35,7 +35,7 @@ Shader::compile()
     glCompileShader(name());
     if (get(GL_COMPILE_STATUS) == GL_FALSE) {
         Log::e("{} compilation failed:{}",
-               nameOfShaderType(get(GL_SHADER_TYPE)),
+               shader_type_name(get(GL_SHADER_TYPE)),
                get_info_log().get());
     }
     return *this;

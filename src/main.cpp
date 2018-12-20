@@ -11,9 +11,14 @@
 // TODO load texture from .obj
 // TODO finish introspection
 
+static decltype(std::this_thread::get_id()) main_thread_id;
+
 void
 OnExit()
 {
+    if (std::this_thread::get_id() != main_thread_id) {
+        return;
+    }
     options.flags.running = false;
     static std::atomic_bool exited = false;
     if (!exited) {
@@ -32,6 +37,7 @@ OnExitSignal(int)
 int
 main(int argc, char** argv)
 {
+    main_thread_id = std::this_thread::get_id();
     console = std::make_unique<Console>(); // XXX enable logging first
     std::atexit(OnExit);
     std::at_quick_exit(OnExit);
@@ -55,8 +61,8 @@ main(int argc, char** argv)
     }
     // prepare everything
     OpenGL::Initialize();
-    sandbox = std::make_unique<Sandbox>();
     Watcher watcher(options.input_files);
+    sandbox = std::make_unique<Sandbox>(watcher);
     declare_commands();
     console->execute_all(options.initial_commands);
     // main loop
@@ -70,6 +76,7 @@ main(int argc, char** argv)
         }
         sandbox->render_background();
         sandbox->render();
+        sandbox->render_postprocess();
         if (options.flags.debug_draw) {
             sandbox->render_debug();
         }

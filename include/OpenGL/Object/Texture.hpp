@@ -55,6 +55,7 @@ class Texture : public Object {
     /// @param data Data to substitute with.
     /// @param level The number of mipmap level to specify.
     /// @param x x_offset and width.
+    /// @note @p data can also be interpreted as offset in bytes to the beginning of the buffer bound to GL_PIXEL_UNPACK_BUFFER.
     static void
     SubImage(GLenum target, GLenum format, GLenum type, const GLvoid* data, GLint level, Range x)
     { glTexSubImage1D(target, level, x.first, x.second, format, type, data); }
@@ -67,6 +68,7 @@ class Texture : public Object {
     /// @param level The number of mipmap level to specify.
     /// @param x x_offset and width.
     /// @param y y_offset and height.
+    /// @note @p data can also be interpreted as offset in bytes to the beginning of the buffer bound to GL_PIXEL_UNPACK_BUFFER.
     static void
     SubImage(GLenum target, GLenum format, GLenum type, const GLvoid* data, GLint level, Range x, Range y)
     { glTexSubImage2D(target, level, x.first, y.first, x.second, y.second, format, type, data); }
@@ -80,9 +82,16 @@ class Texture : public Object {
     /// @param x x_offset and width.
     /// @param y y_offset and height.
     /// @param z z_offset and depth.
+    /// @note @p data can also be interpreted as offset in bytes to the beginning of the buffer bound to GL_PIXEL_UNPACK_BUFFER.
     static void
     SubImage(GLenum target, GLenum format, GLenum type, const GLvoid* data, GLint level, Range x, Range y, Range z)
     { glTexSubImage3D(target, level, x.first, y.first, z.first, x.second, y.second, z.second, format, type, data); }
+
+    /// @brief Activate texture unit @p unit
+    /// @param unit The index of the unit to activate.
+    static void
+    Activate(GLuint unit)
+    { glActiveTexture(GL_TEXTURE0 + unit); }
 
     Texture() : Object(pool().get())
     {}
@@ -90,10 +99,32 @@ class Texture : public Object {
     ~Texture()
     { pool().put(std::move(m_name)); }
 
+    void activate(GLuint unit)
+    { glActiveTexture(GL_TEXTURE0 + unit); }
+
     void bind(GLenum target)
     { glBindTexture(target, name()); }
 
-  private:
+    void set(GLenum pname, GLfloat param)
+    { glTexParameterf(name(), pname, param); }
+
+    void set(GLenum pname, GLint param)
+    { glTexParameteri(name(), pname, param); }
+
+    void set(GLenum pname, const GLfloat* params)
+    { glTexParameterfv(name(), pname, params); }
+
+    void set(GLenum pname, const GLint* params)
+    { glTexParameterIiv(name(), pname, params); }
+
+    void set(GLenum pname, const GLuint* params)
+    { glTexParameterIuiv(name(), pname, params); }
+
+    void storage(GLenum pname, GLint param)
+    { glPixelStorei(pname, param); }
+
+    void storage(GLenum pname, GLfloat param)
+    { glPixelStoref(pname, param); }
 };
 
 } // namespace OpenGL

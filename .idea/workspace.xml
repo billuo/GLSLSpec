@@ -2,11 +2,11 @@
 <project version="4">
   <component name="CMakeRunConfigurationManager" shouldGenerate="true" shouldDeleteObsolete="true">
     <generated>
+      <config projectName="GLSLViewer" targetName="test" />
       <config projectName="GLSLViewer" targetName="generated-glad" />
       <config projectName="GLSLViewer" targetName="MainLib" />
       <config projectName="GLSLViewer" targetName="GLSLSpec" />
       <config projectName="GLSLViewer" targetName="third_party" />
-      <config projectName="GLSLViewer" targetName="test" />
     </generated>
   </component>
   <component name="CMakeSettings">
@@ -16,8 +16,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="460e510e-385f-4180-b246-988c8b40ad7d" name="Default Changelist" comment="Minor fixes">
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Sandbox.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Sandbox.cpp" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/cmake-build-debug/" />
@@ -38,8 +36,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="421">
-              <caret line="67" column="22" lean-forward="true" selection-start-line="67" selection-start-column="22" selection-end-line="67" selection-end-column="22" />
+            <state relative-caret-position="511">
+              <caret line="73" column="22" selection-start-line="73" selection-start-column="22" selection-end-line="73" selection-end-column="22" />
               <folding>
                 <element signature="e#63#85#0" expanded="true" />
               </folding>
@@ -51,9 +49,29 @@
         <entry file="file://$PROJECT_DIR$/src/Sandbox.cpp">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="360">
-              <caret line="177" column="24" selection-start-line="177" selection-start-column="24" selection-end-line="177" selection-end-column="24" />
+              <caret line="229" column="21" selection-start-line="229" selection-start-column="21" selection-end-line="229" selection-end-column="21" />
               <folding>
-                <element signature="e#67#89#0" expanded="true" />
+                <element signature="e#0#65#0" />
+                <element signature="e#249#727#0" />
+                <element signature="e#790#971#1" />
+                <element signature="e#1011#1771#1" />
+                <element signature="e#1811#1936#1" />
+                <element signature="e#1982#2380#1" />
+                <element signature="e#2418#4431#0" />
+                <element signature="e#4433#5297#0" />
+                <element signature="e#5299#6276#0" />
+                <element signature="e#6278#7384#0" />
+                <element signature="e#7583#12351#0" />
+                <element signature="e#12353#12551#0" />
+                <element signature="e#12553#13344#0" />
+                <element signature="e#13346#14866#0" />
+                <element signature="e#14868#16800#0" />
+                <element signature="e#16802#17822#0" />
+                <element signature="e#17824#18448#0" />
+                <element signature="e#18450#18872#0" />
+                <element signature="e#18874#19348#0" />
+                <element signature="e#19350#20265#0" />
+                <element signature="e#20267#20704#0" />
               </folding>
             </state>
           </provider>
@@ -62,8 +80,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/include/Watcher.hpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="375">
-              <caret line="47" selection-start-line="47" selection-end-line="47" />
+            <state relative-caret-position="495">
+              <caret line="55" selection-start-line="55" selection-end-line="55" />
             </state>
           </provider>
         </entry>
@@ -221,7 +239,7 @@
       <workItem from="1545041874159" duration="3242000" />
       <workItem from="1545047240645" duration="12957000" />
       <workItem from="1545211460659" duration="109000" />
-      <workItem from="1545284848069" duration="7663000" />
+      <workItem from="1545284848069" duration="8055000" />
     </task>
     <task id="LOCAL-00001" summary="Minor fixes">
       <created>1545052640019</created>
@@ -234,7 +252,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="23971000" />
+    <option name="totallyTimeSpent" value="24363000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -247,6 +265,7 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="956" height="1044" extended-state="0" />
+    <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49933422" weight="0.43296704" />
       <window_info id="Structure" order="1" sideWeight="0.5006658" side_tool="true" weight="0.20490928" />
@@ -563,8 +582,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="421">
-          <caret line="67" column="22" lean-forward="true" selection-start-line="67" selection-start-column="22" selection-end-line="67" selection-end-column="22" />
+        <state relative-caret-position="511">
+          <caret line="73" column="22" selection-start-line="73" selection-start-column="22" selection-end-line="73" selection-end-column="22" />
           <folding>
             <element signature="e#63#85#0" expanded="true" />
           </folding>
@@ -573,17 +592,37 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/include/Watcher.hpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="375">
-          <caret line="47" selection-start-line="47" selection-end-line="47" />
+        <state relative-caret-position="495">
+          <caret line="55" selection-start-line="55" selection-end-line="55" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Sandbox.cpp">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="360">
-          <caret line="177" column="24" selection-start-line="177" selection-start-column="24" selection-end-line="177" selection-end-column="24" />
+          <caret line="229" column="21" selection-start-line="229" selection-start-column="21" selection-end-line="229" selection-end-column="21" />
           <folding>
-            <element signature="e#67#89#0" expanded="true" />
+            <element signature="e#0#65#0" />
+            <element signature="e#249#727#0" />
+            <element signature="e#790#971#1" />
+            <element signature="e#1011#1771#1" />
+            <element signature="e#1811#1936#1" />
+            <element signature="e#1982#2380#1" />
+            <element signature="e#2418#4431#0" />
+            <element signature="e#4433#5297#0" />
+            <element signature="e#5299#6276#0" />
+            <element signature="e#6278#7384#0" />
+            <element signature="e#7583#12351#0" />
+            <element signature="e#12353#12551#0" />
+            <element signature="e#12553#13344#0" />
+            <element signature="e#13346#14866#0" />
+            <element signature="e#14868#16800#0" />
+            <element signature="e#16802#17822#0" />
+            <element signature="e#17824#18448#0" />
+            <element signature="e#18450#18872#0" />
+            <element signature="e#18874#19348#0" />
+            <element signature="e#19350#20265#0" />
+            <element signature="e#20267#20704#0" />
           </folding>
         </state>
       </provider>

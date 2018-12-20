@@ -12,7 +12,7 @@ namespace OpenGL {
 class VertexArray : public Object {
     static auto& pool()
     {
-        static auto singleton = make_pool(glGenVertexArrays, glDeleteVertexArrays);
+        static auto&& singleton = make_pool(glGenVertexArrays, glDeleteVertexArrays);
         return singleton;
     }
 

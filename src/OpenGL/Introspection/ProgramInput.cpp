@@ -16,7 +16,7 @@ operator<<(std::ostream& os, const ProgramInput& input)
     }
     os << "type=" << nameOfDataType(input.type) << ", array_size=" << input.asize << '\n';
     os << "location=" << input.location << ", component location=" << input.component << '\n';
-    os << Resource::referenced_stages(input.referenced);
+//    os << Resource::referenced_stages(input.referenced);
     return os;
 }
 

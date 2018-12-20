@@ -4,8 +4,21 @@
  */
 #include <OpenGL/Constants.hpp>
 #include <Utility/Debug.hpp>
+#include <Utility/Enumeration.hpp>
 #include <Math/Math.hpp>
 
+
+DEFINE_ENUMERATION_DATABASE(OpenGL::ShaderStage) {
+#define PAIR(e) {OpenGL::ShaderStage::e, #e}
+        PAIR(Vertex),
+        PAIR(TessellationControl),
+        PAIR(TessellationEvaluation),
+        PAIR(Geometry),
+        PAIR(Fragment),
+        PAIR(Compute),
+        PAIR(Max),
+#undef PAIR
+};
 
 using namespace glm;
 
@@ -304,36 +317,36 @@ nameOfDataType(GLenum type)
 }
 
 expected<GLenum, std::string> // suffix is expected to be small; no reference needed
-shaderTypeOfSuffix(std::string suffix)
+suffix_shader_type(std::string suffix)
 {
     static constexpr struct {
         const char* const s;
         GLenum t;
     } pairs[] =
             {
-                    {"vert", GL_VERTEX_SHADER},
-                    {"vs",   GL_VERTEX_SHADER},
-                    {"tesc", GL_TESS_CONTROL_SHADER},
-                    {"tcs",  GL_TESS_CONTROL_SHADER},
-                    {"tese", GL_TESS_EVALUATION_SHADER},
-                    {"tes",  GL_TESS_EVALUATION_SHADER},
-                    {"geom", GL_GEOMETRY_SHADER},
-                    {"gs",   GL_GEOMETRY_SHADER},
-                    {"frag", GL_FRAGMENT_SHADER},
-                    {"fs",   GL_FRAGMENT_SHADER},
-                    {"comp", GL_COMPUTE_SHADER},
-                    {"cs",   GL_COMPUTE_SHADER},
+                    {".vert", GL_VERTEX_SHADER},
+                    {".vs",   GL_VERTEX_SHADER},
+                    {".tesc", GL_TESS_CONTROL_SHADER},
+                    {".tcs",  GL_TESS_CONTROL_SHADER},
+                    {".tese", GL_TESS_EVALUATION_SHADER},
+                    {".tes",  GL_TESS_EVALUATION_SHADER},
+                    {".geom", GL_GEOMETRY_SHADER},
+                    {".gs",   GL_GEOMETRY_SHADER},
+                    {".frag", GL_FRAGMENT_SHADER},
+                    {".fs",   GL_FRAGMENT_SHADER},
+                    {".comp", GL_COMPUTE_SHADER},
+                    {".cs",   GL_COMPUTE_SHADER},
             };
     for (auto&&[s, type] : pairs) {
         if (s == suffix) {
             return type;
         }
     }
-    return make_unexpected("Unknown suffix ." + suffix);
+    return make_unexpected("Unknown suffix: " + suffix);
 }
 
 std::string
-nameOfShaderType(GLenum type)
+shader_type_name(GLenum type)
 {
     switch (type) {
         case GL_VERTEX_SHADER:
@@ -405,7 +418,7 @@ nameOfProgramInterface(GLenum interface)
 }
 
 GLbitfield
-bitOfShaderType(GLenum type)
+shader_type_bit(GLenum type)
 {
     switch (type) {
         case GL_VERTEX_SHADER:
@@ -426,7 +439,7 @@ bitOfShaderType(GLenum type)
 }
 
 ShaderStage
-stageOfShaderBit(GLbitfield bits)
+shader_bit_stage(GLbitfield bits)
 // TODO input is bit mask! it doesn't work generally.
 {
     switch (bits) {
@@ -450,7 +463,7 @@ stageOfShaderBit(GLbitfield bits)
 }
 
 GLbitfield
-bitOfShaderStage(ShaderStage stage)
+shader_stage_bit(ShaderStage stage)
 {
     switch (stage) {
         case ShaderStage::Vertex:
@@ -473,7 +486,7 @@ bitOfShaderStage(ShaderStage stage)
 }
 
 ShaderStage
-stageOfShaderType(GLenum type)
+shader_type_stage(GLenum type)
 {
     switch (type) {
         case GL_VERTEX_SHADER:
@@ -491,7 +504,27 @@ stageOfShaderType(GLenum type)
         default:
             UNREACHABLE;
     }
+}
 
+GLenum
+shader_stage_type(ShaderStage stage)
+{
+    switch (stage) {
+        case ShaderStage::Vertex:
+            return GL_VERTEX_SHADER;
+        case ShaderStage::TessellationControl:
+            return GL_TESS_CONTROL_SHADER;
+        case ShaderStage::TessellationEvaluation:
+            return GL_TESS_EVALUATION_SHADER;
+        case ShaderStage::Geometry:
+            return GL_GEOMETRY_SHADER;
+        case ShaderStage::Fragment:
+            return GL_FRAGMENT_SHADER;
+        case ShaderStage::Compute:
+            return GL_COMPUTE_SHADER;
+        default:
+            UNREACHABLE;
+    }
 }
 
 } // namespace OpenGL

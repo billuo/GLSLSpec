@@ -11,8 +11,10 @@
 
 
 class MeshBase {
-
   public:
+    MeshBase(std::size_t n_vertices) : m_n_vertices(n_vertices)
+    {}
+
     void draw(GLuint program)
     {
         update_layout(program);
@@ -44,8 +46,9 @@ class Mesh : public MeshBase {
     template <typename _T>
     using VertexBuffer = OpenGL::VertexBuffer<_T>;
   public:
-    Mesh(Owned<VertexBuffer<P>> positions, Owned<VertexBuffer<N>> normals,
+    Mesh(std::size_t n_vertices, Owned<VertexBuffer<P>> positions, Owned<VertexBuffer<N>> normals,
          Owned<VertexBuffer<T>> tex_coords, Owned<VertexBuffer<C>> colors = {}) :
+            MeshBase(n_vertices),
             m_positions(std::move(positions)),
             m_normals(std::move(normals)),
             m_tex_coords(std::move(tex_coords)),
@@ -57,7 +60,6 @@ class Mesh : public MeshBase {
         auto&& upload = [this](auto& vbo)
         {
             if (vbo) {
-                this->m_n_vertices = vbo->size();
                 vbo->upload();
             }
         };
@@ -73,7 +75,8 @@ class Mesh : public MeshBase {
             return;
         }
         m_vertex_program = program;
-        auto& input = OpenGL::Introspector::Get(m_vertex_program).lock()->input();
+        auto&& locked = OpenGL::Introspector::Get(m_vertex_program).lock();
+        auto& input = locked->input();
         m_layout.clear();
         m_layout.bind();
         auto&& provide = [this, &input](auto& vbo)
@@ -85,6 +88,8 @@ class Mesh : public MeshBase {
                 if (a_input) {
                     m_layout.bind_buffer(*vbo);
                     m_layout.attribute_name_me(a_input->location, usage);
+                } else {
+                    Log::w("{} not found", m_layout.attribute(usage)->name);
                 }
             }
         };

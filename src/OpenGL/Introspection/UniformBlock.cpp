@@ -78,7 +78,7 @@ operator<<(std::ostream& os, const UniformBlock& block)
 {
     os << static_cast<const Resource&>(block) << '\n';
     os << "binding=" << block.binding << ", size=" << block.size << "\n";
-    os << Resource::referenced_stages(block.referenced) << "\n{";
+//    os << Resource::referenced_stages(block.referenced) << "\n{";
     for (auto&& u : block.uniforms) {
         os << "\n\t" << static_cast<const Resource&>(u);
         os << "\n\t" << "type=" << nameOfDataType(u.type) << ", offset=" << u.offset << "\n";

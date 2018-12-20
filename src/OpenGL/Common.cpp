@@ -17,6 +17,7 @@ Initialize()
         Log::c("GLFW failed to initialize!!!");
         std::exit(EXIT_FAILURE);
     }
+    glfwWindowHint(GLFW_RESIZABLE, options.flags.resizable ? GLFW_TRUE : GL_FALSE);
     glfwWindowHint(GLFW_VISIBLE, options.window.hidden ? GLFW_FALSE : GLFW_TRUE);
     glfwWindowHint(GLFW_FLOATING, options.window.always_on_top ? GLFW_TRUE : GLFW_FALSE);
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, DEBUG_BUILD ? GLFW_TRUE : GLFW_FALSE);
@@ -24,6 +25,7 @@ Initialize()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, options.opengl.version.major);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, options.opengl.version.minor);
     main_window = std::make_unique<Window>();
+    glEnable(GL_DEBUG_OUTPUT);
     glDebugMessageCallback(OpenGLOnDebug, nullptr);
     glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
     glEnable(GL_DEPTH_TEST);
