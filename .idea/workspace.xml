@@ -5,8 +5,8 @@
       <config projectName="GLSLViewer" targetName="test" />
       <config projectName="GLSLViewer" targetName="generated-glad" />
       <config projectName="GLSLViewer" targetName="MainLib" />
-      <config projectName="GLSLViewer" targetName="GLSLSpec" />
       <config projectName="GLSLViewer" targetName="third_party" />
+      <config projectName="GLSLViewer" targetName="GLSLSpec" />
     </generated>
   </component>
   <component name="CMakeSettings">
@@ -16,6 +16,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="460e510e-385f-4180-b246-988c8b40ad7d" name="Default Changelist" comment="Minor fixes">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Sandbox.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Sandbox.cpp" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/cmake-build-debug/" />
@@ -29,6 +30,9 @@
   <component name="FavoritesManager">
     <favorites_list name="GLSLViewer">
       <favorite_root url="file://$PROJECT_DIR$/include/Sandbox.hpp" type="psiFile" klass="com.intellij.ide.projectView.impl.nodes.PsiFileNode" />
+    </favorites_list>
+    <favorites_list name="i lovin' it!">
+      <favorite_root url="file://$PROJECT_DIR$/3rdparty/stb/stb_image.h" type="psiFile" klass="com.intellij.ide.projectView.impl.nodes.PsiFileNode" />
     </favorites_list>
   </component>
   <component name="FileEditorManager">
@@ -48,31 +52,38 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/Sandbox.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="360">
-              <caret line="229" column="21" selection-start-line="229" selection-start-column="21" selection-end-line="229" selection-end-column="21" />
+            <state relative-caret-position="285">
+              <caret line="230" column="8" selection-start-line="230" selection-start-column="8" selection-end-line="230" selection-end-column="8" />
               <folding>
                 <element signature="e#0#65#0" />
-                <element signature="e#249#727#0" />
-                <element signature="e#790#971#1" />
-                <element signature="e#1011#1771#1" />
-                <element signature="e#1811#1936#1" />
-                <element signature="e#1982#2380#1" />
-                <element signature="e#2418#4431#0" />
-                <element signature="e#4433#5297#0" />
-                <element signature="e#5299#6276#0" />
-                <element signature="e#6278#7384#0" />
-                <element signature="e#7583#12351#0" />
-                <element signature="e#12353#12551#0" />
-                <element signature="e#12553#13344#0" />
-                <element signature="e#13346#14866#0" />
-                <element signature="e#14868#16800#0" />
-                <element signature="e#16802#17822#0" />
-                <element signature="e#17824#18448#0" />
-                <element signature="e#18450#18872#0" />
-                <element signature="e#18874#19348#0" />
-                <element signature="e#19350#20265#0" />
-                <element signature="e#20267#20704#0" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/include/OpenGL/Object/Texture.hpp">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="178">
+              <caret line="59" column="97" selection-start-line="59" selection-start-column="97" selection-end-line="59" selection-end-column="97" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/3rdparty/stb/stb_image.h">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="45">
+              <caret line="111" column="33" selection-start-line="111" selection-start-column="33" selection-end-line="111" selection-end-column="33" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/include/OpenGL/Object/Object.hpp">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="135">
+              <caret line="27" column="53" selection-start-line="27" selection-start-column="53" selection-end-line="27" selection-end-column="53" />
             </state>
           </provider>
         </entry>
@@ -80,8 +91,26 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/include/Watcher.hpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="495">
-              <caret line="55" selection-start-line="55" selection-end-line="55" />
+            <state relative-caret-position="120">
+              <caret line="24" column="71" selection-start-line="24" selection-start-column="71" selection-end-line="24" selection-end-column="71" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/Console.cpp">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="238">
+              <caret line="244" column="46" selection-start-line="244" selection-start-column="46" selection-end-line="244" selection-end-column="46" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/Options.cpp">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="315">
+              <caret line="225" column="82" selection-start-line="225" selection-start-column="82" selection-end-line="225" selection-end-column="82" />
             </state>
           </provider>
         </entry>
@@ -106,13 +135,13 @@
     </option>
   </component>
   <component name="OCFindUsagesOptions" text="true" ivars="false" properties="true" derivedClasses="false" />
-  <component name="ProjectFrameBounds">
+  <component name="ProjectFrameBounds" extendedState="6">
     <option name="width" value="956" />
     <option name="height" value="1044" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
-    <navigator currentView="Scope" currentSubView="Scope 'Project Source Files'; set:Project Source Files; class com.jetbrains.cidr.lang.search.scopes.ProjectSourcesScopeProvider$SourceFilesScope" proportions="" version="1">
+    <navigator currentView="Scope" currentSubView="Scope 'Project Files'; set:Project Files; class com.intellij.psi.search.scope.ProjectFilesScope" proportions="" version="1">
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
@@ -153,6 +182,24 @@
               <item name="GLSLViewer" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
               <item name="" type="442cc68d:ScopeViewTreeModel$RootNode" />
             </path>
+            <path>
+              <item name="GLSLViewer" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
+              <item name="" type="442cc68d:ScopeViewTreeModel$RootNode" />
+              <item name="include" type="9f88c78c:ScopeViewTreeModel$FileNode" />
+            </path>
+            <path>
+              <item name="GLSLViewer" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
+              <item name="" type="442cc68d:ScopeViewTreeModel$RootNode" />
+              <item name="include" type="9f88c78c:ScopeViewTreeModel$FileNode" />
+              <item name="OpenGL" type="9f88c78c:ScopeViewTreeModel$FileNode" />
+            </path>
+            <path>
+              <item name="GLSLViewer" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
+              <item name="" type="442cc68d:ScopeViewTreeModel$RootNode" />
+              <item name="include" type="9f88c78c:ScopeViewTreeModel$FileNode" />
+              <item name="OpenGL" type="9f88c78c:ScopeViewTreeModel$FileNode" />
+              <item name="Object" type="9f88c78c:ScopeViewTreeModel$FileNode" />
+            </path>
           </expand>
           <select />
         </subPane>
@@ -161,6 +208,35 @@
             <path>
               <item name="GLSLViewer" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
               <item name="" type="442cc68d:ScopeViewTreeModel$RootNode" />
+            </path>
+            <path>
+              <item name="GLSLViewer" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
+              <item name="" type="442cc68d:ScopeViewTreeModel$RootNode" />
+              <item name="3rdparty" type="9f88c78c:ScopeViewTreeModel$FileNode" />
+            </path>
+            <path>
+              <item name="GLSLViewer" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
+              <item name="" type="442cc68d:ScopeViewTreeModel$RootNode" />
+              <item name="3rdparty" type="9f88c78c:ScopeViewTreeModel$FileNode" />
+              <item name="stb" type="9f88c78c:ScopeViewTreeModel$FileNode" />
+            </path>
+            <path>
+              <item name="GLSLViewer" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
+              <item name="" type="442cc68d:ScopeViewTreeModel$RootNode" />
+              <item name="include" type="9f88c78c:ScopeViewTreeModel$FileNode" />
+            </path>
+            <path>
+              <item name="GLSLViewer" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
+              <item name="" type="442cc68d:ScopeViewTreeModel$RootNode" />
+              <item name="include" type="9f88c78c:ScopeViewTreeModel$FileNode" />
+              <item name="OpenGL" type="9f88c78c:ScopeViewTreeModel$FileNode" />
+            </path>
+            <path>
+              <item name="GLSLViewer" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
+              <item name="" type="442cc68d:ScopeViewTreeModel$RootNode" />
+              <item name="include" type="9f88c78c:ScopeViewTreeModel$FileNode" />
+              <item name="OpenGL" type="9f88c78c:ScopeViewTreeModel$FileNode" />
+              <item name="Object" type="9f88c78c:ScopeViewTreeModel$FileNode" />
             </path>
             <path>
               <item name="GLSLViewer" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
@@ -175,7 +251,7 @@
   </component>
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="settings.editor.selected.configurable" value="reference.settingsdialog.IDE.editor.colors.Language Defaults" />
+    <property name="settings.editor.selected.configurable" value="preferences.keymap" />
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -252,7 +328,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="24363000" />
+    <option name="totallyTimeSpent" value="26296000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -264,14 +340,14 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="0" width="956" height="1044" extended-state="0" />
+    <frame x="0" y="0" width="1920" height="1044" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49933422" weight="0.43296704" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.4978166" visible="true" weight="0.13500534" />
       <window_info id="Structure" order="1" sideWeight="0.5006658" side_tool="true" weight="0.20490928" />
-      <window_info id="Favorites" order="2" sideWeight="0.5006821" side_tool="true" weight="0.2524013" />
+      <window_info id="Favorites" order="2" sideWeight="0.5021834" side_tool="true" weight="0.13500534" />
       <window_info anchor="bottom" id="Message" order="0" />
-      <window_info anchor="bottom" id="Find" order="1" weight="0.18886463" />
+      <window_info active="true" anchor="bottom" id="Find" order="1" visible="true" weight="0.18886463" />
       <window_info anchor="bottom" id="Run" order="2" weight="0.32969433" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.34825328" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
@@ -281,7 +357,7 @@
       <window_info anchor="bottom" id="Messages" order="8" weight="0.6419214" />
       <window_info anchor="bottom" id="Terminal" order="9" weight="0.35917032" />
       <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" />
-      <window_info active="true" anchor="bottom" id="Version Control" order="11" visible="true" weight="0.3176856" />
+      <window_info anchor="bottom" id="Version Control" order="11" weight="0.3176856" />
       <window_info anchor="bottom" id="CMake" order="12" weight="0.32751092" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -432,16 +508,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Console.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="648">
-          <caret line="78" selection-start-line="78" selection-end-line="78" />
-          <folding>
-            <element signature="e#678#1184#0" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/Window.cpp">
       <provider selected="true" editor-type-id="text-editor">
         <state>
@@ -486,16 +552,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-735">
           <caret line="26" selection-start-line="26" selection-end-line="26" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Options.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret line="259" column="13" selection-start-line="259" selection-start-column="13" selection-end-line="259" selection-end-column="13" />
-          <folding>
-            <element signature="e#14010#16348#0" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -590,39 +646,54 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/3rdparty/stb/stb_image.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="45">
+          <caret line="111" column="33" selection-start-line="111" selection-start-column="33" selection-end-line="111" selection-end-column="33" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/include/Watcher.hpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="495">
-          <caret line="55" selection-start-line="55" selection-end-line="55" />
+        <state relative-caret-position="120">
+          <caret line="24" column="71" selection-start-line="24" selection-start-column="71" selection-end-line="24" selection-end-column="71" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Console.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="238">
+          <caret line="244" column="46" selection-start-line="244" selection-start-column="46" selection-end-line="244" selection-end-column="46" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/include/OpenGL/Object/Texture.hpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="178">
+          <caret line="59" column="97" selection-start-line="59" selection-start-column="97" selection-end-line="59" selection-end-column="97" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/include/OpenGL/Object/Object.hpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="135">
+          <caret line="27" column="53" selection-start-line="27" selection-start-column="53" selection-end-line="27" selection-end-column="53" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Options.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="315">
+          <caret line="225" column="82" selection-start-line="225" selection-start-column="82" selection-end-line="225" selection-end-column="82" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Sandbox.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="360">
-          <caret line="229" column="21" selection-start-line="229" selection-start-column="21" selection-end-line="229" selection-end-column="21" />
+        <state relative-caret-position="285">
+          <caret line="230" column="8" selection-start-line="230" selection-start-column="8" selection-end-line="230" selection-end-column="8" />
           <folding>
             <element signature="e#0#65#0" />
-            <element signature="e#249#727#0" />
-            <element signature="e#790#971#1" />
-            <element signature="e#1011#1771#1" />
-            <element signature="e#1811#1936#1" />
-            <element signature="e#1982#2380#1" />
-            <element signature="e#2418#4431#0" />
-            <element signature="e#4433#5297#0" />
-            <element signature="e#5299#6276#0" />
-            <element signature="e#6278#7384#0" />
-            <element signature="e#7583#12351#0" />
-            <element signature="e#12353#12551#0" />
-            <element signature="e#12553#13344#0" />
-            <element signature="e#13346#14866#0" />
-            <element signature="e#14868#16800#0" />
-            <element signature="e#16802#17822#0" />
-            <element signature="e#17824#18448#0" />
-            <element signature="e#18450#18872#0" />
-            <element signature="e#18874#19348#0" />
-            <element signature="e#19350#20265#0" />
-            <element signature="e#20267#20704#0" />
           </folding>
         </state>
       </provider>
