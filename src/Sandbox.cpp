@@ -10,8 +10,8 @@
 #include <regex>
 
 #define STB_IMAGE_IMPLEMENTATION
-#include "stb/stb_image.h"
 
+#include "stb/stb_image.h"
 
 
 namespace {
@@ -19,16 +19,16 @@ namespace {
 // TODO temp
 
 
-const glm::vec3 tex0[] = {
-        glm::vec3(1.0f), glm::vec3(1.0f), glm::vec3(0.0f), glm::vec3(0.0f),
-        glm::vec3(1.0f), glm::vec3(1.0f), glm::vec3(0.0f), glm::vec3(0.0f),
-        glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f), glm::vec3(1.0f),
-        glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f), glm::vec3(1.0f),
-};
-const glm::vec3 tex1[] = {
-        glm::vec3(1.0f), glm::vec3(0.0f),
-        glm::vec3(0.0f), glm::vec3(1.0f),
-};
+    const glm::vec3 tex0[] = {
+            glm::vec3(1.0f), glm::vec3(1.0f), glm::vec3(0.0f), glm::vec3(0.0f),
+            glm::vec3(1.0f), glm::vec3(1.0f), glm::vec3(0.0f), glm::vec3(0.0f),
+            glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f), glm::vec3(1.0f),
+            glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f), glm::vec3(1.0f),
+    };
+    const glm::vec3 tex1[] = {
+            glm::vec3(1.0f), glm::vec3(0.0f),
+            glm::vec3(0.0f), glm::vec3(1.0f),
+    };
 
 } // namespace
 
@@ -93,8 +93,7 @@ void main() {
 
 std::unique_ptr<Sandbox> sandbox;
 
-Sandbox::Sandbox(Watcher& watcher) : watcher(watcher)
-{
+Sandbox::Sandbox(Watcher &watcher) : watcher(watcher) {
     m_pipeline_user.bind().label("[user]");
     // initialize internal OpenGL objects
     m_vao_internal.bind().label("[internal]");
@@ -140,8 +139,7 @@ Sandbox::Sandbox(Watcher& watcher) : watcher(watcher)
 }
 
 void
-Sandbox::import(ImportedFile file, bool add_to_watch)
-{
+Sandbox::import(ImportedFile file, bool add_to_watch) {
     if (file.path().empty()) {
         Log::w("File to import has empty path, ignored...");
         return;
@@ -171,8 +169,7 @@ Sandbox::import(ImportedFile file, bool add_to_watch)
 }
 
 bool
-Sandbox::aux_import_shader(const ImportedFile& file)
-{
+Sandbox::aux_import_shader(const ImportedFile &file) {
     auto ex_type = OpenGL::suffix_shader_type(file.path().extension());
     if (!ex_type) {
         Log::e("Can't determine shader type: {}", ex_type.error());
@@ -194,8 +191,7 @@ Sandbox::aux_import_shader(const ImportedFile& file)
 }
 
 std::string
-Sandbox::aux_preprocess_shader_source(std::string source, const std::vector<std::string>& extra_defines)
-{
+Sandbox::aux_preprocess_shader_source(std::string source, const std::vector<std::string> &extra_defines) {
     // TODO anchor ('$') seems not to work??
     std::regex version("^[:space:]*#version[^\r\n]*", std::regex_constants::basic);
     std::smatch match;
@@ -205,9 +201,8 @@ Sandbox::aux_preprocess_shader_source(std::string source, const std::vector<std:
     } else {
         it = match[0].second + 1; // still <= source.end()
     }
-    static auto&& add_define = [](std::string& str, const auto& defines)
-    {
-        for (auto& macro : defines) {
+    static auto &&add_define = [](std::string &str, const auto &defines) {
+        for (auto &macro : defines) {
             std::string define = "#define " + macro + '\n';
             auto pos = define.find_first_of('=');
             if (pos != std::string::npos) {
@@ -224,20 +219,29 @@ Sandbox::aux_preprocess_shader_source(std::string source, const std::vector<std:
 }
 
 bool
-Sandbox::aux_import_image(const ImportedFile& file)
-{
+Sandbox::aux_import_image(const ImportedFile &file) {
     int x, y, n;
     unsigned char *data = stbi_load(file.path().c_str(), &x, &y, &n, 0);
+    OpenGL::Texture tex_obj;
+    if (file.tag == "cubemap") { // TODO
+        tex_obj.Storage()
+    } else if (file.tag == "spheremap") { // TODO
+
+    } else if (file.tag == "texture") {
+        
+    } else {
+        Log::w("Unimplemented tag name {}", file.tag);
+    }
+
 //    throw unimplemented("Load image");
     return true;
 }
 
 bool
-Sandbox::aux_import_geometry(const ImportedFile& file)
-{
+Sandbox::aux_import_geometry(const ImportedFile &file) {
     using namespace OpenGL;
     std::string extension(file.path().extension());
-    for (auto& c : extension) {
+    for (auto &c : extension) {
         c = static_cast<char>(std::toupper(c));
     }
     if (extension == ".OBJ") {
@@ -257,9 +261,9 @@ Sandbox::aux_import_geometry(const ImportedFile& file)
             Log::e("Failed to load .obj file.");
             return false;
         }
-        for (auto& shape : shapes) {
+        for (auto &shape : shapes) {
             DEBUG("group name '{}'", shape.name);
-            auto& mesh = shape.mesh;
+            auto &mesh = shape.mesh;
             size_t n_vertices = mesh.indices.size();
             // XXX triangulated when loading, every face in mesh should have 3 vertices
             assert(n_vertices == mesh.num_face_vertices.size() * 3);
@@ -278,7 +282,7 @@ Sandbox::aux_import_geometry(const ImportedFile& file)
                 VertexBuffer<glm::vec3>::MappedPtr ppos;
                 VertexBuffer<glm::vec3>::MappedPtr pnorms;
                 VertexBuffer<glm::vec2>::MappedPtr puvs;
-                auto& sample = mesh.indices[0];
+                auto &sample = mesh.indices[0];
                 using Usage = VertexAttribute::Usage;
                 if (sample.vertex_index != -1) {
                     positions = std::make_unique<VertexBuffer<glm::vec3>>(Usage::Position);
@@ -295,7 +299,7 @@ Sandbox::aux_import_geometry(const ImportedFile& file)
                     tex_coords->data(mesh.indices.size() * sizeof(glm::vec2), nullptr, GL_STATIC_DRAW);
                     puvs = tex_coords->map();
                 }
-                for (auto& index : mesh.indices) {
+                for (auto &index : mesh.indices) {
                     if (positions) {
                         *ppos = {attributes.vertices[3 * index.vertex_index],
                                  attributes.vertices[3 * index.vertex_index + 1],
@@ -334,22 +338,21 @@ Sandbox::aux_import_geometry(const ImportedFile& file)
 }
 
 bool
-Sandbox::aux_import_dependency(const ImportedFile& path)
-{
+Sandbox::aux_import_dependency(const ImportedFile &path) {
     // TODO import dependencies of shader (with in-source '#include')
     throw unimplemented("Load dependencies");
     return true;
 }
 
 void
-Sandbox::recompile_all()
-{
+Sandbox::recompile_all() {
     using Stage = OpenGL::ShaderStage;
     static const std::vector<Stage> stages = {Stage::Vertex, Stage::TessellationControl,
                                               Stage::TessellationEvaluation, Stage::Geometry,
                                               Stage::Fragment, Stage::Compute};
-    static auto recompile_it = [](ImportedProgram& imported, auto stage, auto usage)
-    { imported = aux_compile(imported.file, stage, usage); };
+    static auto recompile_it = [](ImportedProgram &imported, auto stage, auto usage) {
+        imported = aux_compile(imported.file, stage, usage);
+    };
     for (auto stage : stages) {
         recompile_it(m_programs_user[underlying_cast(stage)], stage, ShaderUsage::User);
         recompile_it(m_programs_postprocess[underlying_cast(stage)], stage, ShaderUsage::Postprocess);
@@ -358,16 +361,15 @@ Sandbox::recompile_all()
 }
 
 Sandbox::ImportedProgram
-Sandbox::aux_compile(const ImportedFile& file, OpenGL::ShaderStage stage, ShaderUsage usage)
-{
-    auto&& ex_source = file.fetch();
+Sandbox::aux_compile(const ImportedFile &file, OpenGL::ShaderStage stage, ShaderUsage usage) {
+    auto &&ex_source = file.fetch();
     if (!ex_source) {
         Log::e("Failed to read content of {}:\n\t{}", file.path(), ex_source.error());
         return {file, OpenGL::Empty()};
     }
     auto type = OpenGL::shader_stage_type(stage);
-    auto&& name = OpenGL::shader_type_name(type);
-    auto& source = *ex_source;
+    auto &&name = OpenGL::shader_type_name(type);
+    auto &source = *ex_source;
     std::string label;
     switch (usage) {
         case ShaderUsage::User:
@@ -399,8 +401,7 @@ Sandbox::aux_compile(const ImportedFile& file, OpenGL::ShaderStage stage, Shader
 }
 
 void
-Sandbox::render()
-{
+Sandbox::render() {
     // if postprocessing is enabled, render into custom framebuffer rather than the default one.
     if (m_scene.name() != 0) {
         m_scene.bind(GL_FRAMEBUFFER);
@@ -425,7 +426,7 @@ Sandbox::render()
             ONCE_PER(Log::e("No fragment shader found."), 60);
             return;
         };
-        auto&& uniforms = aux_assign_uniforms(vertex_shader, camera);
+        auto &&uniforms = aux_assign_uniforms(vertex_shader, camera);
         // TODO material and illumination is per-mesh at least.
         GLuint name = vertex_shader.name();
         uniforms.assign(name, "L.pos", camera.world_to_view({4.0f, 10.0f, 4.0f}));
@@ -443,8 +444,7 @@ Sandbox::render()
 }
 
 void
-Sandbox::render_postprocess()
-{
+Sandbox::render_postprocess() {
     // If postprocessing is disabled, do nothing.
     if (m_scene.name() == 0) {
         return;
@@ -472,8 +472,7 @@ Sandbox::render_postprocess()
 }
 
 void
-Sandbox::render_background()
-{
+Sandbox::render_background() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     if (m_background_frag.program.name() == 0) {
         return;
@@ -491,12 +490,11 @@ Sandbox::render_background()
 }
 
 void
-Sandbox::render_debug()
-{
+Sandbox::render_debug() {
     m_pipeline_internal.use_stage(m_debug_axes, GL_ALL_SHADER_BITS);
     assert(m_pipeline_internal.valid());
     m_pipeline_internal.bind();
-    auto&& pvm = camera.projection_world();
+    auto &&pvm = camera.projection_world();
     glProgramUniformMatrix4fv(m_debug_axes.name(), 0, 1, GL_FALSE, glm::value_ptr(pvm));
     glProgramUniform1f(m_debug_axes.name(), 1, 1.0f);
     m_vao_internal.bind();
@@ -504,28 +502,26 @@ Sandbox::render_debug()
 }
 
 std::vector<std::pair<GLuint, std::string>>
-Sandbox::programs()
-{
+Sandbox::programs() {
     std::vector<std::pair<GLuint, std::string>> ret;
     for (auto&&[_, program] : m_programs_user) {
         if (program.name() != 0) {
             ret.emplace_back(program.name(), program.label());
         }
     }
-    auto& background_frag = m_background_frag.program;
+    auto &background_frag = m_background_frag.program;
     if (background_frag.name() != 0) {
         ret.emplace_back(background_frag.name(), background_frag.label());
     }
     return ret;
 }
 
-const OpenGL::ProgramInterface<OpenGL::Uniform>&
-Sandbox::aux_assign_uniforms(const OpenGL::Program& program, const Scene::Camera& camera)
-{
-    auto&& uni = program.interfaces().lock()->uniform();
+const OpenGL::ProgramInterface<OpenGL::Uniform> &
+Sandbox::aux_assign_uniforms(const OpenGL::Program &program, const Scene::Camera &camera) {
+    auto &&uni = program.interfaces().lock()->uniform();
     GLuint name = program.name();
-    auto&& vp = main_window->viewport();
-    auto&& mpos = main_window->mouse_position();
+    auto &&vp = main_window->viewport();
+    auto &&mpos = main_window->mouse_position();
     mpos.y = vp.w - mpos.y; // XXX
     uni.assign(name, "u_viewport", vp);
     uni.assign(name, "u_fbsize", main_window->frame_buffer_size());
@@ -541,8 +537,7 @@ Sandbox::aux_assign_uniforms(const OpenGL::Program& program, const Scene::Camera
 }
 
 void
-Sandbox::toggle_background()
-{
+Sandbox::toggle_background() {
     if (m_background_frag.program.name() == 0) {
         if (m_background_frag.file.path().empty()) {
             Log::w("Background shader not yet specified; can not enable");
