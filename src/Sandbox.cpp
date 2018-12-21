@@ -77,32 +77,20 @@ const std::string background_vert_source = R"SHADER(
 out gl_PerVertex {
     vec4 gl_Position;
 };
+out vec2 v_position; // [-1, 1]
+out vec2 v_texcoord; // [0, 1]
 void main() {
     const vec2[] vertices = vec2[](vec2(-1.0f, -1.0f), vec2(1.0f, -1.0f), vec2(1.0f, 1.0f), vec2(-1.0f, 1.0f));
     if (gl_VertexID < 3) {
-        gl_Position.xy = vertices[gl_VertexID];
+        v_position = vertices[gl_VertexID];
     } else {
-        gl_Position.xy = vertices[(gl_VertexID - 1) % 4];
+        v_position = vertices[(gl_VertexID - 1) % 4];
     }
-    gl_Position.zw = vec2(1.0f, 1.0f);
+    gl_Position = vec4(v_position, 1.0f, 1.0f);
+    v_texcoord = (v_position + 1.0) / 2.0;
 })SHADER";
 
-const std::string postprocess_vert_source = R"SHADER(
-#version 430 core
-out gl_PerVertex {
-    vec4 gl_Position;
-};
-out vec2 p_texcoord; // tex coord of fragment in scene texture
-void main() {
-    const vec2[] vertices = vec2[](vec2(-1.0f, -1.0f), vec2(1.0f, -1.0f), vec2(1.0f, 1.0f), vec2(-1.0f, 1.0f));
-    if (gl_VertexID < 3) {
-        gl_Position.xy = vertices[gl_VertexID];
-    } else {
-        gl_Position.xy = vertices[(gl_VertexID - 1) % 4];
-    }
-    gl_Position.zw = vec2(1.0f, 1.0f);
-    p_texcoord = (gl_Position.xy + 1.0) / 2.0;
-})SHADER";
+const std::string& postprocess_vert_source = background_vert_source;
 
 std::unique_ptr<Sandbox> sandbox;
 
@@ -199,7 +187,7 @@ Sandbox::aux_import_shader(const ImportedFile& file)
         m_postprocess_frag = aux_compile(file, stage, ShaderUsage::Postprocess);
         Log::i("Postprocess shader {} imported", m_postprocess_frag.program.label());
     }
-    if (original != file) {
+    if (!original.path().empty() && original != file) {
         watcher.unwatch(original.path(), original.tag);
     }
     return true;

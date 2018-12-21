@@ -41,14 +41,49 @@ uniform sampler2D u_scene;
 uniform sampler2D u_depth;
 uniform float u_time;
 
+in vec2 v_position;
 in vec2 p_texcoord;
 
 out vec4 o_color;
 
+vec3 color_floor(vec3 p)
+{
+    if (fract(p.x*0.2)>0.2) {
+        if (fract(p.z*0.2) > 0.2) {
+            return vec3(0.0f, 0.1f, 0.2f);
+        }
+        return vec3(1.0f, 1.0f, 1.0f);
+    } else {
+        if (fract(p.z*0.2) > 0.2) {
+            return vec3(1.0f, 1.0f, 1.0f);
+        }
+        return vec3(0.3f, 0.0f, 0.0f);
+    }
+}
+
+vec3 color_primitive(vec3 p)
+{
+    return vec3(0.6f, 0.6f, 0.8f);
+}
+
+vec2 obj_floor(vec3 p)
+{
+    return vec2(p.y + 10.0, 0);
+}
+
+vec2 distance_to_obj(vec3 p)
+{
+    return obj_floor(p);
+}
+
 void main() {
     vec2 tex = p_texcoord;
-    tex.x += 0.02f * cos(tex.y * 8 * PI + u_time * 4);
-    o_color.rgb = texture(u_scene, tex).rgb;
+    tex.x += 0.02f * cos(tex.y * 8 * PI + u_time * PI);
+    float sqrt2over2 = 1.414f /2f;
+    vec2 shifted = tex + mat2(2*sqrt2over2, 2*sqrt2over2, -sqrt2over2, sqrt2over2) * vec2(0.01f * sin(u_time), 0.01f* cos(u_time));
+    vec3 color = mix(texture(u_scene, shifted).rgb, texture(u_scene, tex).rgb, 0.5f);
+    color = max(color, 0.3f * vec3(abs(sin(u_time))));
+    o_color = vec4(color, 1.0f);
 }
 
 #else
