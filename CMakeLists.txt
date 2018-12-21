@@ -80,12 +80,17 @@ add_library(MainLib
 		src/Scene/Camera.cpp
 		src/Scene/Node.cpp
 		src/Utility/Log.cpp
-		src/Utility/Misc.cpp include/OpenGL/VertexBuffer.hpp src/OpenGL/VertexAttribute.cpp src/OpenGL/Object/Texture.cpp include/OpenGL/Object/Texture.hpp src/OpenGL/Object/Sampler.cpp include/OpenGL/Object/Sampler.hpp src/OpenGL/Object/Framebuffer.cpp include/OpenGL/Object/Framebuffer.hpp src/OpenGL/Object/RenderBuffer.cpp include/OpenGL/Object/RenderBuffer.hpp)
+		src/Utility/Misc.cpp
+		src/OpenGL/VertexAttribute.cpp
+		src/OpenGL/Object/Texture.cpp
+		src/OpenGL/Object/Sampler.cpp
+		src/OpenGL/Object/Framebuffer.cpp
+		src/OpenGL/Object/RenderBuffer.cpp)
 
 message(STATUS "Build target:${CMAKE_HOST_SYSTEM_NAME}")
 set(HOST ${CMAKE_HOST_SYSTEM_NAME})
 target_compile_definitions(MainLib PUBLIC APP_NAME=\"GLSLViewer\")
-target_compile_definitions(MainLib PUBLIC APP_VERSION=\"0.2.0\")
+target_compile_definitions(MainLib PUBLIC APP_VERSION=\"0.3.0\")
 target_compile_definitions(MainLib PUBLIC PLATFORM_NAME=\"${HOST}\")
 target_compile_definitions(MainLib PUBLIC $<$<STREQUAL:${HOST},Linux>:PLATFORM_LINUX>)
 target_compile_definitions(MainLib PUBLIC $<$<STREQUAL:${HOST},Windows>:PLATFORM_WINDOWS>)
