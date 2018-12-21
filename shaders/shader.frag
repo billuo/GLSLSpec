@@ -47,8 +47,8 @@ out vec4 o_color;
 
 void main() {
     vec2 tex = p_texcoord;
-    tex.x += 0.05f * cos(tex.y * 8 * PI + u_time);
-    o_color.rgb = vec3(1.0f) - texture(u_scene, tex).rgb;
+    tex.x += 0.02f * cos(tex.y * 8 * PI + u_time * 4);
+    o_color.rgb = texture(u_scene, tex).rgb;
 }
 
 #else

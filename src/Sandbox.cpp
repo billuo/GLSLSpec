@@ -185,15 +185,22 @@ Sandbox::aux_import_shader(const ImportedFile& file)
     }
     auto stage = OpenGL::shader_type_stage(*ex_type);
     auto n = underlying_cast(stage);
+    ImportedFile original;
     if (file.tag == "user") {
+        original = m_programs_user[n].file;
         m_programs_user[n] = aux_compile(file, stage, ShaderUsage::User);
         Log::i("User shader {} imported", m_programs_user[n].program.label());
     } else if (file.tag == "background") {
+        original = m_background_frag.file;
         m_background_frag = aux_compile(file, stage, ShaderUsage::Background);
         Log::i("Background shader {} imported", m_background_frag.program.label());
     } else if (file.tag == "postprocess") {
+        original = m_postprocess_frag.file;
         m_postprocess_frag = aux_compile(file, stage, ShaderUsage::Postprocess);
         Log::i("Postprocess shader {} imported", m_postprocess_frag.program.label());
+    }
+    if (original != file) {
+        watcher.unwatch(original.path(), original.tag);
     }
     return true;
 }
@@ -537,7 +544,7 @@ Sandbox::aux_assign_uniforms(const OpenGL::Program& program, const Scene::Camera
     uni.assign(name, "u_mpos", mpos);
     uni.assign(name, "u_time", static_cast<float>(glfwGetTime()));
     uni.assign(name, "u_camera", camera.transform().position);
-    uni.assign(name, "u_camera_clip", camera.clip());
+    uni.assign(name, "u_clip", camera.clip());
     uni.assign(name, "PVM", camera.projection_world());
     uni.assign(name, "PV", camera.projection_view());
     uni.assign(name, "VM", camera.view_world());
@@ -566,6 +573,7 @@ Sandbox::aux_allocate_framebuffer_texture(glm::ivec2 fbsize)
     m_scene.bind(GL_FRAMEBUFFER);
     //
     OpenGL::Texture::Activate(0);
+    m_color_texture = OpenGL::Texture();
     m_color_texture.bind(GL_TEXTURE_2D);
     m_color_texture.Storage(GL_TEXTURE_2D, 1, GL_RGBA8, fbsize.x, fbsize.y);
     m_scene.Attach(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, m_color_texture, 0);
@@ -576,6 +584,7 @@ Sandbox::aux_allocate_framebuffer_texture(glm::ivec2 fbsize)
     m_color_sampler.set(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     //
     OpenGL::Texture::Activate(1);
+    m_depth_texture = OpenGL::Texture();
     m_depth_texture.bind(GL_TEXTURE_2D);
     m_depth_texture.Storage(GL_TEXTURE_2D, 1, GL_DEPTH_COMPONENT32F, fbsize.x, fbsize.y);
     m_scene.Attach(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, m_depth_texture, 0);

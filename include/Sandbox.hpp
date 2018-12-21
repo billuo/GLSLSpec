@@ -122,8 +122,8 @@ class Sandbox {
     ImportedProgram m_postprocess_frag;
 
     OpenGL::Framebuffer m_scene; ///< FBO for postprocessing.
-    OpenGL::Texture m_color_texture; ///< Input of postprocessing, attached to postprocessing FBO.
-    OpenGL::Texture m_depth_texture; ///< Input of postprocessing, attached to postprocessing FBO.
+    OpenGL::Texture m_color_texture{Empty()}; ///< Input of postprocessing, attached to postprocessing FBO.
+    OpenGL::Texture m_depth_texture{Empty()}; ///< Input of postprocessing, attached to postprocessing FBO.
     OpenGL::Sampler m_color_sampler; ///< Sampler for m_color_texture
     OpenGL::Sampler m_depth_sampler; ///< Sampler for m_depth_texture
 

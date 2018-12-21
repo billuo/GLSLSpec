@@ -1,21 +1,20 @@
 #version 430 core
 
 uniform sampler2D   u_scene;
-uniform sampler2D   u_sceneDepth;
+uniform sampler2D   u_depth;
 
 uniform vec3        u_camera;
-uniform vec2        u_camera_clip;
+uniform vec2        u_clip;
+#define u_light vec3(5.0f, 10.0f, 5.0f)
+uniform ivec2        u_fbsize;
 
-uniform vec3        u_light;
-uniform vec3        u_lightColor;
-uniform vec2        u_resolution;
-
-in vec3        v_position;
 in vec3        v_normal;
-in vec2        v_texcoord;
+in vec2        p_texcoord;
+
+out vec4 o_color;
 
 float linearizeDepth(float zoverw) {
-    return (2.0 * u_camera_clip.x) / (u_camera_clip.y + u_camera_clip.x - zoverw * (u_camera_clip.y - u_camera_clip.x));
+    return (2.0 * u_clip.x) / (u_clip.y + u_clip.x - zoverw * (u_clip.y - u_clip.x));
 }
 
 // The MIT License
@@ -349,42 +348,35 @@ mat3 setCamera( in vec3 ro, in vec3 ta) {
     return mat3( cu, cv, cw );
 }
 
-void main() {
-    vec3 color = vec3(0.0);
-    vec2 uv = v_texcoord;
-    vec2 st = gl_FragCoord.xy/u_resolution;
+#if defined(POSTPROCESS)
 
-// #ifdef BACKGROUND
-#if defined(POSTPROCESSING)
+void main() {
+    vec2 st = p_texcoord;
+    vec2 uv = (st + 1.0f) / 2.0f;
 
     // camera
-    vec3 ta = vec3( 0.0, 0.0, 0.0 );
+    vec3 ta = vec3(0.0, 0.0, 0.0);
 
     // camera-to-world transformation
-    mat3 ca = setCamera( u_camera, ta);
+    mat3 ca = setCamera(u_camera, ta);
 
     // ray direction
-    vec3 rd = ca * normalize( vec3(uv*2.0-1.0, 2.0) );
+    vec3 rd = ca * normalize(vec3(st, 2.0));
 
     // render
-    vec4 rndr_raymarch = render( u_camera * 0.11, rd );
+    vec4 rndr_raymarch = render(u_camera * 0.11, rd);
 
-    float depth = texture(u_sceneDepth, uv).x;
-    depth = linearizeDepth(depth) * u_camera_clip.y;
+    float depth = texture2D(u_depth, uv).r;
+    depth = linearizeDepth(depth) * u_clip.y;
 
-    vec4 rndr_foward = texture(u_scene, st);
+    vec4 rndr_foward = texture2D(u_scene, st);
 
-    color = mix(rndr_raymarch.rgb, rndr_foward.rgb, 1.0-step(rndr_raymarch.a * 0.175, depth * 0.01));
+    vec3 color = mix(rndr_raymarch.rgb, rndr_foward.rgb, 1.0-step(rndr_raymarch.a * 0.175, depth * 0.01));
 
     // gamma
-    color = pow( color, vec3(0.4545454545) );
-#else
-    // FOWARD RENDER
-    color = vec3(.5);
+    color = pow(color, vec3(0.4545454545));
+    o_color = vec4(color, 1.0);
+}
 
-    float shade = dot(v_normal, normalize(u_light));
-    color *= smoothstep(-1.0, 1.0, shade);
 #endif
 
-    gl_FragColor = vec4( color, 1.0 );
-}
