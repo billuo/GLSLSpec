@@ -193,7 +193,7 @@ Window::set_viewport(glm::ivec2 size)
     glfwMakeContextCurrent(m_handle);
     glViewport(0, 0, size.x, size.y);
     if (sandbox) {
-        sandbox->camera.set_aspect(static_cast<float>(size.x) / size.y);
+        sandbox->on_resize(size);
     }
     m_properties.viewport = glm::ivec4(0, 0, size.x, size.y);
 }

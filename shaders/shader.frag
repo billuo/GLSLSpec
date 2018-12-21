@@ -1,6 +1,6 @@
 #version 430 core
 
-#ifdef BACKGROUND
+#if defined(BACKGROUND)
 
 #define PI_TWO 1.5707963
 #define PI 3.1415926
@@ -19,7 +19,7 @@ vec3 hsb2rgb(vec3 hsb) {
 
 out vec4 o_color;
 
-void main(void) {
+void main() {
     vec2 st = gl_FragCoord.xy / u_fbsize;
     vec2 ij = vec2(u_mpos) / u_fbsize;
     //
@@ -32,6 +32,23 @@ void main(void) {
     vec3 color = mix(hsb2rgb(vec3(angle/TWO_PI, r, 1.0f)), hsb2rgb(vec3(mouse_angle/TWO_PI, mouse_r, 1.0f)), step(1.0f, r));
     //
     o_color = vec4(color, 1.0f);
+}
+#elif defined(POSTPROCESS)
+
+#define PI 3.1415926
+
+uniform sampler2D u_scene;
+uniform sampler2D u_depth;
+uniform float u_time;
+
+in vec2 p_texcoord;
+
+out vec4 o_color;
+
+void main() {
+    vec2 tex = p_texcoord;
+    tex.x += 0.05f * cos(tex.y * 8 * PI + u_time);
+    o_color.rgb = vec3(1.0f) - texture(u_scene, tex).rgb;
 }
 
 #else

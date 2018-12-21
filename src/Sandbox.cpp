@@ -87,6 +87,23 @@ void main() {
     gl_Position.zw = vec2(1.0f, 1.0f);
 })SHADER";
 
+const std::string postprocess_vert_source = R"SHADER(
+#version 430 core
+out gl_PerVertex {
+    vec4 gl_Position;
+};
+out vec2 p_texcoord; // tex coord of fragment in scene texture
+void main() {
+    const vec2[] vertices = vec2[](vec2(-1.0f, -1.0f), vec2(1.0f, -1.0f), vec2(1.0f, 1.0f), vec2(-1.0f, 1.0f));
+    if (gl_VertexID < 3) {
+        gl_Position.xy = vertices[gl_VertexID];
+    } else {
+        gl_Position.xy = vertices[(gl_VertexID - 1) % 4];
+    }
+    gl_Position.zw = vec2(1.0f, 1.0f);
+    p_texcoord = (gl_Position.xy + 1.0) / 2.0;
+})SHADER";
+
 std::unique_ptr<Sandbox> sandbox;
 
 Sandbox::Sandbox(Watcher& watcher) : watcher(watcher)
@@ -95,7 +112,7 @@ Sandbox::Sandbox(Watcher& watcher) : watcher(watcher)
     // initialize internal OpenGL objects
     m_vao_internal.bind().label("[internal]");
     m_pipeline_internal.bind().label("[internal]");
-    // initialize internal programs
+    // initialize debug shaders
     OpenGL::Shader axes_vert(GL_VERTEX_SHADER), axes_frag(GL_FRAGMENT_SHADER);
     axes_vert.source(axes_vert_source).compile();
     axes_frag.source(axes_frag_source).compile();
@@ -110,29 +127,21 @@ Sandbox::Sandbox(Watcher& watcher) : watcher(watcher)
     background_vert.source(background_vert_source).compile();
     m_background_vert.set(GL_PROGRAM_SEPARABLE, GL_TRUE).attach(background_vert).link();
     if (m_background_vert.name() == 0) {
-        ERROR("Background drawing vertex shader stage invalid!");
+        ERROR("Background rendering vertex shader invalid!");
     } else {
         m_background_vert.label("[background]vertex");
     }
-    // initialize framebuffer
-#if 0 // TODO below are temp
+    // initialize postprocessing
+    OpenGL::Shader postprocess_vert(GL_VERTEX_SHADER);
+    postprocess_vert.source(postprocess_vert_source).compile();
+    m_postprocess_vert.set(GL_PROGRAM_SEPARABLE, GL_TRUE).attach(postprocess_vert).link();
+    if (m_postprocess_vert.name() == 0) {
+        ERROR("Postprocess rendering vertex shader invalid!");
+    } else {
+        m_postprocess_vert.label("[postprocess]vertex");
+    }
     m_scene.bind(GL_FRAMEBUFFER).label("[scene]");
-    auto&& fbsize = main_window->frame_buffer_size();
-    color_texture.bind(GL_TEXTURE_2D);
-    color_texture.Storage(GL_TEXTURE_2D, 1, GL_RGBA8, fbsize.x, fbsize.y);
-    color_texture.activate(0);
-    color_sampler.bind(0);
-    color_sampler.set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    color_sampler.set(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    depth_texture.bind(GL_TEXTURE_2D);
-    depth_texture.Storage(GL_TEXTURE_2D, 1, GL_DEPTH_COMPONENT32F, fbsize.x, fbsize.y);
-    depth_texture.activate(1);
-    depth_sampler.bind(1);
-    m_scene.Attach(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, color_texture, 0);
-    m_scene.Attach(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depth_texture, 0);
-    glDrawBuffer(GL_COLOR_ATTACHMENT0);
-    m_scene.unbind(GL_FRAMEBUFFER);
-#endif
+    aux_allocate_framebuffer_texture(main_window->frame_buffer_size());
 }
 
 void
@@ -183,8 +192,8 @@ Sandbox::aux_import_shader(const ImportedFile& file)
         m_background_frag = aux_compile(file, stage, ShaderUsage::Background);
         Log::i("Background shader {} imported", m_background_frag.program.label());
     } else if (file.tag == "postprocess") {
-        m_programs_postprocess[n] = aux_compile(file, stage, ShaderUsage::Postprocess);
-        Log::i("Postprocess shader {} imported", m_programs_postprocess[n].program.label());
+        m_postprocess_frag = aux_compile(file, stage, ShaderUsage::Postprocess);
+        Log::i("Postprocess shader {} imported", m_postprocess_frag.program.label());
     }
     return true;
 }
@@ -347,9 +356,9 @@ Sandbox::recompile_all()
     { imported = aux_compile(imported.file, stage, usage); };
     for (auto stage : stages) {
         recompile_it(m_programs_user[underlying_cast(stage)], stage, ShaderUsage::User);
-        recompile_it(m_programs_postprocess[underlying_cast(stage)], stage, ShaderUsage::Postprocess);
     }
     recompile_it(m_background_frag, Stage::Fragment, ShaderUsage::Background);
+    recompile_it(m_postprocess_frag, Stage::Fragment, ShaderUsage::Postprocess);
 }
 
 Sandbox::ImportedProgram
@@ -378,6 +387,10 @@ Sandbox::aux_compile(const ImportedFile& file, OpenGL::ShaderStage stage, Shader
             source = aux_preprocess_shader_source(source, {"BACKGROUND"});
             break;
         case ShaderUsage::Postprocess:
+            if (stage != OpenGL::ShaderStage::Fragment) {
+                ERROR("Only fragment shader can be specified in postprocess phase rendering");
+                return {file, OpenGL::Empty()};
+            }
             label = "[postprocess]" + name;
             source = aux_preprocess_shader_source(source, {"POSTPROCESS"});
             break;
@@ -394,12 +407,35 @@ Sandbox::aux_compile(const ImportedFile& file, OpenGL::ShaderStage stage, Shader
 }
 
 void
-Sandbox::render()
+Sandbox::render_background()
 {
     // if postprocessing is enabled, render into custom framebuffer rather than the default one.
-    if (m_scene.name() != 0) {
+    if (m_postprocess_frag.program.name() != 0) {
+        m_scene.unbind(GL_FRAMEBUFFER);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear default buffer
         m_scene.bind(GL_FRAMEBUFFER);
     }
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear buffer currently drawing into
+    if (m_background_frag.program.name() == 0) {
+        return;
+    }
+    m_pipeline_internal.use_stage(m_background_frag.program, GL_FRAGMENT_SHADER_BIT);
+    m_pipeline_internal.use_stage(m_background_vert, GL_VERTEX_SHADER_BIT);
+    if (m_pipeline_internal.valid()) {
+        m_pipeline_internal.bind();
+        m_vao_internal.bind();
+        aux_assign_uniforms(m_background_frag.program, camera);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+    } else {
+        ONCE_PER(ERROR("Background shader program invalid."), 60);
+    }
+}
+
+void
+Sandbox::render()
+{
+    // this could either render into post-processing FBO or the default framebuffer depending on if m_scene is bound in
+    // render_background().
     using Stage = OpenGL::ShaderStage;
     for (auto stage : {Stage::Vertex, Stage::TessellationControl, Stage::TessellationEvaluation, Stage::Geometry,
                        Stage::Fragment, Stage::Compute}) {
@@ -440,48 +476,22 @@ Sandbox::render()
 void
 Sandbox::render_postprocess()
 {
-    // If postprocessing is disabled, do nothing.
-    if (m_scene.name() == 0) {
+    if (m_postprocess_frag.program.name() == 0) {
         return;
     }
-    // TODO all!
-    using Stage = OpenGL::ShaderStage;
-    for (auto stage : {Stage::Vertex, Stage::TessellationControl, Stage::TessellationEvaluation, Stage::Geometry,
-                       Stage::Fragment, Stage::Compute}) {
-        auto&[_, program] = m_programs_user[underlying_cast(stage)];
-        if (program.name()) {
-            m_pipeline_internal.use_stage(program, OpenGL::shader_stage_bit(stage));
-        }
-    }
-    // Otherwise, now we render into the default framebuffer.
-    m_scene.unbind(GL_FRAMEBUFFER);
+    m_scene.unbind(GL_FRAMEBUFFER); // we should rendering into default framebuffer
+    m_pipeline_internal.use_stage(m_postprocess_frag.program, GL_FRAGMENT_SHADER_BIT);
+    m_pipeline_internal.use_stage(m_postprocess_vert, GL_VERTEX_SHADER_BIT);
     if (m_pipeline_internal.valid()) {
-        m_pipeline_internal.bind();
-        const auto&[_, vertex_shader] = m_programs_user[underlying_cast(Stage::Vertex)];
-        aux_assign_uniforms(vertex_shader, camera);
-        GLuint name = vertex_shader.name();
-        for (auto&&[file, mesh] : m_meshes) {
-            mesh->draw(name);
-        }
-    }
-}
-
-void
-Sandbox::render_background()
-{
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    if (m_background_frag.program.name() == 0) {
-        return;
-    }
-    m_pipeline_internal.use_stage(m_background_frag.program, GL_FRAGMENT_SHADER_BIT);
-    m_pipeline_internal.use_stage(m_background_vert, GL_VERTEX_SHADER_BIT);
-    if (m_pipeline_internal.valid()) {
-        aux_assign_uniforms(m_background_frag.program, camera);
         m_pipeline_internal.bind();
         m_vao_internal.bind();
+        auto&& uniforms = aux_assign_uniforms(m_postprocess_frag.program, camera);
+        auto name = m_postprocess_frag.program.name();
+        uniforms.assign(name, "u_scene", 0);
+        uniforms.assign(name, "u_depth", 1);
         glDrawArrays(GL_TRIANGLES, 0, 6);
     } else {
-        ONCE_PER(ERROR("Background shader program invalid."), 60);
+        ONCE_PER(ERROR("Postprocessing shader invalid"), 60);
     }
 }
 
@@ -546,6 +556,51 @@ Sandbox::toggle_background()
         m_background_frag = aux_compile(m_background_frag.file, OpenGL::ShaderStage::Fragment, ShaderUsage::Background);
     } else {
         m_background_frag.program = OpenGL::Empty();
+    }
+}
+
+void
+Sandbox::aux_allocate_framebuffer_texture(glm::ivec2 fbsize)
+{
+    // XXX GL_TEXTURE0 & GL_TEXTURE1 are reserved for these two textures.
+    m_scene.bind(GL_FRAMEBUFFER);
+    //
+    OpenGL::Texture::Activate(0);
+    m_color_texture.bind(GL_TEXTURE_2D);
+    m_color_texture.Storage(GL_TEXTURE_2D, 1, GL_RGBA8, fbsize.x, fbsize.y);
+    m_scene.Attach(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, m_color_texture, 0);
+    m_color_sampler.bind(0);
+    m_color_sampler.set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    m_color_sampler.set(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    m_color_sampler.set(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    m_color_sampler.set(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    //
+    OpenGL::Texture::Activate(1);
+    m_depth_texture.bind(GL_TEXTURE_2D);
+    m_depth_texture.Storage(GL_TEXTURE_2D, 1, GL_DEPTH_COMPONENT32F, fbsize.x, fbsize.y);
+    m_scene.Attach(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, m_depth_texture, 0);
+    m_depth_sampler.bind(1);
+    m_depth_sampler.set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    m_depth_sampler.set(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    m_color_sampler.set(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    m_color_sampler.set(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    //
+    glDrawBuffer(GL_COLOR_ATTACHMENT0);
+    m_scene.unbind(GL_FRAMEBUFFER);
+}
+
+void
+Sandbox::toggle_postprocess()
+{
+    if (m_postprocess_frag.program.name() == 0) {
+        if (m_postprocess_frag.file.path().empty()) {
+            Log::w("Postprocessing shader not yet specified, can not enable");
+            return;
+        }
+        m_postprocess_frag =
+                aux_compile(m_postprocess_frag.file, OpenGL::ShaderStage::Fragment, ShaderUsage::Postprocess);
+    } else {
+        m_postprocess_frag.program = OpenGL::Empty();
     }
 }
 

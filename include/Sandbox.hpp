@@ -14,12 +14,19 @@
 #include <OpenGL/Object/Sampler.hpp>
 #include <OpenGL/Object/VertexArray.hpp>
 #include <OpenGL/Object/Framebuffer.hpp>
+#include "Window.hpp"
 
 
 /// Contains everything... for now
 class Sandbox {
   public:
     Sandbox(Watcher& watcher);
+
+    void on_resize(glm::ivec2 fbsize)
+    {
+        aux_allocate_framebuffer_texture(fbsize);
+        camera.set_aspect(static_cast<float>(fbsize.x) / fbsize.y);
+    }
 
     void import(ImportedFile file, bool add_to_watch = false);
 
@@ -73,36 +80,17 @@ class Sandbox {
     static const OpenGL::ProgramInterface<OpenGL::Uniform>&
     aux_assign_uniforms(const OpenGL::Program& program, const Scene::Camera& camera);
 
+    //region Forward rendering
+
     /// Program pipeline using stages of shader programs that were compiled from user specified shader sources.
     /// @note Should always be validated before use. Only used in render().
     OpenGL::ProgramPipeline m_pipeline_user;
 
-    //region Shaders for various render phases
-
-    /// Vertex shader used to draw background (compiled from internal source)
-    OpenGL::Program m_background_vert;
-    /// Fragment shader used to draw background (compiled from user source)
-    /// @note If non-empty, background rendering is enabled.
-    ImportedProgram m_background_frag;
-
     std::array<ImportedProgram, OpenGL::MaxShaderStage> m_programs_user{};
 
-    std::array<ImportedProgram, OpenGL::MaxShaderStage> m_programs_postprocess{};
-
-    OpenGL::Program m_debug_axes; /// Debug drawing -- RGB unit axes located at world origin
-    // OpenGL::Program m_debug_plane; /// Debug drawing -- x-z plane in gray grid
-
     //endregion
 
-    //region FBO
-
-    OpenGL::Framebuffer m_scene{Empty()}; ///< FBO of postprocessing @note If non-empty, postprocessing is enabled.
-    OpenGL::Texture m_color_texture; ///< Input of postprocessing, attached to postprocessing FBO.
-    OpenGL::Texture m_depth_texture; ///< Input of postprocessing, attached to postprocessing FBO.
-    OpenGL::Sampler m_color_sampler; ///< Sampler for m_color_texture
-    OpenGL::Sampler m_depth_sampler; ///< Sampler for m_depth_texture
-
-    //endregion
+    //region Debug rendering
 
     /// VAO for internal and static usage, like when drawing background or debug curves/planes.
     /// It specifies no vertex attributes at all and is the minimum VAO OpenGL can draw with.
@@ -110,16 +98,52 @@ class Sandbox {
     /// Program pipeline for internal usage, consisting of stages from pre-defined shader mostly.
     OpenGL::ProgramPipeline m_pipeline_internal;
 
+    OpenGL::Program m_debug_axes; /// Debug drawing -- RGB unit axes located at world origin
+    // OpenGL::Program m_debug_plane; /// Debug drawing -- x-z plane in gray grid
+
+    //endregion
+
+    //region Background rendering
+
+    /// Vertex shader used to draw background (compiled from internal source)
+    OpenGL::Program m_background_vert;
+    /// Fragment shader used to draw background (compiled from user source)
+    /// @note If non-empty, background rendering is enabled.
+    ImportedProgram m_background_frag;
+
+    //endregion
+
+    //region Postprocessing
+
+    /// Vertex shader used for postprocessing (compiled from internal source)
+    OpenGL::Program m_postprocess_vert;
+    /// Fragment shader used for postprocessing (compiled from user source)
+    /// @note If non-empty, postprocessing is enabled.
+    ImportedProgram m_postprocess_frag;
+
+    OpenGL::Framebuffer m_scene; ///< FBO for postprocessing.
+    OpenGL::Texture m_color_texture; ///< Input of postprocessing, attached to postprocessing FBO.
+    OpenGL::Texture m_depth_texture; ///< Input of postprocessing, attached to postprocessing FBO.
+    OpenGL::Sampler m_color_sampler; ///< Sampler for m_color_texture
+    OpenGL::Sampler m_depth_sampler; ///< Sampler for m_depth_texture
+
+    //endregion
+
+
     bool aux_import_shader(const ImportedFile& file);
 
-    /// Import a geometry to obtain mesh(es).
+    /// @brief Import a geometry to obtain mesh(es).
+    /// @param file File to import from
+    /// @return True if successfully imported and added to watch.
     bool aux_import_geometry(const ImportedFile& file);
 
-    /// User supplied meshes to draw.
+    /// @brief User supplied meshes to draw.
     std::unordered_map<ImportedFile, Shared<MeshBase>> m_meshes;
 
     bool aux_import_image(const ImportedFile& file);
     bool aux_import_dependency(const ImportedFile& path);
+
+    void aux_allocate_framebuffer_texture(glm::ivec2 fbsize);
 };
 
 extern std::unique_ptr<Sandbox> sandbox;

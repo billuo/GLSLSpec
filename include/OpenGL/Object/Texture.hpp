@@ -99,9 +99,6 @@ class Texture : public Object {
     ~Texture()
     { pool().put(std::move(m_name)); }
 
-    void activate(GLuint unit)
-    { glActiveTexture(GL_TEXTURE0 + unit); }
-
     void bind(GLenum target)
     { glBindTexture(target, name()); }
 
