@@ -62,17 +62,14 @@ Watcher::watch(const FS::path& path, FileType type, const std::string& tag)
 }
 
 void
-Watcher::unwatch(const FS::path& path, FileType type, const std::string& tag)
+Watcher::unwatch(const FS::path& path, const std::string& tag)
 {
     if (path.empty()) {
         Log::e("Can not unwatch empty path.");
         return;
     }
     std::lock_guard guard(mutex_watching_files);
-    auto n = m_watching_files.erase(std::make_pair(path, tag));
-    if (n == 0) {
-        Log::w("File to stop watching({}) was unwatched.", path);
-    }
+    m_watching_files.erase(std::make_pair(path, tag));
 }
 
 expected<ImportedFile, std::string>

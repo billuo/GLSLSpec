@@ -93,14 +93,18 @@ class Texture : public Object {
     Activate(GLuint unit)
     { glActiveTexture(GL_TEXTURE0 + unit); }
 
-    Texture() : Object(pool().get())
+    explicit Texture() : Object(pool().get())
     {}
+
+    // XXX no explicit
+    Texture(Empty) : Object(Name(0))
+    {}
+
+    Texture(Texture&&) = default;
+    Texture& operator=(Texture&&) = default;
 
     ~Texture()
     { pool().put(std::move(m_name)); }
-
-    void activate(GLuint unit)
-    { glActiveTexture(GL_TEXTURE0 + unit); }
 
     void bind(GLenum target)
     { glBindTexture(target, name()); }

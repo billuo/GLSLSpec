@@ -90,7 +90,7 @@ class Watcher {
 
     void watch(const FS::path& path, FileType type, const std::string& tag);
 
-    void unwatch(const FS::path& path, FileType type, const std::string& tag);
+    void unwatch(const FS::path& path, const std::string& tag);
 
     expected<ImportedFile, std::string> find(const FS::path& path, const std::string& tag);
 
