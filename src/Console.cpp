@@ -246,6 +246,19 @@ declare_commands()
                                  sandbox->import(file, true);
                              }
                          });
+    Console::add_command("postprocess", {0, 1}, {"shader.frag"},
+                         "Toggle post-processing. When supplied with a path to a fragment shader,"
+                         "it always enable post-processing using the specified shader.",
+                         [](std::string cmd, Arguments args)
+                         {
+                             if (args.empty()) {
+                                 sandbox->toggle_postprocess();
+                             } else {
+                                 assert(args.size() == 1);
+                                 ImportedFile file(args.front(), FileType::Shader, "postprocess");
+                                 sandbox->import(file, true);
+                             }
+                         });
     // Console::add_command("command", {0, 0}, {},
     //                      "description",
     //                      [](std::string cmd, Arguments args)

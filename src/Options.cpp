@@ -210,13 +210,29 @@ const std::vector<NamedOption> NamedOptions = {
                     options.flags.verbose = true;
                     return 0u;
                 }},
-        {"",  {"cursor"},
-                "Show cursor in window",
-                {0, 0}, {},
-                [](const std::string&, unsigned, const std::string*) -> unsigned
+        // {"",  {"cursor"},
+        //         "Show cursor in window",
+        //         {0, 0}, {},
+        //         [](const std::string&, unsigned, const std::string*) -> unsigned
+        //         {
+        //             options.window.cursor = true;
+        //             return 0u;
+        //         }},
+        {"",  {"background"},
+                "Load a fragment shader as background rendering shader",
+                {1, 1}, {"shader.frag"},
+                [](const std::string&, unsigned, const std::string* arg) -> unsigned
                 {
-                    options.window.cursor = true;
-                    return 0u;
+                    options.input_files.emplace_back(*arg, FileType::Shader, "background");
+                    return 1u;
+                }},
+        {"",  {"postprocess"},
+                "Load a fragment shader as postprocessing shader",
+                {1, 1}, {"shader.frag"},
+                [](const std::string&, unsigned, const std::string* arg) -> unsigned
+                {
+                    options.input_files.emplace_back(*arg, FileType::Shader, "postprocess");
+                    return 1u;
                 }},
         {"C", {},
                 "Load and draw an environmental cube map",
