@@ -224,7 +224,7 @@ Sandbox::aux_import_image(const ImportedFile &file) {
     unsigned char *data = stbi_load(file.path().c_str(), &x, &y, &n, 0);
     OpenGL::Texture tex_obj;
     if (file.tag == "cubemap") { // TODO
-        tex_obj.Storage()
+
     } else if (file.tag == "spheremap") { // TODO
 
     } else if (file.tag == "texture") {
