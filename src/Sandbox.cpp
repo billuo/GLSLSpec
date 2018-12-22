@@ -437,9 +437,9 @@ Sandbox::render()
         auto&&[_, program] = m_programs_user[underlying_cast(stage)];
         if (program.name()) {
             m_pipeline_user.use_stage(program, OpenGL::shader_stage_bit(stage));
+            aux_assign_uniforms(program, camera);
         }
     }
-    // TODO can pipeline with only one stage bound be 'valid'?
     if (m_pipeline_user.valid()) {
         m_pipeline_user.bind();
         const auto&[_, vertex_shader] = m_programs_user[underlying_cast(Stage::Vertex)];
@@ -451,7 +451,7 @@ Sandbox::render()
             ONCE_PER(Log::e("No fragment shader found."), 60);
             return;
         };
-        auto&& uniforms = aux_assign_uniforms(vertex_shader, camera);
+        auto&& uniforms = vertex_shader.interfaces().lock()->uniform();
         // TODO material and illumination is per-mesh at least.
         GLuint name = vertex_shader.name();
         uniforms.assign(name, "L.pos", camera.world_to_view({4.0f, 10.0f, 4.0f}));
@@ -563,8 +563,8 @@ Sandbox::aux_allocate_framebuffer_texture(glm::ivec2 fbsize)
     OpenGL::Texture::Activate(0);
     m_color_texture = OpenGL::Texture();
     m_color_texture.bind(GL_TEXTURE_2D);
-    m_color_texture.Storage(GL_TEXTURE_2D, 1, GL_RGBA8, fbsize.x, fbsize.y);
-    m_scene.Attach(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, m_color_texture, 0);
+    OpenGL::Texture::Storage(GL_TEXTURE_2D, 1, GL_RGBA8, fbsize.x, fbsize.y);
+    OpenGL::Framebuffer::Attach(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, m_color_texture, 0);
     m_color_sampler.bind(0);
     m_color_sampler.set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     m_color_sampler.set(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -574,8 +574,8 @@ Sandbox::aux_allocate_framebuffer_texture(glm::ivec2 fbsize)
     OpenGL::Texture::Activate(1);
     m_depth_texture = OpenGL::Texture();
     m_depth_texture.bind(GL_TEXTURE_2D);
-    m_depth_texture.Storage(GL_TEXTURE_2D, 1, GL_DEPTH_COMPONENT32F, fbsize.x, fbsize.y);
-    m_scene.Attach(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, m_depth_texture, 0);
+    OpenGL::Texture::Storage(GL_TEXTURE_2D, 1, GL_DEPTH_COMPONENT32F, fbsize.x, fbsize.y);
+    OpenGL::Framebuffer::Attach(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, m_depth_texture, 0);
     m_depth_sampler.bind(1);
     m_depth_sampler.set(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     m_depth_sampler.set(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
