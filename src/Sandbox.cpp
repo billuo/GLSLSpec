@@ -9,6 +9,7 @@
 #include <tol/tiny_obj_loader.h>
 #include <regex>
 
+
 #define STB_IMAGE_IMPLEMENTATION
 
 #include "stb/stb_image.h"
@@ -228,9 +229,10 @@ Sandbox::aux_preprocess_shader_source(std::string source, const std::vector<std:
 }
 
 bool
-Sandbox::aux_import_image(const ImportedFile &file) {
+Sandbox::aux_import_image(const ImportedFile& file)
+{
     int x, y, n;
-    unsigned char *data = stbi_load(file.path().c_str(), &x, &y, &n, 0);
+    unsigned char* data = stbi_load(file.path().c_str(), &x, &y, &n, 0);
     OpenGL::Texture tex_obj;
     if (file.tag == "cubemap") { // TODO
 
@@ -363,7 +365,9 @@ Sandbox::recompile_all()
                                               Stage::TessellationEvaluation, Stage::Geometry,
                                               Stage::Fragment, Stage::Compute};
     static auto recompile_it = [](ImportedProgram& imported, auto stage, auto usage)
-    { imported = aux_compile(imported.file, stage, usage); };
+    {
+        imported = aux_compile(imported.file, stage, usage);
+    };
     for (auto stage : stages) {
         recompile_it(m_programs_user[underlying_cast(stage)], stage, ShaderUsage::User);
     }
@@ -534,12 +538,13 @@ Sandbox::programs()
     return ret;
 }
 
-const OpenGL::ProgramInterface<OpenGL::Uniform> &
-Sandbox::aux_assign_uniforms(const OpenGL::Program &program, const Scene::Camera &camera) {
-    auto &&uni = program.interfaces().lock()->uniform();
+const OpenGL::ProgramInterface<OpenGL::Uniform>&
+Sandbox::aux_assign_uniforms(const OpenGL::Program& program, const Scene::Camera& camera)
+{
+    auto&& uni = program.interfaces().lock()->uniform();
     GLuint name = program.name();
-    auto &&vp = main_window->viewport();
-    auto &&mpos = main_window->mouse_position();
+    auto&& vp = main_window->viewport();
+    auto&& mpos = main_window->mouse_position();
     mpos.y = vp.w - mpos.y; // XXX
     uni.assign(name, "u_viewport", vp);
     uni.assign(name, "u_fbsize", main_window->frame_buffer_size());
@@ -555,7 +560,8 @@ Sandbox::aux_assign_uniforms(const OpenGL::Program &program, const Scene::Camera
 }
 
 void
-Sandbox::toggle_background() {
+Sandbox::toggle_background()
+{
     if (m_background_frag.program.name() == 0) {
         if (m_background_frag.file.path().empty()) {
             Log::w("Background shader not yet specified; can not enable");
