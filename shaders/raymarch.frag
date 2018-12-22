@@ -1,7 +1,5 @@
 #version 430 core
 
-#if defined(POSTPROCESS)
-
 uniform sampler2D u_scene;
 uniform sampler2D u_depth;
 
@@ -96,4 +94,3 @@ void main() {
     o_color = vec4(color, 1.0);
 }
 
-#endif
