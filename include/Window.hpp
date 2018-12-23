@@ -18,7 +18,7 @@ struct GLFWwindow;
 using Handle = GLFWwindow*;
 
 class Window {
-public:
+  public:
 
     Window();
     Window(const Window&) = delete;

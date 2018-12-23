@@ -224,6 +224,7 @@ Sandbox::aux_preprocess_shader_source(std::string source, const std::vector<std:
     std::string defines;
     add_define(defines, options.defines);
     add_define(defines, extra_defines);
+    defines += "#line 2\n"; // recalibrate line number so compile/link errors are still displayed correctly.
     source.insert(it, defines.begin(), defines.end());
     return source;
 }

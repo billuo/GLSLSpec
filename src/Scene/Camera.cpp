@@ -77,9 +77,9 @@ void
 Camera::set_orbit(Degree lat, Degree lon, const glm::vec3& center, const glm::vec3& up)
 {
     lat.clamp(89.9f);
-    m_angle.vertical = -lat;
-    m_angle.horizontal = -lon;
-    m_angle.horizontal.round_half();
+    m_view_angle.vertical = -lat;
+    m_view_angle.horizontal = -lon;
+    m_view_angle.horizontal.round_half();
     auto lat_quat = angleAxis(static_cast<float>(lat.radians()), glm::vec3(-1.0f, 0.0f, 0.0f));
     auto lon_quat = angleAxis(static_cast<float>(lon.radians()), glm::vec3(0.0f, 1.0f, 0.0f));
     set_position(lon_quat * (lat_quat * glm::vec3(0.0f, 0.0f, distance_to(center))) + center);

@@ -80,7 +80,7 @@ Window::Callbacks::default_on_key(GLFWwindow* handle, int key, int scancode, int
             break;
         case GLFW_KEY_D:
             if (action != GLFW_RELEASE) {
-                sandbox->camera.track(0.2f);
+                sandbox->camera.track(-0.2f);
             }
             break;
         case GLFW_KEY_P:

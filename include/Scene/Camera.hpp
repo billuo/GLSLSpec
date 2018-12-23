@@ -42,8 +42,8 @@ class Camera : public Node {
     {
         look_at(target, m_up);
         auto&&[lat, lon] = get_orbit(target);
-        m_angle.vertical = -lat;
-        m_angle.horizontal = -lon;
+        m_view_angle.vertical = -lat;
+        m_view_angle.horizontal = -lon;
     }
 
     /// @brief Move the camera on the orbit around current look_at.
@@ -69,15 +69,15 @@ class Camera : public Node {
 
     void tilt(Degree degree)
     {
-        m_angle.vertical += degree;
-        m_angle.vertical.clamp(89.9f);
+        m_view_angle.vertical += degree;
+        m_view_angle.vertical.clamp(89.9f);
         m_matrices.cached = false;
     }
 
     void pan(Degree degree)
     {
-        m_angle.horizontal += degree;
-        m_angle.horizontal.round_half();
+        m_view_angle.horizontal += degree;
+        m_view_angle.horizontal.round_half();
         m_matrices.cached = false;
     }
 
@@ -88,8 +88,8 @@ class Camera : public Node {
 
     auto look_dir() const
     {
-        auto& h = m_angle.horizontal;
-        auto& v = m_angle.vertical;
+        auto& h = m_view_angle.horizontal;
+        auto& v = m_view_angle.vertical;
         return glm::vec3(v.cos() * h.sin(), v.sin(), v.cos() * -h.cos());
     }
 
@@ -107,7 +107,7 @@ class Camera : public Node {
     void on_rotation(const glm::quat& result) override
     {
         Node::on_rotation(result);
-        // adjust m_angle ...?
+        // TODO adjust m_view_angle ...?
         m_matrices.cached = false;
     }
 
@@ -126,13 +126,13 @@ class Camera : public Node {
     };
     mutable Matrices m_matrices;
 
-    /// View angle to calculate direction looking at
+    /// View angle to calculate the look direction
     struct {
         Degree horizontal = 0_deg;
         Degree vertical = 0_deg;
-    } m_angle;
+    } m_view_angle;
 
-    /// Update all cached matrices
+    /// Try to update all cached matrices
     void compute_all() const;
 
     glm::vec3 m_up;
