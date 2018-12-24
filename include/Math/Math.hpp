@@ -168,7 +168,7 @@ struct Real {
         return *this;
     }
 
-    explicit constexpr operator value_type() const
+    auto value() const
     { return v; }
 
     Real& assign(value_type value)

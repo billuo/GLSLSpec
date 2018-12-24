@@ -26,101 +26,113 @@ class Node {
     explicit Node(const glm::mat4& transform_matrix) : m_transform(transform_matrix)
     {}
 
+    //region trivial getter/setters
+
     const Transform& transform() const
     { return m_transform; }
 
-    enum class Axis : uint8_t { X, Y, Z, };
+    auto get_position() const
+    { return m_transform.position; }
 
+    auto get_rotation() const
+    { return m_transform.rotation; }
+
+    auto get_scale() const
+    { return m_transform.scale; }
+
+    /// @brief Obtain all basis vectors in order as column vectors.
     glm::mat3 axes() const
     { return glm::mat3_cast(m_transform.rotation); }
 
-    glm::vec3 axis(Axis axis) const
-    { return glm::row(glm::mat3_cast(m_transform.rotation), underlying_cast(axis)); }
+    enum class Axis { X, Y, Z, };
 
-    void look_at(const glm::vec3& target, const glm::vec3& up)
-    {
-        auto&& forward = glm::normalize(target - m_transform.position);
-        auto&& right = glm::normalize(glm::cross(forward, up));
-        auto&& new_up = glm::normalize(glm::cross(right, forward));
-        set_rotation(glm::transpose(glm::mat3(right, new_up, -forward)));
-    }
+    /// @brief Obtain a specified basis vector.
+    glm::vec3 axis(Axis axis) const
+    { return glm::mat3_cast(m_transform.rotation)[underlying_cast(axis)]; }
 
     void reset()
-    { on_reset(); }
+    {
+        on_reset();
+        m_transform = Math::Transform();
+    }
 
     void set_position(const glm::vec3& position)
-    { on_position(position); }
+    {
+        on_position(position);
+        m_transform.position = position;
+    }
 
     void set_rotation(const glm::quat& rotation)
-    { on_rotation(rotation); }
+    {
+        on_rotation(rotation);
+        m_transform.rotation = rotation;
+    }
 
     void set_scale(const glm::vec3& scale)
-    { on_scale(scale); }
+    {
+        on_scale(scale);
+        m_transform.scale = scale;
+    }
 
     void translate_by(const glm::vec3& offset)
     { set_position(offset + m_transform.position); }
 
+    /// @note It applies the rotation locally; i.e. multiplied on the left.
     void rotate_by(const glm::quat& quat)
     { set_rotation(quat * m_transform.rotation); }
 
     void scale_by(const glm::vec3& scale)
     { set_scale(scale * m_transform.scale); }
 
-    float distance_to(const glm::vec3& position) const
-    { return glm::length(position - m_transform.position); }
+
+    //endregion
+
+    // TODO cache a rotation mat3 maybe?
+    //      - and if we do, on_rotation needs to be redesigned and maybe we should insist on
+    //      - subclasses calling the base versions since they don't (and shouldn't) know
+    //      - how to invalidate or update the cached mat3.
+
+    /// @brief Return the rotation matrix that aligns the specified axis with a <B>normalized</B> vector.
+    /// @note Result is undefined when the reference vector points to the opposite direction of the specified axis.
+    glm::mat3 align(Axis axis, const glm::vec3& reference) const
+    { return Transform::align(this->axis(axis), reference); }
+
+    /// @brief Align one of the axis of this node with a <B>normalized</B> vector.
+    /// @sa align()
+    void align_with(Axis axis, const glm::vec3& reference)
+    { rotate_by(glm::quat_cast(align(axis, reference))); }
+
+    float distance(const glm::vec3& position) const
+    { return glm::length(position - get_position()); }
 
     void distance(const glm::vec3& position, float distance)
     {
-        auto&& dir = glm::normalize(m_transform.position - position);
+        auto&& dir = glm::normalize(get_position() - position);
         set_position(position + distance * dir);
     }
 
-    void track(float distance)
-    { translate_by(distance * axis(Axis::X)); }
-
-    void pedestal(float distance)
-    { translate_by(distance * axis(Axis::Y)); }
-
-    void dolly(float distance)
-    { translate_by(distance * axis(Axis::Z)); }
-
-    // void tilt(Degree degree)
-    // { rotate_by(glm::angleAxis(static_cast<float>(degree.radians()), glm::vec3(1.0f, 0.0f, 0.0f))); }
-
-    // void pan(Degree degree)
-    // { rotate_by(glm::angleAxis(static_cast<float>(degree.radians()), glm::vec3(0.0f, 1.0f, 0.0f))); }
-
-    // void roll(Degree degree)
-    // { rotate_by(glm::angleAxis(static_cast<float>(degree.radians()), glm::vec3(0.0f, 0.0f, 1.0f))); }
-
-    /// @brief Get the latitude & longitude of the orbit to a center
-    /// @param center Center of the orbit
-    /// @return a pair of Degree representing latitude and longitude resp.
-    std::pair<Degree, Degree> get_orbit(const glm::vec3& center = glm::vec3(0.0f)) const;
   protected:
-    Transform m_transform;
-
     // These callbacks are called BEFORE any changes occur to the underlying Transform.
-    // The value after change is passed as an argument except in on_reset(),
+    // The new value to change to is passed as an argument, except for on_reset();
     // where the result is assumed to be the identity Transform.
-    // Currently, by default, they each set the result to the Transform, nothing else.
-    // To actually assign the new value, either call these or assign it yourself in the overriding versions.
+    // By default, they do nothing. The result value is also automatically assigned.
+    // To actually assign the new value, either call these base versions or do the assignment in subclasses.
 
     virtual void on_reset()
-    {
-        set_position(glm::vec3(0.0f));
-        set_rotation(glm::identity<glm::quat>());
-        set_scale(glm::vec3(1.0f));
-    }
+    {}
 
     virtual void on_position(const glm::vec3& result)
-    { m_transform.position = result; }
+    {}
 
     virtual void on_rotation(const glm::quat& result)
-    { m_transform.rotation = result; }
+    {}
 
     virtual void on_scale(const glm::vec3& result)
-    { m_transform.scale = result; }
+    {}
+
+  private:
+    Transform m_transform;
+
 };
 
 } // namespace Scene

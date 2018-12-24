@@ -9,6 +9,32 @@ using namespace glm;
 
 namespace Math {
 
+LngLat::LngLat(const glm::vec3& p, const glm::vec3& center, const glm::vec3& up, const glm::vec3& front)
+{
+    const auto d = glm::normalize(p - center);
+    const auto c = glm::dot(d, up); // =sin(lon)
+    const auto proj = d - c * up; // projected to plane perpendicular to 'up'
+    const auto normal = glm::cross(up, front);
+    const auto y = glm::dot(proj, normal);
+    const auto x = glm::length(glm::cross(proj, normal));
+    longitude = Degree::asin(c);
+    latitude = Degree::atan(y, x);
+}
+
+glm::vec3
+LngLat::to_vec3() const
+{
+    auto s = longitude.sin();
+    auto c = longitude.cos();
+    return glm::vec3(c * latitude.cos(), s, -c * latitude.sin());
+}
+
+std::ostream&
+operator<<(std::ostream& os, LngLat rhs)
+{
+    return os << '{' << rhs.longitude << ", " << rhs.latitude << '}';
+}
+
 Transform::Transform(glm::mat4 m) : Transform()
 {
     using namespace glm;
@@ -25,5 +51,20 @@ Transform::Transform(glm::mat4 m) : Transform()
         rotation = quat(r_m); // r_m needs to be pure rotation matrix
     }
 }
+
+glm::mat3
+Transform::align(const glm::vec3& axis, const glm::vec3& reference)
+{
+    const auto v = glm::cross(axis, reference);
+    const auto cos = glm::dot(axis, reference);
+    const auto k = 1.0f / (1.0f + cos);
+    return glm::mat3(v.x * v.x * k + cos, v.x * v.y * k + v.z, v.x * v.z * k - v.y,
+                     v.y * v.x * k - v.z, v.y * v.y * k + cos, v.y * v.z * k + v.x,
+                     v.z * v.x * k + v.y, v.z * v.y * k - v.x, v.z * v.z * k + cos);
+}
+
+glm::mat4
+Transform::to_mat4() const
+{ return glm::translate(mat4(1.0f), position) * glm::scale(glm::mat4_cast(rotation), scale); }
 
 } // namespace Math

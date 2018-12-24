@@ -65,27 +65,28 @@ Window::Callbacks::default_on_key(GLFWwindow* handle, int key, int scancode, int
             //  - track key states
         case GLFW_KEY_W:
             if (action != GLFW_RELEASE) {
-                sandbox->camera.dolly(-0.2f);
+                sandbox->camera.dolly(0.25f);
             }
             break;
         case GLFW_KEY_A:
             if (action != GLFW_RELEASE) {
-                sandbox->camera.track(0.2f);
+                sandbox->camera.track(-0.25f);
             }
             break;
         case GLFW_KEY_S:
             if (action != GLFW_RELEASE) {
-                sandbox->camera.dolly(-0.2f);
+                sandbox->camera.dolly(-0.25f);
             }
             break;
         case GLFW_KEY_D:
             if (action != GLFW_RELEASE) {
-                sandbox->camera.track(-0.2f);
+                sandbox->camera.track(0.25f);
             }
             break;
         case GLFW_KEY_P:
             if (action == GLFW_PRESS) {
                 PRINT_VALUE(sandbox->camera.axes());
+                PRINT_VALUE(sandbox->camera.look_direction());
             }
             break;
         default:
@@ -112,7 +113,7 @@ Window::Callbacks::default_on_scroll(GLFWwindow* handle, double dx, double dy)
     constexpr float factor = 1.1892; // = 2^0.25
     if (dy != 0.0) {
         float n = std::pow(factor, static_cast<float>(dy));
-        sandbox->camera.distance(glm::vec3(0.0f), sandbox->camera.distance_to(glm::vec3(0.0f)) / n);
+        sandbox->camera.distance(glm::vec3(0.0f), sandbox->camera.distance(glm::vec3(0.0f)) / n);
     }
 }
 
@@ -140,17 +141,18 @@ Window::Callbacks::default_on_mouse_drag(Window* _this, int button, double dx, d
     assert(_this);
     switch (button) {
         case GLFW_MOUSE_BUTTON_LEFT:
-            sandbox->camera.orbit(Math::Degree::Of(static_cast<Math::Degree::value_type>(dy)),
-                                  Math::Degree::Of(static_cast<Math::Degree::value_type>(-dx)),
-                                  glm::vec3(0.0f));
-            break;
-        case GLFW_MOUSE_BUTTON_RIGHT:
+            // sandbox->camera.orbit(Math::Degree::Of(static_cast<Math::Degree::value_type>(dy)),
+            //                       Math::Degree::Of(static_cast<Math::Degree::value_type>(-dx)),
+            //                       glm::vec3(0.0f));
             if (dx != 0.0) {
-                sandbox->camera.pan(180_deg / _this->size().x * dx);
+                sandbox->camera.horizontal_look(180_deg / _this->size().x * dx);
+                // don't use camera.pan()
             }
             if (dy != 0.0) {
-                sandbox->camera.tilt(180_deg / _this->size().y * -dy);
+                sandbox->camera.vertical_look(180_deg / _this->size().y * dy);
             }
+            break;
+        case GLFW_MOUSE_BUTTON_RIGHT:
             break;
         default:
             break;
