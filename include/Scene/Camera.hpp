@@ -66,7 +66,14 @@ class Camera : public Node {
     /// @brief Update look direction to look at specified target.
     /// @param target The target point to look at in world coord.
     void look_at(const glm::vec3& target)
-    { aux_set_look(Math::LngLat{target, get_position(), axis(Axis::Y), axis(Axis::X)}); }
+    { set_look(Math::LngLat{target, get_position(), axis(Axis::Y), axis(Axis::X)}); }
+
+    void set_look(Math::LngLat lnglat)
+    {
+        lnglat.latitude.round_half();
+        lnglat.longitude.clamp(89.9f);
+        aux_set_look(lnglat);
+    }
 
     /// @brief Set latitude of look direction
     void look_lat(Degree degrees)
@@ -125,7 +132,7 @@ class Camera : public Node {
     }
 
     /// LngLat of the target point we are looking at on the unit sphere centered at this camera.
-    Math::LngLat m_direction;
+    Math::LngLat m_direction{0_deg, 90_deg};
     /// Distance of the near/far clipping planes.
     glm::vec2 m_clip{1.0f / 128.0f, 128.0f};
     /// Field Of View (vertical; y direction)

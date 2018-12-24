@@ -47,7 +47,7 @@ class Sandbox {
     Watcher& watcher;
 
     // TODO encapsulate?
-    Scene::Camera camera{glm::vec3(3.0f, 0.0f, 3.0f), glm::vec3()};
+    Scene::Camera camera{glm::vec3(3.0f, 0.0f, 3.0f), glm::vec3(0.0f)};
 
     /// @brief Obtain a list of program names and labels.
     /// @return The aforementioned list.

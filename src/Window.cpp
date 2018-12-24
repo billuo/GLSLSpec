@@ -139,20 +139,30 @@ void
 Window::Callbacks::default_on_mouse_drag(Window* _this, int button, double dx, double dy)
 {
     assert(_this);
+    auto& camera = sandbox->camera;
+    auto dlat = 180_deg / _this->size().x * dx;
+    auto dlng = 180_deg / _this->size().y * dy;
     switch (button) {
-        case GLFW_MOUSE_BUTTON_LEFT:
-            // sandbox->camera.orbit(Math::Degree::Of(static_cast<Math::Degree::value_type>(dy)),
-            //                       Math::Degree::Of(static_cast<Math::Degree::value_type>(-dx)),
-            //                       glm::vec3(0.0f));
-            if (dx != 0.0) {
-                sandbox->camera.horizontal_look(180_deg / _this->size().x * dx);
-                // don't use camera.pan()
-            }
-            if (dy != 0.0) {
-                sandbox->camera.vertical_look(180_deg / _this->size().y * dy);
-            }
+        case GLFW_MOUSE_BUTTON_LEFT: {
+            auto lnglat = camera.look_direction();
+            lnglat.latitude += dlat;
+            lnglat.longitude += dlng;
+            camera.set_look(lnglat);
+        }
             break;
-        case GLFW_MOUSE_BUTTON_RIGHT:
+        case GLFW_MOUSE_BUTTON_RIGHT: {
+            auto target = glm::vec3(0.0f);
+            auto lnglat = Math::LngLat(target,
+                                       camera.get_position(),
+                                       camera.axis(Scene::Camera::Axis::Y),
+                                       camera.axis(Scene::Camera::Axis::X));
+            lnglat.longitude -= dlng;
+            lnglat.latitude -= dlat;
+            lnglat.longitude.clamp(89.9f);
+            auto new_position = -lnglat.position(target, camera.distance(target));
+            camera.set_position(new_position);
+            camera.set_look(lnglat);
+        }
             break;
         default:
             break;

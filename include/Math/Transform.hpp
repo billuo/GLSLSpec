@@ -12,7 +12,7 @@ namespace Math {
 struct LngLat {
     LngLat() = default;
 
-    LngLat(Degree lon, Degree lat) : longitude(lon), latitude(lat)
+    LngLat(Degree lng, Degree lat) : longitude(lng), latitude(lat)
     {}
 
     /// @brief Compute the latitude & longitude of a point relative to the given references
@@ -20,11 +20,11 @@ struct LngLat {
     /// @param p The relative point.
     /// @param center The center point as a reference.
     /// @param up Normalized vector on whose direction longitude=90.
-    /// @param front Normalized vector on whose direction latitude=0.
+    /// @param right Normalized vector on whose direction latitude=0.
     /// @return The pair of longitude & latitude in degrees.
-    LngLat(const glm::vec3& p, const glm::vec3& center, const glm::vec3& up, const glm::vec3& front);
+    LngLat(const glm::vec3& p, const glm::vec3& center, const glm::vec3& up, const glm::vec3& right);
 
-    glm::vec3 to_vec3() const;
+    glm::vec3 position(const glm::vec3& center = glm::vec3(0.0f), float radius = 1.0f) const;
 
     Degree longitude{0_deg};
     Degree latitude{0_deg};

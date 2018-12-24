@@ -9,24 +9,24 @@ using namespace glm;
 
 namespace Math {
 
-LngLat::LngLat(const glm::vec3& p, const glm::vec3& center, const glm::vec3& up, const glm::vec3& front)
+LngLat::LngLat(const glm::vec3& p, const glm::vec3& center, const glm::vec3& up, const glm::vec3& right)
 {
+    const auto front = glm::cross(up, right);
     const auto d = glm::normalize(p - center);
-    const auto c = glm::dot(d, up); // =sin(lon)
-    const auto proj = d - c * up; // projected to plane perpendicular to 'up'
-    const auto normal = glm::cross(up, front);
-    const auto y = glm::dot(proj, normal);
-    const auto x = glm::length(glm::cross(proj, normal));
+    const auto c = glm::dot(d, up);
+    const auto proj = d - c * up;
+    const auto y = glm::dot(proj, front);
+    const auto x = glm::dot(proj, right);
     longitude = Degree::asin(c);
     latitude = Degree::atan(y, x);
 }
 
 glm::vec3
-LngLat::to_vec3() const
+LngLat::position(const glm::vec3& center, float radius) const
 {
     auto s = longitude.sin();
     auto c = longitude.cos();
-    return glm::vec3(c * latitude.cos(), s, -c * latitude.sin());
+    return center + radius * glm::vec3(c * latitude.cos(), s, -c * latitude.sin());
 }
 
 std::ostream&

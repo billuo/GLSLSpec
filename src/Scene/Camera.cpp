@@ -69,7 +69,7 @@ Camera::compute_all() const
         m_matrices.projection_view = glm::ortho(-3 * m_aspect, 3 * m_aspect, -3.0f, 3.0f, -10.0f, 10.0f);
     }
     m_matrices.view_world =
-            glm::lookAt(get_position(), get_position() + get_rotation() * m_direction.to_vec3(), axis(Axis::Y));
+            glm::lookAt(get_position(), get_position() + get_rotation() * m_direction.position(), axis(Axis::Y));
     m_matrices.projection_world = m_matrices.projection_view * m_matrices.view_world;
     m_matrices.normal = glm::transpose(glm::inverse(glm::mat3(m_matrices.view_world)));
     m_matrices.cached = true;
@@ -80,11 +80,11 @@ Camera::view_axis(Node::Axis axis)
 {
     switch (axis) {
         case Axis::X:
-            return glm::cross(m_direction.to_vec3(), this->axis(Axis::X));
+            return glm::normalize(glm::cross(m_direction.position(), this->axis(Axis::Y)));
         case Axis::Y:
             return this->axis(Axis::Y);
         case Axis::Z:
-            return -m_direction.to_vec3();
+            return -m_direction.position();
         default:
             UNREACHABLE;
     }
