@@ -12,7 +12,7 @@ Adapted from [glslViewer] for personal, educational purposes.
 
 ## Dependencies
 * Python(3, for now) interpreter to generate glad to load OpenGL.
-* GLFW3 headers and libraries (version >= 3.2.0).
+* GLFW3 headers and libraries (version >= 3.0.0).
 * C++17 conforming C++ compiler.
 
 ## TODO
