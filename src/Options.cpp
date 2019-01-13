@@ -210,14 +210,6 @@ const std::vector<NamedOption> NamedOptions = {
                     options.flags.verbose = true;
                     return 0u;
                 }},
-        // {"",  {"cursor"},
-        //         "Show cursor in window",
-        //         {0, 0}, {},
-        //         [](const std::string&, unsigned, const std::string*) -> unsigned
-        //         {
-        //             options.window.cursor = true;
-        //             return 0u;
-        //         }},
         {"",  {"background"},
                 "Load a fragment shader as background rendering shader",
                 {1, 1}, {"shader.frag"},

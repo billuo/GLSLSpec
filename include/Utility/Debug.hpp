@@ -6,7 +6,7 @@
 #pragma once
 
 #include <cassert>
-#include <Utility/Log.hpp>
+#include "Log.hpp"
 
 
 #define TRACE(fmt, ...)     Log::t("{}:{} in {}\n\t" fmt, __FILE__, __LINE__, __func__, ##__VA_ARGS__)

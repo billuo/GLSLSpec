@@ -11,13 +11,14 @@
 
 
 #define STB_IMAGE_IMPLEMENTATION
+#define STBI_ONLY_JPG
 
 #include "stb/stb_image.h"
 
 
 namespace {
 
-// TODO temp
+// TODO this is temporary
 
 
 const glm::vec3 tex0[] = {
@@ -33,7 +34,7 @@ const glm::vec3 tex1[] = {
 
 } // namespace
 
-// TODO
+// TODO supply reasonable default shader
 const std::string default_vert_source = R"SHADER(
 #version 430 core
 uniform mat4 PVM;
@@ -235,17 +236,15 @@ Sandbox::aux_import_image(const ImportedFile& file)
     int x, y, n;
     unsigned char* data = stbi_load(file.path().c_str(), &x, &y, &n, 0);
     OpenGL::Texture tex_obj;
-    if (file.tag == "cubemap") { // TODO
-
-    } else if (file.tag == "spheremap") { // TODO
-
+    if (file.tag == "cubemap") {
+        throw unimplemented("Load" + file.tag);
+    } else if (file.tag == "spheremap") {
+        throw unimplemented("Load" + file.tag);
     } else if (file.tag == "texture") {
-
+        throw unimplemented("Load" + file.tag);
     } else {
-        Log::w("Unimplemented tag name {}", file.tag);
+        Log::w("Can not recognize tag {}", file.tag);
     }
-
-//    throw unimplemented("Load image");
     return true;
 }
 
@@ -262,7 +261,7 @@ Sandbox::aux_import_geometry(const ImportedFile& file)
         std::vector<tinyobj::shape_t> shapes;
         std::vector<tinyobj::material_t> materials;
         std::string err;
-        auto path = file.path();
+        const auto& path = file.path();
         auto parent_path = file.path();
         parent_path.remove_filename();
         bool result = tinyobj::LoadObj(&attributes, &shapes, &materials, &err, path.c_str(), parent_path.c_str(), true);

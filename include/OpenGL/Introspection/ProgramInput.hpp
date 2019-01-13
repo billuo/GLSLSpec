@@ -5,8 +5,8 @@
 #pragma once
 
 #include <ostream>
-#include <OpenGL/Introspection/Resource.hpp>
-#include <OpenGL/Constants.hpp>
+#include "Resource.hpp"
+#include "../Constants.hpp"
 
 
 namespace OpenGL {

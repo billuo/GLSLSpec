@@ -4,7 +4,7 @@
  */
 #pragma once
 
-#include <OpenGL/Introspection/Resource.hpp>
+#include "Resource.hpp"
 #include <vector>
 
 

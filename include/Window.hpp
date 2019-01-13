@@ -8,7 +8,6 @@
 #include <glm/ivec4.hpp>
 #include <glm/bvec2.hpp>
 #include <glm/dvec2.hpp>
-
 #include <unordered_map>
 #include <memory>
 

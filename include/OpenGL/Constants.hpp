@@ -5,10 +5,9 @@
  */
 #pragma once
 
+#include "Common.hpp"
 #include <Utility/Expected.hpp>
 #include <Utility/Misc.hpp>
-#include <OpenGL/Common.hpp>
-
 #include <string>
 
 

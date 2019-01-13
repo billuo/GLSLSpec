@@ -4,10 +4,10 @@
  */
 #pragma once
 
-#include <Math/Math.hpp>
-#include <OpenGL/VertexLayout.hpp>
-#include <OpenGL/VertexBuffer.hpp>
-#include <OpenGL/Introspection/Introspector.hpp>
+#include "Math/Math.hpp"
+#include "OpenGL/VertexLayout.hpp"
+#include "OpenGL/VertexBuffer.hpp"
+#include "OpenGL/Introspection/Introspector.hpp"
 
 
 class MeshBase {

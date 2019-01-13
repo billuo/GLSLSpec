@@ -105,7 +105,7 @@ declare_commands()
                          });
 
     Console::add_command("version", {0, 0}, {},
-                         "Display version string of application",
+                         "Display version string regarding application, OpenGL & GLSL",
                          [](std::string cmd, Arguments args)
                          {
                              assert(args.empty());
@@ -263,12 +263,6 @@ declare_commands()
     //                      "description",
     //                      [](std::string cmd, Arguments args)
     //                      {
-    //                          switch(args.size()){
-    //                              case 0:
-    //                                  break;
-    //                              default:
-    //                                  break;
-    //                          }
     //                      });
 }
 

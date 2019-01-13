@@ -4,10 +4,10 @@
  */
 #pragma once
 
-#include <Math/Math.hpp>
-#include <OpenGL/Introspection/Resource.hpp>
-#include <OpenGL/Constants.hpp>
+#include "Resource.hpp"
+#include "../Constants.hpp"
 #include <Utility/Debug.hpp>
+#include <Math/Math.hpp>
 
 
 namespace OpenGL {

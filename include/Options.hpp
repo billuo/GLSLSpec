@@ -4,12 +4,11 @@
  */
 #pragma once
 
+#include "Utility/Log.hpp"
+#include "FileSystem.hpp"
+#include "Watcher.hpp"
 #include <glm/fwd.hpp>
 #include <glm/ivec2.hpp>
-#include <Utility/Log.hpp>
-#include <FileSystem.hpp>
-#include <Watcher.hpp>
-
 #include <string>
 #include <list>
 #include <queue>

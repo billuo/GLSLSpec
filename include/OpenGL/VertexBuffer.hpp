@@ -4,8 +4,8 @@
  */
 #pragma once
 
-#include <OpenGL/Object/Buffer.hpp>
-#include <OpenGL/VertexAttribute.hpp>
+#include "Object/Buffer.hpp"
+#include "VertexAttribute.hpp"
 
 
 namespace OpenGL {

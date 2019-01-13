@@ -4,16 +4,16 @@
  */
 #pragma once
 
-#include <Mesh.hpp>
-#include <Scene/Camera.hpp>
-#include <Watcher.hpp>
-#include <OpenGL/Constants.hpp>
-#include <OpenGL/Object/Buffer.hpp>
-#include <OpenGL/Object/ProgramPipeline.hpp>
-#include <OpenGL/Object/Texture.hpp>
-#include <OpenGL/Object/Sampler.hpp>
-#include <OpenGL/Object/VertexArray.hpp>
-#include <OpenGL/Object/Framebuffer.hpp>
+#include "Mesh.hpp"
+#include "Scene/Camera.hpp"
+#include "Watcher.hpp"
+#include "OpenGL/Constants.hpp"
+#include "OpenGL/Object/Buffer.hpp"
+#include "OpenGL/Object/ProgramPipeline.hpp"
+#include "OpenGL/Object/Texture.hpp"
+#include "OpenGL/Object/Sampler.hpp"
+#include "OpenGL/Object/VertexArray.hpp"
+#include "OpenGL/Object/Framebuffer.hpp"
 #include "Window.hpp"
 
 

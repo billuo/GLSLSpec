@@ -4,8 +4,7 @@
  */
 #pragma once
 
-#include <Utility/Log.hpp>
-
+#include "Log.hpp"
 #include <cmath>
 #include <cstdlib>
 #include <new>

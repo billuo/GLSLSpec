@@ -4,7 +4,7 @@
  */
 #pragma once
 
-#include <OpenGL/Object/Shader.hpp>
+#include "Shader.hpp"
 #include <Utility/Misc.hpp>
 #include <set>
 

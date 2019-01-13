@@ -4,10 +4,9 @@
  */
 #pragma once
 
+#include "../Common.hpp"
+#include "../Debug.hpp"
 #include <Utility/Log.hpp>
-#include <OpenGL/Common.hpp>
-#include <OpenGL/Debug.hpp>
-
 #include <memory>
 #include <ostream>
 #include <vector>

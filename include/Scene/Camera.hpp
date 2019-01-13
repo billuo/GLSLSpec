@@ -4,7 +4,7 @@
  */
 #pragma once
 
-#include <Scene/Node.hpp>
+#include "Node.hpp"
 
 
 namespace Scene {

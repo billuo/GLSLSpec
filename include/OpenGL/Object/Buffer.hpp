@@ -4,7 +4,7 @@
  */
 #pragma once
 
-#include <OpenGL/Object/Object.hpp>
+#include "Object.hpp"
 
 
 namespace OpenGL {

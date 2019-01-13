@@ -4,7 +4,7 @@
  */
 #pragma once
 
-#include <OpenGL/Introspection/Interface.hpp>
+#include "Interface.hpp"
 #include <unordered_map>
 
 

@@ -3,7 +3,8 @@
  * @author Zhen Luo 461652354@qq.com
  */
 #include <Watcher.hpp>
-#include <Sandbox.hpp>
+#include <Utility/Log.hpp>
+#include <Utility/Enumeration.hpp>
 #include <fstream>
 
 
@@ -18,6 +19,7 @@ DEFINE_ENUMERATION_DATABASE(FileType) {
 Watcher::Watcher(const std::vector<ImportedFile>& to_watch) :
         m_thread([this]()
                  {
+                     std::vector<ImportedFile> to_erase;
                      while (m_watching) {
                          {
                              std::lock_guard guard1(mutex_watching_files);
@@ -25,7 +27,12 @@ Watcher::Watcher(const std::vector<ImportedFile>& to_watch) :
                                  if (file.check_update()) {
                                      std::lock_guard guard2(mutex_updated);
                                      m_updated.insert(file);
+                                 } else {
+                                     to_erase.push_back(file);
                                  }
+                             }
+                             for (auto&& file : to_erase) {
+                                 m_watching_files.erase({file.path(), file.tag});
                              }
                          }
                          sleep_for_ms(250);

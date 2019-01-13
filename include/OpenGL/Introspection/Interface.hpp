@@ -5,13 +5,13 @@
  */
 #pragma once
 
-#include <OpenGL/Constants.hpp>
-#include <OpenGL/Object/Program.hpp>
-#include <OpenGL/Introspection/ProgramInput.hpp>
-#include <OpenGL/Introspection/ProgramOutput.hpp>
-#include <OpenGL/Introspection/Uniform.hpp>
-#include <OpenGL/Introspection/UniformBlock.hpp>
-#include <OpenGL/Introspection/SubroutineUniform.hpp>
+#include "../Constants.hpp"
+#include "../Object/Program.hpp"
+#include "ProgramInput.hpp"
+#include "ProgramOutput.hpp"
+#include "Uniform.hpp"
+#include "UniformBlock.hpp"
+#include "SubroutineUniform.hpp"
 
 
 namespace OpenGL {
