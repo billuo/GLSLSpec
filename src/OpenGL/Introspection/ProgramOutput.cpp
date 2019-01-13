@@ -13,7 +13,7 @@ operator<<(std::ostream& os, const ProgramOutput& output)
     os << "type=" << nameOfDataType(output.type) << ", array_size=" << output.asize << '\n';
     os << "location=" << output.location << ", location index=" << output.location_index
        << ", component location=" << output.component << '\n';
-    os << Resource::referenced_stages(output.referenced);
+//    os << Resource::referenced_stages(output.referenced);
     return os;
 }
 

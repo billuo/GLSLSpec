@@ -5,10 +5,9 @@
  */
 #pragma once
 
+#include "Common.hpp"
 #include <Utility/Expected.hpp>
 #include <Utility/Misc.hpp>
-#include <OpenGL/Common.hpp>
-
 #include <string>
 
 
@@ -47,27 +46,37 @@ nameOfDataType(GLenum type);
 
 /// string -> GLenum
 expected<GLenum, std::string>
-shaderTypeOfSuffix(std::string suffix);
+suffix_shader_type(std::string suffix);
 
 /// GLenum -> string
 std::string
-nameOfShaderType(GLenum type);
+shader_type_name(GLenum type);
 
 /// GLenum -> GLbitfield
 GLbitfield
-bitOfShaderType(GLenum type);
+shader_type_bit(GLenum type);
 
 /// GLenum -> ShaderStage
 ShaderStage
-stageOfShaderType(GLenum type);
+shader_type_stage(GLenum type);
 
 /// GLbitfield -> enum class ShaderStage
+/// @note @p bit must not be OR-ed.
 ShaderStage
-stageOfShaderBit(GLbitfield bit);
+shader_bit_stage(GLbitfield bit);
+
+/// GLbitfield -> GLenum
+/// @note @p bit must not be OR-ed.
+GLenum
+shader_bit_type(GLbitfield bit);
+
+/// enum class ShaderStage -> GLenum
+GLenum
+shader_stage_type(ShaderStage stage);
 
 /// enum class ShaderStage -> GLbitfield
 GLbitfield
-bitOfShaderStage(ShaderStage stage);
+shader_stage_bit(ShaderStage stage);
 
 
 //endregion

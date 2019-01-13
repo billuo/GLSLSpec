@@ -4,3 +4,5 @@
 tags
 *build*/
 include/glm
+3rdparty/glad
+.idea/workspace.xml

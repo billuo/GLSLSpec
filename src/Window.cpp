@@ -65,27 +65,28 @@ Window::Callbacks::default_on_key(GLFWwindow* handle, int key, int scancode, int
             //  - track key states
         case GLFW_KEY_W:
             if (action != GLFW_RELEASE) {
-                sandbox->camera.dolly(-0.2f);
+                sandbox->camera.dolly(0.25f);
             }
             break;
         case GLFW_KEY_A:
             if (action != GLFW_RELEASE) {
-                sandbox->camera.track(0.2f);
+                sandbox->camera.track(-0.25f);
             }
             break;
         case GLFW_KEY_S:
             if (action != GLFW_RELEASE) {
-                sandbox->camera.dolly(-0.2f);
+                sandbox->camera.dolly(-0.25f);
             }
             break;
         case GLFW_KEY_D:
             if (action != GLFW_RELEASE) {
-                sandbox->camera.track(0.2f);
+                sandbox->camera.track(0.25f);
             }
             break;
         case GLFW_KEY_P:
             if (action == GLFW_PRESS) {
                 PRINT_VALUE(sandbox->camera.axes());
+                PRINT_VALUE(sandbox->camera.look_direction());
             }
             break;
         default:
@@ -112,7 +113,7 @@ Window::Callbacks::default_on_scroll(GLFWwindow* handle, double dx, double dy)
     constexpr float factor = 1.1892; // = 2^0.25
     if (dy != 0.0) {
         float n = std::pow(factor, static_cast<float>(dy));
-        sandbox->camera.distance(glm::vec3(0.0f), sandbox->camera.distance_to(glm::vec3(0.0f)) / n);
+        sandbox->camera.distance(glm::vec3(0.0f), sandbox->camera.distance(glm::vec3(0.0f)) / n);
     }
 }
 
@@ -138,19 +139,30 @@ void
 Window::Callbacks::default_on_mouse_drag(Window* _this, int button, double dx, double dy)
 {
     assert(_this);
+    auto& camera = sandbox->camera;
+    auto dlat = 180_deg / _this->size().x * dx;
+    auto dlng = 180_deg / _this->size().y * dy;
     switch (button) {
-        case GLFW_MOUSE_BUTTON_LEFT:
-            sandbox->camera.orbit(Math::Degree::Of(static_cast<Math::Degree::value_type>(dy)),
-                                  Math::Degree::Of(static_cast<Math::Degree::value_type>(-dx)),
-                                  glm::vec3(0.0f));
+        case GLFW_MOUSE_BUTTON_LEFT: {
+            auto lnglat = camera.look_direction();
+            lnglat.latitude += dlat;
+            lnglat.longitude += dlng;
+            camera.set_look(lnglat);
+        }
             break;
-        case GLFW_MOUSE_BUTTON_RIGHT:
-            if (dx != 0.0) {
-                sandbox->camera.pan(180_deg / _this->size().x * dx);
-            }
-            if (dy != 0.0) {
-                sandbox->camera.tilt(180_deg / _this->size().y * -dy);
-            }
+        case GLFW_MOUSE_BUTTON_RIGHT: {
+            auto target = glm::vec3(0.0f);
+            auto lnglat = Math::LngLat(target,
+                                       camera.get_position(),
+                                       camera.axis(Scene::Camera::Axis::Y),
+                                       camera.axis(Scene::Camera::Axis::X));
+            lnglat.longitude -= dlng;
+            lnglat.latitude -= dlat;
+            lnglat.longitude.clamp(89.9f);
+            auto new_position = -lnglat.position(target, camera.distance(target));
+            camera.set_position(new_position);
+            camera.set_look(lnglat);
+        }
             break;
         default:
             break;
@@ -193,7 +205,7 @@ Window::set_viewport(glm::ivec2 size)
     glfwMakeContextCurrent(m_handle);
     glViewport(0, 0, size.x, size.y);
     if (sandbox) {
-        sandbox->camera.set_aspect(static_cast<float>(size.x) / size.y);
+        sandbox->on_resize(size);
     }
     m_properties.viewport = glm::ivec4(0, 0, size.x, size.y);
 }
@@ -205,12 +217,10 @@ Window::next_frame()
     m_properties.frame_count++;
     m_properties.frame_delay = glfwGetTime() - m_properties.start_last_frame;
     m_properties.start_last_frame += m_properties.frame_delay; // set to this frame
-    // Fix FPS if necessary
-    if (!options.window.full_fps) {
-        double leisure = options.window.frame_delay - frame_delay();
-        if (leisure > 0) {
-            sleep_for_sec(static_cast<float>(leisure));
-        }
+    // Fix FPS despite presence of v-sync
+    double leisure = options.window.frame_delay - frame_delay();
+    if (leisure > 0) {
+        sleep_for_sec(static_cast<float>(leisure));
     }
     // Measure performance by FPS
     m_properties.since_FPS += frame_delay();

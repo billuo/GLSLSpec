@@ -80,12 +80,17 @@ add_library(MainLib
 		src/Scene/Camera.cpp
 		src/Scene/Node.cpp
 		src/Utility/Log.cpp
-		src/Utility/Misc.cpp include/OpenGL/VertexBuffer.hpp src/OpenGL/VertexAttribute.cpp src/OpenGL/Object/Texture.cpp include/OpenGL/Object/Texture.hpp)
+		src/Utility/Misc.cpp
+		src/OpenGL/VertexAttribute.cpp
+		src/OpenGL/Object/Texture.cpp
+		src/OpenGL/Object/Sampler.cpp
+		src/OpenGL/Object/Framebuffer.cpp
+		src/OpenGL/Object/RenderBuffer.cpp)
 
 message(STATUS "Build target:${CMAKE_HOST_SYSTEM_NAME}")
 set(HOST ${CMAKE_HOST_SYSTEM_NAME})
 target_compile_definitions(MainLib PUBLIC APP_NAME=\"GLSLViewer\")
-target_compile_definitions(MainLib PUBLIC APP_VERSION=\"0.2.0\")
+target_compile_definitions(MainLib PUBLIC APP_VERSION=\"0.3.0\")
 target_compile_definitions(MainLib PUBLIC PLATFORM_NAME=\"${HOST}\")
 target_compile_definitions(MainLib PUBLIC $<$<STREQUAL:${HOST},Linux>:PLATFORM_LINUX>)
 target_compile_definitions(MainLib PUBLIC $<$<STREQUAL:${HOST},Windows>:PLATFORM_WINDOWS>)
@@ -110,7 +115,7 @@ include_directories(${OPENGL_INCLUDE_DIR})
 target_link_libraries(MainLib ${OPENGL_LIBRARIES})
 
 find_package(glfw3 3.2 REQUIRED)
-target_link_libraries(MainLib ${GLFW_LIBRARIES} ${GLFW_STATIC_LIBRARIES})
+target_link_libraries(MainLib glfw)
 
 add_executable(GLSLSpec src/main.cpp)
 add_dependencies(GLSLSpec MainLib)

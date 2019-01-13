@@ -4,9 +4,9 @@
  */
 #pragma once
 
-#include <OpenGL/Common.hpp>
-#include <OpenGL/Object/VertexArray.hpp>
-#include <OpenGL/VertexBuffer.hpp>
+#include "Common.hpp"
+#include "Object/VertexArray.hpp"
+#include "VertexBuffer.hpp"
 #include <Utility/Misc.hpp>
 #include <Utility/Enumeration.hpp>
 

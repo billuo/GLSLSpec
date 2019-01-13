@@ -1,7 +1,6 @@
 #pragma once
 
-#include <OpenGL/Common.hpp>
-
+#include "Common.hpp"
 #include <string>
 
 

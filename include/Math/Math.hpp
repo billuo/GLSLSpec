@@ -151,7 +151,6 @@ operator<<(std::ostream& os, mat<C, R, T, Q> const& x)
 
 } // namespace glm
 
-// TODO Re-encapsulate into own Vector and Metrix classes.
 namespace Math {
 
 static constexpr float Pi = 3.1415926f;
@@ -169,7 +168,7 @@ struct Real {
         return *this;
     }
 
-    explicit constexpr operator value_type() const
+    auto value() const
     { return v; }
 
     Real& assign(value_type value)

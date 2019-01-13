@@ -4,8 +4,7 @@
  */
 #pragma once
 
-#include <Utility/Log.hpp>
-
+#include "Log.hpp"
 #include <cmath>
 #include <cstdlib>
 #include <new>
@@ -90,6 +89,8 @@ type_name()
     return r;
 }
 
+//region string_to<>
+
 template <typename T>
 inline T
 string_to(const std::string& str);
@@ -100,6 +101,38 @@ string_to<int>(const std::string& str)
 {
     try {
         return std::stoi(str);
+    } catch (std::invalid_argument& e) {
+        Log::e("{} can not be converted to int", str);
+    } catch (std::out_of_range& e) {
+        Log::e("{} out of range of int", str);
+    }
+    return 0;
+}
+
+template <>
+inline unsigned int
+string_to<unsigned int>(const std::string& str)
+{
+    try {
+        auto ret = std::stoul(str);
+        if (ret > std::numeric_limits<unsigned int>::max()) {
+            throw std::out_of_range("");
+        }
+        return static_cast<unsigned int>(ret);
+    } catch (std::invalid_argument& e) {
+        Log::e("{} can not be converted to unsigned int", str);
+    } catch (std::out_of_range& e) {
+        Log::e("{} out of range of unsigned int", str);
+    }
+    return 0;
+}
+
+template <>
+inline unsigned long
+string_to<unsigned long>(const std::string& str)
+{
+    try {
+        return std::stoul(str);
     } catch (std::invalid_argument& e) {
         Log::e("{} can not be converted to int", str);
     } catch (std::out_of_range& e) {
@@ -163,3 +196,5 @@ string_to<double>(const std::string& str)
     }
     return ret;
 }
+
+//endregion

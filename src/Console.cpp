@@ -105,7 +105,7 @@ declare_commands()
                          });
 
     Console::add_command("version", {0, 0}, {},
-                         "Display version string of application",
+                         "Display version string regarding application, OpenGL & GLSL",
                          [](std::string cmd, Arguments args)
                          {
                              assert(args.empty());
@@ -145,6 +145,10 @@ declare_commands()
                          "Resize main window",
                          [](std::string cmd, Arguments args)
                          {
+                             if (!options.flags.resizable) {
+                                 Log::e("Window resizing already disabled.");
+                                 return;
+                             }
                              switch (args.size()) {
                                  case 1: {
                                      int sz = string_to<int>(args.front());
@@ -175,7 +179,7 @@ declare_commands()
                                  for (auto&& arg : args) {
                                      options.define(arg);
                                  }
-                                 sandbox->recompile();
+                                 sandbox->recompile_all();
                              }
                          });
     Console::add_command("mouse", {0, 0}, {},
@@ -186,17 +190,79 @@ declare_commands()
                          "Display current frame buffer size in pixels",
                          [](std::string cmd, Arguments args)
                          { *console << main_window->frame_buffer_size() << '\n'; });
+    Console::add_command("imported", {0, 0}, {},
+                         "Display a list of imported and currently watching files.",
+                         [](std::string cmd, Arguments args)
+                         {
+                             *console << "Imported files:\n";
+                             for (auto&&[path, tag] : sandbox->watcher.files()) {
+                                 *console << "\tPath:" << path << '[' << tag << "]\n";
+                             }
+                         });
+    Console::add_command("programs", {0, 0}, {},
+                         "Display current imported shader programs by their OpenGL object names and optional labels.",
+                         [](std::string cmd, Arguments args)
+                         {
+                             *console << "Program list:\n";
+                             for (auto&&[name, label] : sandbox->programs()) {
+                                 *console << "\tProgram" << name << ':' << label << '\n';
+                             }
+                         });
+    Console::add_command("program", {1, 2}, {"name", "interface name:uniform|uniform_block|input"},
+                         "Introspect specified program and optionally in the specified interface.",
+            // TODO built-in introspection might not be worth it, NVIDIA Nsight has done a great job.
+                         [](std::string cmd, Arguments args)
+                         {
+                             auto name = string_to<GLuint>(args.front());
+                             auto&& intro = OpenGL::Introspector::Get(name).lock();
+                             if (!intro) {
+                                 return;
+                             }
+                             *console << "Introspecting Program" << args.front() << ":\n";
+                             if (args.size() == 2) {
+                                 if (args.back() == "uniform") {
+                                     *console << intro->uniform() << '\n';
+                                 } else if (args.back() == "uniform_block") {
+                                     *console << intro->uniform_block() << '\n';
+                                 } else if (args.back() == "input") {
+                                     *console << intro->input() << '\n';
+                                 } else {
+                                     Log::w("Unimplemented: print interface {} to console", args.back());
+                                 }
+                             } else {
+                                 *console << *intro << '\n';
+                             };
+                         });
+    Console::add_command("background", {0, 1}, {"shader.frag"},
+                         "Toggle background rendering. When supplied with a path to a fragment shader,"
+                         "it always enable background rendering using the specified shader.",
+                         [](std::string cmd, Arguments args)
+                         {
+                             if (args.empty()) {
+                                 sandbox->toggle_background();
+                             } else {
+                                 assert(args.size() == 1);
+                                 ImportedFile file(args.front(), FileType::Shader, "background");
+                                 sandbox->import(file, true);
+                             }
+                         });
+    Console::add_command("postprocess", {0, 1}, {"shader.frag"},
+                         "Toggle post-processing. When supplied with a path to a fragment shader,"
+                         "it always enable post-processing using the specified shader.",
+                         [](std::string cmd, Arguments args)
+                         {
+                             if (args.empty()) {
+                                 sandbox->toggle_postprocess();
+                             } else {
+                                 assert(args.size() == 1);
+                                 ImportedFile file(args.front(), FileType::Shader, "postprocess");
+                                 sandbox->import(file, true);
+                             }
+                         });
     // Console::add_command("command", {0, 0}, {},
     //                      "description",
     //                      [](std::string cmd, Arguments args)
     //                      {
-    //                          switch(args.size()){
-    //                              case 0:
-    //                                  break;
-    //                              default:
-    //                                  return false;
-    //                          }
-    //                          return true;
     //                      });
 }
 

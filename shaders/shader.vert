@@ -1,4 +1,4 @@
-#version 430
+#version 430 core
 
 out gl_PerVertex {
     vec4 gl_Position;
@@ -35,13 +35,17 @@ uniform mat4 VM;
 uniform mat4 PVM;
 uniform mat3 NM;
 
+uniform float u_time;
+
 void ViewSpace(out vec3 position, out vec3 normal) {
     position = (VM * vec4(v_position, 1.0f)).xyz;
     normal = normalize(NM * v_normal);
 }
 
 vec3 ADS(vec3 pos, vec3 norm) {
-    vec3 l = normalize(L.pos - pos);
+    // vec3 lpos = vec3(L.pos.x * sin(u_time), L.pos.y, L.pos.z * cos(u_time));
+    vec3 lpos = L.pos;
+    vec3 l = normalize(lpos - pos);
     vec3 v = normalize(-pos.xyz);
     vec3 r = reflect(-l, norm);
     // float l_n = abs(dot(l, norm));

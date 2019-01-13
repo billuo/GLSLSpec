@@ -28,7 +28,7 @@ operator<<(std::ostream& os, const Uniform& uniform)
     } else {
         os << "type=" << nameOfDataType(uniform.type) << ", location=" << uniform.location << '\n';
     }
-    os << Resource::referenced_stages(uniform.referenced);
+//    os << Resource::referenced_stages(uniform.referenced);
     return os;
 }
 

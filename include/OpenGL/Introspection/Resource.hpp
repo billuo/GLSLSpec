@@ -4,9 +4,8 @@
  */
 #pragma once
 
-#include <OpenGL/Common.hpp>
-#include <OpenGL/Constants.hpp>
-#include <Utility/Misc.hpp>
+#include "../Common.hpp"
+#include "../Constants.hpp"
 
 
 namespace OpenGL {

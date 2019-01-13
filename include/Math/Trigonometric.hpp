@@ -136,6 +136,9 @@ class Radian : public Real {
     static Radian atan(float v)
     { return Radian{Tag(), glm::atan(v)}; }
 
+    static Radian atan(float y, float x)
+    { return Radian{Tag(), glm::atan(y, x)}; }
+
     static Radian asinh(float v)
     { return Radian{Tag(), glm::asinh(v)}; }
 
@@ -286,6 +289,9 @@ class Degree : public Real {
 
     static Degree atan(float v)
     { return Radian::atan(v).degrees(); }
+
+    static Degree atan(float y, float x)
+    { return Radian::atan(y, x).degrees(); }
 
     static Degree asinh(float v)
     { return Radian::asinh(v).degrees(); }

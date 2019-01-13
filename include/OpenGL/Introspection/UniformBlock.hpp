@@ -4,7 +4,7 @@
  */
 #pragma once
 
-#include <OpenGL/Introspection/Uniform.hpp>
+#include "Uniform.hpp"
 #include <vector>
 
 

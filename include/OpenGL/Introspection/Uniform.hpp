@@ -4,10 +4,10 @@
  */
 #pragma once
 
-#include <Math/Math.hpp>
-#include <OpenGL/Introspection/Resource.hpp>
-#include <OpenGL/Constants.hpp>
+#include "Resource.hpp"
+#include "../Constants.hpp"
 #include <Utility/Debug.hpp>
+#include <Math/Math.hpp>
 
 
 namespace OpenGL {
@@ -15,21 +15,23 @@ namespace OpenGL {
 namespace details {
 
 template <typename To, typename ...Args> static constexpr auto
-        all_convertible_v = (std::is_convertible_v<Args, To> && ...);
+        all_convertible_from_v = (std::is_convertible_v<Args, To> && ...);
 
 template <typename T> static constexpr auto is_GL_type_v =
         std::is_convertible_v<T, GLfloat> || std::is_convertible_v<T, GLint> || std::is_convertible_v<T, GLuint>;
 
 template <typename ...Args> static constexpr auto all_GL_type_v =
-        all_convertible_v<GLfloat, Args...> || all_convertible_v<GLint, Args...> || all_convertible_v<GLuint, Args...>;
+        all_convertible_from_v<GLfloat, Args...> ||
+        all_convertible_from_v<GLint, Args...> ||
+        all_convertible_from_v<GLuint, Args...>;
 
-// TODO the order of conditional may have unexpected effect on result...
+// TODO order of conditional may has unexpected effect
 template <typename ...Args> using GL_cast =
-std::conditional_t<all_convertible_v<GLfloat, Args...>,
+std::conditional_t<all_convertible_from_v<GLfloat, Args...>,
         GLfloat,
-        std::conditional_t<all_convertible_v<GLint, Args...>,
+        std::conditional_t<all_convertible_from_v<GLint, Args...>,
                 GLint,
-                std::conditional_t<all_convertible_v<GLuint, Args...>, GLuint, void>>>;
+                std::conditional_t<all_convertible_from_v<GLuint, Args...>, GLuint, void>>>;
 
 //region glUniformxx
 

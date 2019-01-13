@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include <OpenGL/Common.hpp>
+#include "Common.hpp"
 
 
 #define OPENGL_TRACE if(auto err = glGetError()) {Log::d("error[{}], line#{}\nfile:{}", err, __LINE__, __FILE__);}
